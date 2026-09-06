@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-ibm-plex-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Global Reset & Research Instrument Styling */
+html, body {
+  background-color: #101214;
+  color: #F6F5F0;
+  font-family: var(--font-ibm-plex-sans);
+  letter-spacing: -0.01em;
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessible Visible Focus */
+:focus-visible {
+  outline: 2px solid #D86A3A;
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Clean Custom Scrollbar for Desktop Research Application */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #101214;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #25282B;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #383D43;
+}
+
+/* Citation highlight animation (single deliberate pulse) */
+@keyframes citationPulse {
+  0% {
+    background-color: rgba(65, 105, 225, 0.25);
+    border-color: #4169E1;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.highlight-evidence {
+  animation: citationPulse 1.5s ease-out;
+}

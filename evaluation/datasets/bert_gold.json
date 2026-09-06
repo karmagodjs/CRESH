@@ -1,0 +1,489 @@
+[
+  {
+    "id": "bert_001",
+    "question": "What is Masked Language Modeling in BERT?",
+    "question_type": "definition",
+    "expected_concepts": [
+      "masked language modeling",
+      "random masking",
+      "predict original vocabulary",
+      "bidirectional context"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Task #1",
+      "Masked LM"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_002",
+    "question": "What is Next Sentence Prediction in BERT?",
+    "question_type": "definition",
+    "expected_concepts": [
+      "next sentence prediction",
+      "binarized prediction",
+      "sentence relationships",
+      "IsNext"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Task #2",
+      "Next Sentence Prediction"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_003",
+    "question": "What does the acronym BERT stand for?",
+    "question_type": "definition",
+    "expected_concepts": [
+      "Bidirectional Encoder Representations from Transformers",
+      "language representation model"
+    ],
+    "gold_section_keywords": [
+      "Abstract",
+      "Introduction"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_004",
+    "question": "What is the GLUE benchmark according to the paper?",
+    "question_type": "definition",
+    "expected_concepts": [
+      "General Language Understanding Evaluation",
+      "collection of diverse natural language understanding tasks"
+    ],
+    "gold_section_keywords": [
+      "GLUE",
+      "Experiments"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_005",
+    "question": "What is SQuAD v1.1 as described in the paper?",
+    "question_type": "definition",
+    "expected_concepts": [
+      "Stanford Question Answering Dataset",
+      "collection of 100k crowd-sourced question/answer pairs"
+    ],
+    "gold_section_keywords": [
+      "SQuAD v1.1",
+      "Experiments"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_006",
+    "question": "How does Masked Language Modeling enable bidirectional representations without allowing words to see themselves?",
+    "question_type": "mechanism",
+    "expected_concepts": [
+      "see itself",
+      "unidirectional",
+      "left-to-right",
+      "masking",
+      "bidirectional conditioning"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Task #1",
+      "Masked LM"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_007",
+    "question": "How does BERT perform the Next Sentence Prediction task during pre-training?",
+    "question_type": "mechanism",
+    "expected_concepts": [
+      "sentence pairs",
+      "50% actual next sentence",
+      "IsNext",
+      "50% random sentence",
+      "NotNext",
+      "vector C",
+      "[CLS]"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Task #2",
+      "Next Sentence Prediction"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_008",
+    "question": "How are tokens replaced in the 80/10/10 masking strategy in BERT?",
+    "question_type": "mechanism",
+    "expected_concepts": [
+      "80% of the time [MASK]",
+      "10% of the time a random token",
+      "10% of the time unchanged",
+      "15% of tokens"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Task #1",
+      "Masked LM"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_009",
+    "question": "How is fine-tuning implemented with BERT on downstream tasks?",
+    "question_type": "mechanism",
+    "expected_concepts": [
+      "self-attention",
+      "fine-tune all parameters",
+      "task-specific inputs and outputs",
+      "end-to-end"
+    ],
+    "gold_section_keywords": [
+      "Fine-tuning BERT",
+      "Introduction"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_010",
+    "question": "How does BERT represent input sequences and distinguish between two sentences?",
+    "question_type": "mechanism",
+    "expected_concepts": [
+      "[CLS]",
+      "[SEP]",
+      "segment embeddings",
+      "positional embeddings",
+      "WordPiece"
+    ],
+    "gold_section_keywords": [
+      "BERT",
+      "Model Architecture",
+      "Pre-training BERT"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_011",
+    "question": "What are the two pre-training tasks used in BERT?",
+    "question_type": "methodology",
+    "expected_concepts": [
+      "two unsupervised tasks",
+      "Masked LM",
+      "Next Sentence Prediction"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Task #1",
+      "Task #2"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_012",
+    "question": "What percentage of input tokens are masked during BERT pre-training?",
+    "question_type": "methodology",
+    "expected_concepts": [
+      "15% of all WordPiece tokens",
+      "masked at random"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Task #1",
+      "Masked LM"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_013",
+    "question": "What pre-training corpora were used to train BERT?",
+    "question_type": "methodology",
+    "expected_concepts": [
+      "BooksCorpus",
+      "800M words",
+      "English Wikipedia",
+      "2500M words",
+      "document-level corpus"
+    ],
+    "gold_section_keywords": [
+      "Pre-training BERT",
+      "Pre-training Procedure"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_014",
+    "question": "What are the architectural specifications for BERT BASE and BERT LARGE?",
+    "question_type": "methodology",
+    "expected_concepts": [
+      "BERT BASE L=12 H=768 A=12",
+      "110M",
+      "BERT LARGE L=24 H=1024 A=16",
+      "340M"
+    ],
+    "gold_section_keywords": [
+      "Model Architecture",
+      "BERT"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_015",
+    "question": "What activation function is used in BERT intermediate layers?",
+    "question_type": "methodology",
+    "expected_concepts": [
+      "GELU",
+      "Gaussian Error Linear Unit",
+      "feed-forward"
+    ],
+    "gold_section_keywords": [
+      "Model Architecture",
+      "BERT",
+      "Pre-training BERT"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_016",
+    "question": "What are the three main contributions of this paper?",
+    "question_type": "contribution",
+    "expected_concepts": [
+      "bidirectional pre-training",
+      "eliminating heavily-engineered task-specific architectures",
+      "eleven nlp tasks state-of-the-art"
+    ],
+    "gold_section_keywords": [
+      "Introduction",
+      "contributions"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_017",
+    "question": "How does BERT eliminate the need for heavily-engineered task-specific architectures?",
+    "question_type": "contribution",
+    "expected_concepts": [
+      "pre-trained representations reduce need",
+      "first fine-tuning based representation model",
+      "sentence-level and token-level tasks"
+    ],
+    "gold_section_keywords": [
+      "Introduction",
+      "contributions"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_018",
+    "question": "What is the primary motivation for proposing bidirectional pre-training over unidirectional language models?",
+    "question_type": "contribution",
+    "expected_concepts": [
+      "unidirectional language models restrict",
+      "left-to-right",
+      "sub-optimal for sentence-level and token-level tasks"
+    ],
+    "gold_section_keywords": [
+      "Introduction",
+      "Abstract"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_019",
+    "question": "Across how many natural language processing benchmarks does BERT establish new state-of-the-art results?",
+    "question_type": "contribution",
+    "expected_concepts": [
+      "eleven natural language processing tasks",
+      "11 NLP tasks",
+      "state-of-the-art"
+    ],
+    "gold_section_keywords": [
+      "Introduction",
+      "Abstract",
+      "Experiments"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_020",
+    "question": "What major conclusion does the paper reach regarding deep bidirectional pre-training?",
+    "question_type": "contribution",
+    "expected_concepts": [
+      "deep bidirectionality",
+      "rich unsupervised pre-training",
+      "low-resource tasks"
+    ],
+    "gold_section_keywords": [
+      "Conclusion"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_021",
+    "question": "What results did BERT achieve on the GLUE benchmark?",
+    "question_type": "results",
+    "expected_concepts": [
+      "80.5",
+      "BERT LARGE",
+      "Table 1",
+      "79.6 average",
+      "OpenAI GPT 72.8"
+    ],
+    "gold_section_keywords": [
+      "GLUE",
+      "Table 1",
+      "Experiments"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_022",
+    "question": "What score did BERT achieve on SQuAD v1.1?",
+    "question_type": "results",
+    "expected_concepts": [
+      "87.4 EM",
+      "93.2 F1",
+      "84.1 EM",
+      "90.9 F1",
+      "Table 2"
+    ],
+    "gold_section_keywords": [
+      "SQuAD v1.1",
+      "Table 2"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_023",
+    "question": "What performance did BERT achieve on SQuAD v2.0?",
+    "question_type": "results",
+    "expected_concepts": [
+      "80.0 EM",
+      "83.1 F1",
+      "+5.1 F1 improvement",
+      "Table 3"
+    ],
+    "gold_section_keywords": [
+      "SQuAD v2.0",
+      "Table 3"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_024",
+    "question": "What accuracy did BERT achieve on the SWAG dataset?",
+    "question_type": "results",
+    "expected_concepts": [
+      "86.3%",
+      "outperforms human baseline",
+      "88.0%",
+      "Table 4"
+    ],
+    "gold_section_keywords": [
+      "SWAG",
+      "Table 4"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_025",
+    "question": "What absolute accuracy improvement did BERT achieve on MNLI?",
+    "question_type": "results",
+    "expected_concepts": [
+      "4.6% absolute accuracy improvement",
+      "MNLI",
+      "86.7%"
+    ],
+    "gold_section_keywords": [
+      "GLUE",
+      "Table 1"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_026",
+    "question": "What is the difference between BERT's fine-tuning and feature-based approaches?",
+    "question_type": "comparison",
+    "expected_concepts": [
+      "fine-tuning",
+      "feature-based",
+      "all parameters updated end-to-end",
+      "fixed representations extracted",
+      "Section 5.3",
+      "CoNLL-2003"
+    ],
+    "gold_section_keywords": [
+      "Feature-based Approach with BERT",
+      "Fine-tuning BERT",
+      "Table 7"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_027",
+    "question": "What happens when Next Sentence Prediction is removed in the ablation experiments?",
+    "question_type": "comparison",
+    "expected_concepts": [
+      "No NSP",
+      "hurts sentence-pair tasks",
+      "QNLI drops 5.4%",
+      "MNLI drops",
+      "Table 5"
+    ],
+    "gold_section_keywords": [
+      "Effect of Pre-training Tasks",
+      "Ablation Studies",
+      "Table 5"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_028",
+    "question": "What is the effect of using a Left-to-Right model without NSP in the ablation study?",
+    "question_type": "comparison",
+    "expected_concepts": [
+      "LTR & No NSP",
+      "substantially worse than BERT",
+      "MRPC drops",
+      "unidirectional representation"
+    ],
+    "gold_section_keywords": [
+      "Effect of Pre-training Tasks",
+      "Table 5"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_029",
+    "question": "What does the ablation study demonstrate regarding the effect of model size?",
+    "question_type": "comparison",
+    "expected_concepts": [
+      "larger model size leads to large improvements",
+      "scaling to 340M parameters",
+      "Table 6",
+      "BERT LARGE outperforms BERT BASE"
+    ],
+    "gold_section_keywords": [
+      "Effect of Model Size",
+      "Table 6"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  },
+  {
+    "id": "bert_030",
+    "question": "How does BERT differ from OpenAI GPT and ELMo in pre-training architecture?",
+    "question_type": "comparison",
+    "expected_concepts": [
+      "ELMo shallow concatenation of left-to-right and right-to-left",
+      "OpenAI GPT left-to-right Transformer",
+      "BERT deep bidirectional Transformer"
+    ],
+    "gold_section_keywords": [
+      "Related Work",
+      "Introduction",
+      "Figure 1"
+    ],
+    "gold_document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a"
+  }
+]

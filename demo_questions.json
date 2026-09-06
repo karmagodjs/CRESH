@@ -1,0 +1,158 @@
+{
+  "title": "Cohere Research Intelligence (CRI) Demo & Benchmark Questions",
+  "target_paper": "1810.04805v2.pdf (BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding)",
+  "total_questions": 18,
+  "categories": {
+    "factual": 5,
+    "technical": 5,
+    "comparison": 3,
+    "unsupported_adversarial": 3,
+    "multi_hop": 2
+  },
+  "questions": [
+    {
+      "id": "demo_001",
+      "category": "factual",
+      "question": "What does BERT stand for?",
+      "expected_behavior": "Synthesizes that BERT stands for Bidirectional Encoder Representations from Transformers, citing the Abstract or Section 1.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Abstract", "Section 1"]
+    },
+    {
+      "id": "demo_002",
+      "category": "factual",
+      "question": "What are the two model sizes introduced for BERT?",
+      "expected_behavior": "Details BERT_BASE (12 layers, 768 hidden, 12 heads, 110M parameters) and BERT_LARGE (24 layers, 1024 hidden, 16 heads, 340M parameters), citing Section 3.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3", "Section 3.1"]
+    },
+    {
+      "id": "demo_003",
+      "category": "factual",
+      "question": "What corpora were used to pre-train BERT?",
+      "expected_behavior": "Identifies the BooksCorpus (800M words) and English Wikipedia (2,500M words), citing Section 3.1.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3.1"]
+    },
+    {
+      "id": "demo_004",
+      "category": "factual",
+      "question": "What activation function is used in BERT's intermediate feed-forward layers?",
+      "expected_behavior": "Identifies the GELU (Gaussian Error Linear Unit) activation function, citing Section 3.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3"]
+    },
+    {
+      "id": "demo_005",
+      "category": "factual",
+      "question": "What maximum sequence length was used during pre-training?",
+      "expected_behavior": "Notes pre-training used sequence length 128 for 90% of steps and sequence length 512 for the remaining 10% of steps to learn positional embeddings, citing Section 3.1.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3.1"]
+    },
+    {
+      "id": "demo_006",
+      "category": "technical",
+      "question": "What is Masked Language Modeling in BERT?",
+      "expected_behavior": "Explains that 15% of token positions are chosen at random: 80% replaced with [MASK], 10% replaced with a random token, and 10% kept unchanged, trained to predict the original token via cross-entropy loss, citing Section 3.1.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3.1"]
+    },
+    {
+      "id": "demo_007",
+      "category": "technical",
+      "question": "What is the purpose of Next Sentence Prediction (NSP)?",
+      "expected_behavior": "Explains the binary classification task where 50% of pairs are consecutive sentences (IsNext) and 50% are randomly paired (NotNext) to capture inter-sentence relationships for QA and NLI, citing Section 3.1.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3.1"]
+    },
+    {
+      "id": "demo_008",
+      "category": "technical",
+      "question": "What are the three main contributions of this paper?",
+      "expected_behavior": "Enumerates the 3 contributions: demonstrating importance of bidirectional pre-training, showing pre-trained representations eliminate need for heavily engineered architectures, and advancing SOTA on 11 NLP tasks, citing Section 1.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 1"]
+    },
+    {
+      "id": "demo_009",
+      "category": "technical",
+      "question": "What results did BERT achieve on GLUE and SQuAD?",
+      "expected_behavior": "Reports GLUE score of 80.5% (BERT_BASE: 79.6%, BERT_LARGE: 80.5%), SQuAD v1.1 F1 of 93.2, and SQuAD v2.0 F1 of 83.1, citing Section 4.1 and Section 4.2.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 4.1", "Section 4.2"]
+    },
+    {
+      "id": "demo_010",
+      "category": "technical",
+      "question": "How does BERT represent input sequences containing two sentences?",
+      "expected_behavior": "Explains concatenation into a single sequence with [CLS] token at start, [SEP] token separating sentences, and learned segment embeddings (EA and EB) added to token and position embeddings, citing Section 3.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3"]
+    },
+    {
+      "id": "demo_011",
+      "category": "comparison",
+      "question": "What is the difference between BERT's fine-tuning and feature-based approaches?",
+      "expected_behavior": "Contrasts fine-tuning (updating all BERT parameters end-to-end for downstream tasks) with feature-based approaches (extracting fixed activations from intermediate/top layers without updating BERT weights), citing Section 4.3 and Section 5.3.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 4.3", "Section 5.3"]
+    },
+    {
+      "id": "demo_012",
+      "category": "comparison",
+      "question": "How does BERT differ from OpenAI GPT and ELMo in directionality?",
+      "expected_behavior": "Clarifies that BERT uses deep bidirectional self-attention across all layers, whereas OpenAI GPT uses left-to-right unidirectional self-attention, and ELMo trains shallow left-to-right and right-to-left LSTMs independently and concatenates them, citing Section 1 and Section 2.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 1", "Section 2"]
+    },
+    {
+      "id": "demo_013",
+      "category": "comparison",
+      "question": "Compare BERT_BASE and BERT_LARGE in terms of layers, hidden size, attention heads, and parameter count.",
+      "expected_behavior": "Compares BERT_BASE (L=12, H=768, A=12, 110M params) with BERT_LARGE (L=24, H=1024, A=16, 340M params), noting BERT_LARGE was chosen to match OpenAI GPT's model size for direct architectural comparison, citing Section 3.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3"]
+    },
+    {
+      "id": "demo_014",
+      "category": "unsupported_adversarial",
+      "question": "What is the population of Mars?",
+      "expected_behavior": "Triggers safe abstention via Evidence Sufficiency Gate. Returns refusal stating insufficient evidence in the selected document. Zero hallucinated figures.",
+      "grounding_expected": "ABSTAIN",
+      "expected_citations": []
+    },
+    {
+      "id": "demo_015",
+      "category": "unsupported_adversarial",
+      "question": "According to the paper, what is Medusa decoding and how many speculative heads does it use?",
+      "expected_behavior": "Triggers safe abstention. The system recognizes that Medusa decoding is not discussed in the BERT paper, refusing rather than guessing from pre-trained weights.",
+      "grounding_expected": "ABSTAIN",
+      "expected_citations": []
+    },
+    {
+      "id": "demo_016",
+      "category": "unsupported_adversarial",
+      "question": "What learning rate did the authors use when training BERT on Llama-3 checkpoints?",
+      "expected_behavior": "Triggers safe abstention. Detects that the question assumes entities (Llama-3) not present in the document evidence, returning safe insufficient-evidence notification.",
+      "grounding_expected": "ABSTAIN",
+      "expected_citations": []
+    },
+    {
+      "id": "demo_017",
+      "category": "multi_hop",
+      "question": "What are the two pre-training tasks in BERT, and what does each task do?",
+      "expected_behavior": "Assembles multi-hop evidence from Section 3.1 covering both Task #1 (Masked Language Modeling: random token masking and prediction) and Task #2 (Next Sentence Prediction: binary sentence adjacency classification).",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3.1"]
+    },
+    {
+      "id": "demo_018",
+      "category": "multi_hop",
+      "question": "Why does BERT pre-training use 80% [MASK], 10% random token, and 10% original token instead of 100% [MASK]?",
+      "expected_behavior": "Synthesizes the rationale from Section 3.1 explaining that the [MASK] token never appears during downstream fine-tuning; the 80/10/10 distribution mitigates pre-train/fine-tune mismatch and forces the encoder to maintain a continuous contextual representation for every input token.",
+      "grounding_expected": "PASS",
+      "expected_citations": ["Section 3.1"]
+    }
+  ]
+}

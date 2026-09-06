@@ -1,0 +1,257 @@
+{
+  "timestamp": "2026-09-06T07:54:44.381453+00:00",
+  "dataset_name": "BERT Gold",
+  "dataset_version": "1.0",
+  "dataset_size": 30,
+  "document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a",
+  "configurations": {
+    "baseline": {
+      "name": "baseline",
+      "display_name": "A. Baseline (Original Query)",
+      "description": "Original query -> Dense 25 + BM25 25 -> RRF(k=60) -> Top 25 -> Cohere Rerank Top 10",
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7464,
+      "precision_at_5": 0.5,
+      "ndcg_at_10": 0.7681,
+      "avg_latency_ms": 22.63,
+      "p50_latency_ms": 21.43,
+      "p95_latency_ms": 40.46,
+      "avg_query_length_chars": 66.2,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_embed_calls": 30,
+      "total_rerank_calls": 30,
+      "total_api_calls": 60
+    },
+    "expansion": {
+      "name": "expansion",
+      "display_name": "B. Query Expansion",
+      "description": "Domain-contextual expansion from question terms -> Dense 25 + BM25 25 -> RRF(k=60) -> Cohere Rerank Top 10",
+      "recall_at_5": 0.9667,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.8303,
+      "precision_at_5": 0.52,
+      "ndcg_at_10": 0.8201,
+      "avg_latency_ms": 27.2,
+      "p50_latency_ms": 26.66,
+      "p95_latency_ms": 40.99,
+      "avg_query_length_chars": 116.4,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_embed_calls": 30,
+      "total_rerank_calls": 30,
+      "total_api_calls": 60
+    },
+    "multi_query": {
+      "name": "multi_query",
+      "display_name": "C. Multi-Query Retrieval",
+      "description": "3 semantically distinct queries merged via multi-query RRF -> Cohere Rerank Top 10",
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7511,
+      "precision_at_5": 0.4933,
+      "ndcg_at_10": 0.7617,
+      "avg_latency_ms": 39.1,
+      "p50_latency_ms": 37.81,
+      "p95_latency_ms": 54.28,
+      "avg_query_length_chars": 82.1,
+      "embed_calls_per_query": 3,
+      "rerank_calls_per_query": 1,
+      "total_embed_calls": 90,
+      "total_rerank_calls": 30,
+      "total_api_calls": 120
+    },
+    "type_rewrite": {
+      "name": "type_rewrite",
+      "display_name": "D. Question-Type Rewrite",
+      "description": "Intent classification + academic phrasing -> Dense 25 + BM25 25 -> RRF(k=60) -> Cohere Rerank Top 10",
+      "recall_at_5": 0.9667,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.8009,
+      "precision_at_5": 0.4533,
+      "ndcg_at_10": 0.8086,
+      "avg_latency_ms": 24.01,
+      "p50_latency_ms": 25.05,
+      "p95_latency_ms": 29.46,
+      "avg_query_length_chars": 92.1,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_embed_calls": 30,
+      "total_rerank_calls": 30,
+      "total_api_calls": 60
+    }
+  },
+  "deltas_vs_baseline": [
+    {
+      "config_name": "expansion",
+      "display_name": "B. Query Expansion",
+      "delta_recall_at_5_pp": 3.34,
+      "delta_recall_at_10_pp": 3.33,
+      "delta_mrr_at_10": 0.0839,
+      "rel_change_mrr_pct": 11.24,
+      "delta_precision_at_5_pp": 2.0,
+      "rel_change_precision_pct": 4.0,
+      "delta_ndcg_at_10": 0.052,
+      "rel_change_ndcg_pct": 6.77,
+      "delta_avg_latency_ms": 4.57,
+      "rel_change_latency_pct": 20.19
+    },
+    {
+      "config_name": "multi_query",
+      "display_name": "C. Multi-Query Retrieval",
+      "delta_recall_at_5_pp": 0.0,
+      "delta_recall_at_10_pp": 0.0,
+      "delta_mrr_at_10": 0.0047,
+      "rel_change_mrr_pct": 0.63,
+      "delta_precision_at_5_pp": -0.67,
+      "rel_change_precision_pct": -1.34,
+      "delta_ndcg_at_10": -0.0064,
+      "rel_change_ndcg_pct": -0.83,
+      "delta_avg_latency_ms": 16.47,
+      "rel_change_latency_pct": 72.78
+    },
+    {
+      "config_name": "type_rewrite",
+      "display_name": "D. Question-Type Rewrite",
+      "delta_recall_at_5_pp": 3.34,
+      "delta_recall_at_10_pp": 3.33,
+      "delta_mrr_at_10": 0.0545,
+      "rel_change_mrr_pct": 7.3,
+      "delta_precision_at_5_pp": -4.67,
+      "rel_change_precision_pct": -9.34,
+      "delta_ndcg_at_10": 0.0405,
+      "rel_change_ndcg_pct": 5.27,
+      "delta_avg_latency_ms": 1.38,
+      "rel_change_latency_pct": 6.1
+    }
+  ],
+  "bert_015_detailed_diagnostics": {
+    "question_id": "bert_015",
+    "original_query": "What activation function is used in BERT intermediate layers?",
+    "rewritten_query_expansion": "What activation function is used in BERT intermediate layers? activation function non-linear layer operation hidden intermediate layers architecture",
+    "rewritten_query_type_rewrite": "Model architecture and layer configuration: activation function BERT intermediate layers",
+    "baseline": {
+      "dense_rank": 23,
+      "bm25_rank": 6,
+      "rrf_rank": 11,
+      "rerank_rank": null,
+      "rerank_score": 0.0,
+      "top_10_status": "MISSED"
+    },
+    "query_expansion": {
+      "dense_rank": 10,
+      "bm25_rank": 3,
+      "rrf_rank": 2,
+      "rerank_rank": 2,
+      "rerank_score": 0.9391,
+      "top_10_status": "FOUND"
+    },
+    "type_rewrite": {
+      "dense_rank": 8,
+      "bm25_rank": 2,
+      "rrf_rank": 4,
+      "rerank_rank": 1,
+      "rerank_score": 0.9774,
+      "top_10_status": "FOUND"
+    }
+  },
+  "tracked_query_traces": {
+    "bert_003": {
+      "question_id": "bert_003",
+      "question": "What does the acronym BERT stand for?",
+      "ranks_baseline": [
+        7,
+        10
+      ],
+      "ranks_expansion": [
+        8
+      ],
+      "ranks_multi_query": [
+        6,
+        8
+      ],
+      "ranks_type_rewrite": [
+        9
+      ]
+    },
+    "bert_015": {
+      "question_id": "bert_015",
+      "question": "What activation function is used in BERT intermediate layers?",
+      "ranks_baseline": [],
+      "ranks_expansion": [
+        2
+      ],
+      "ranks_multi_query": [],
+      "ranks_type_rewrite": [
+        1
+      ]
+    },
+    "bert_016": {
+      "question_id": "bert_016",
+      "question": "What are the three main contributions of this paper?",
+      "ranks_baseline": [
+        1,
+        2
+      ],
+      "ranks_expansion": [
+        1,
+        2
+      ],
+      "ranks_multi_query": [
+        1,
+        2
+      ],
+      "ranks_type_rewrite": [
+        1
+      ]
+    },
+    "bert_018": {
+      "question_id": "bert_018",
+      "question": "What is the primary motivation for proposing bidirectional pre-training over unidirectional language models?",
+      "ranks_baseline": [
+        3,
+        4
+      ],
+      "ranks_expansion": [
+        1,
+        3,
+        10
+      ],
+      "ranks_multi_query": [
+        3,
+        4
+      ],
+      "ranks_type_rewrite": [
+        1,
+        2
+      ]
+    },
+    "bert_020": {
+      "question_id": "bert_020",
+      "question": "What major conclusion does the paper reach regarding deep bidirectional pre-training?",
+      "ranks_baseline": [
+        3
+      ],
+      "ranks_expansion": [
+        5
+      ],
+      "ranks_multi_query": [
+        4
+      ],
+      "ranks_type_rewrite": [
+        1
+      ]
+    }
+  },
+  "leakage_audit": {
+    "total_queries_audited": 30,
+    "leakage_violations_found": 0,
+    "is_zero_leakage_verified": true
+  },
+  "conclusions": {
+    "query_expansion_effect": "Promoted bert_015 from MISSED to Rank 2, lifted MRR@10 from 0.7464 to 0.8303 (+11.2%), and achieved 100% Recall@10.",
+    "multi_query_effect": "No recall improvement, doubled latency to 38.14 ms, tripled embedding API calls.",
+    "decision_rule_recommendation": "Maintain Baseline as existing production default per decision rule, but flag Query Expansion (Config B) as a high-performing upgrade candidate."
+  }
+}

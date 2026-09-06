@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Secrets & Environment
+.env
+.env.local
+.env*.local
+*.pem
+*.key
+
+# Node & Next.js
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# Vector DB & Storage
+qdrant_storage/
+data/uploads/*
+!data/uploads/.gitkeep
+data/sample_papers/*
+!data/sample_papers/.gitkeep
+
+# Evaluation outputs
+evaluation/results/*
+!evaluation/results/.gitkeep
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

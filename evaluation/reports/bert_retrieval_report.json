@@ -1,0 +1,399 @@
+{
+  "timestamp": "2026-09-06T07:15:16.868070+00:00",
+  "dataset_name": "BERT Gold",
+  "dataset_version": "1.0",
+  "dataset_size": 30,
+  "document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a",
+  "retrieval_configuration": {
+    "embedding_model": "embed-english-v3.0",
+    "rerank_model": "rerank-v3.5",
+    "hybrid_search_enabled": true,
+    "dense_weight": 0.7,
+    "bm25_weight": 0.3
+  },
+  "overall": {
+    "recall_at_5": 0.9333,
+    "recall_at_10": 0.9667,
+    "mrr_at_10": 0.7581,
+    "precision_at_5": 0.4933,
+    "ndcg_at_10": 0.7628
+  },
+  "metrics_by_retrieval_stage": {
+    "dense": {
+      "recall_at_5": 0.5667,
+      "recall_at_10": 0.8,
+      "mrr_at_10": 0.3808,
+      "precision_at_5": 0.1667,
+      "ndcg_at_10": 0.4712
+    },
+    "bm25": {
+      "recall_at_5": 0.9667,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.825,
+      "precision_at_5": 0.5333,
+      "ndcg_at_10": 0.8418
+    },
+    "hybrid": {
+      "recall_at_5": 0.8333,
+      "recall_at_10": 0.9333,
+      "mrr_at_10": 0.6694,
+      "precision_at_5": 0.3867,
+      "ndcg_at_10": 0.7031
+    },
+    "rerank": {
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7581,
+      "precision_at_5": 0.4933,
+      "ndcg_at_10": 0.7628
+    },
+    "final_evidence": {
+      "recall_at_5": 0.9,
+      "recall_at_10": 0.9,
+      "mrr_at_10": 0.725,
+      "precision_at_5": 0.4067,
+      "ndcg_at_10": 0.7683
+    }
+  },
+  "metrics_by_question_type": {
+    "definition": {
+      "count": 5,
+      "recall_at_5": 0.8,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.5917,
+      "precision_at_5": 0.28,
+      "ndcg_at_10": 0.638
+    },
+    "mechanism": {
+      "count": 5,
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.9,
+      "precision_at_5": 0.64,
+      "ndcg_at_10": 0.8773
+    },
+    "methodology": {
+      "count": 5,
+      "recall_at_5": 0.8,
+      "recall_at_10": 0.8,
+      "mrr_at_10": 0.7,
+      "precision_at_5": 0.36,
+      "ndcg_at_10": 0.6376
+    },
+    "contribution": {
+      "count": 5,
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.6167,
+      "precision_at_5": 0.36,
+      "ndcg_at_10": 0.6971
+    },
+    "results": {
+      "count": 5,
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.84,
+      "precision_at_5": 0.6,
+      "ndcg_at_10": 0.8505
+    },
+    "comparison": {
+      "count": 5,
+      "recall_at_5": 1.0,
+      "recall_at_10": 1.0,
+      "mrr_at_10": 0.9,
+      "precision_at_5": 0.72,
+      "ndcg_at_10": 0.8763
+    }
+  },
+  "failure_cases": [
+    {
+      "question_id": "bert_003",
+      "question": "What does the acronym BERT stand for?",
+      "question_type": "definition",
+      "expected_concepts": [
+        "Bidirectional Encoder Representations from Transformers",
+        "language representation model"
+      ],
+      "expected_section": [
+        "Abstract",
+        "Introduction"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "BERT",
+          "page": 3,
+          "preview": "We introduce BERT and its detailed implementation in this section. There are two steps in our framework: pre-training an"
+        },
+        {
+          "rank": 2,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Unlike Peters et al. ( 2018a ) and Radford et al. ( 2018 ), we do not use traditional left-to-right or right-to-left lan"
+        },
+        {
+          "rank": 3,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Task #2: Next Sentence Prediction (NSP) Many important downstream tasks such as Question Answering (QA) and Natural Lang"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "final_evidence",
+      "reason": "Evidence selection failure: concept budget or anti-contamination omitted relevant chunk"
+    },
+    {
+      "question_id": "bert_005",
+      "question": "What is SQuAD v1.1 as described in the paper?",
+      "question_type": "definition",
+      "expected_concepts": [
+        "Stanford Question Answering Dataset",
+        "collection of 100k crowd-sourced question/answer pairs"
+      ],
+      "expected_section": [
+        "SQuAD v1.1",
+        "Experiments"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "SQuAD v1.1",
+          "page": 6,
+          "preview": "Table 2: SQuAD 1.1 results. The BERT ensemble is 7x systems which use different pre-training checkpoints and fine-tuning"
+        },
+        {
+          "rank": 2,
+          "section": "SQuAD v2.0",
+          "page": 7,
+          "preview": "The SQuAD 2.0 task extends the SQuAD 1.1 problem definition by allowing for the possibility that no short answer exists "
+        },
+        {
+          "rank": 3,
+          "section": "SQuAD v1.1",
+          "page": 6,
+          "preview": "The Stanford Question Answering Dataset (SQuAD v1.1) is a collection of 100k crowdsourced question/answer pairs ( Rajpur"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "dense",
+      "reason": "Weak semantic match: relevant passage not in dense top 10"
+    },
+    {
+      "question_id": "bert_013",
+      "question": "What pre-training corpora were used to train BERT?",
+      "question_type": "methodology",
+      "expected_concepts": [
+        "BooksCorpus",
+        "800M words",
+        "English Wikipedia",
+        "2500M words",
+        "document-level corpus"
+      ],
+      "expected_section": [
+        "Pre-training BERT",
+        "Pre-training Procedure"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Unlike Peters et al. ( 2018a ) and Radford et al. ( 2018 ), we do not use traditional left-to-right or right-to-left lan"
+        },
+        {
+          "rank": 2,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Task #2: Next Sentence Prediction (NSP) Many important downstream tasks such as Question Answering (QA) and Natural Lang"
+        },
+        {
+          "rank": 3,
+          "section": "Effect of Pre-training Tasks",
+          "page": 8,
+          "preview": "We demonstrate the importance of the deep bidirectionality of BERT by evaluating two pretraining objectives using exactl"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "dense",
+      "reason": "Weak semantic match: relevant passage not in dense top 10"
+    },
+    {
+      "question_id": "bert_015",
+      "question": "What activation function is used in BERT intermediate layers?",
+      "question_type": "methodology",
+      "expected_concepts": [
+        "GELU",
+        "Gaussian Error Linear Unit",
+        "feed-forward"
+      ],
+      "expected_section": [
+        "Model Architecture",
+        "BERT",
+        "Pre-training BERT"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "Conclusion",
+          "page": 9,
+          "preview": "Recent empirical improvements due to transfer learning with language models have demonstrated that rich, unsupervised pr"
+        },
+        {
+          "rank": 2,
+          "section": "BERT",
+          "page": 3,
+          "preview": "We introduce BERT and its detailed implementation in this section. There are two steps in our framework: pre-training an"
+        },
+        {
+          "rank": 3,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Task #2: Next Sentence Prediction (NSP) Many important downstream tasks such as Question Answering (QA) and Natural Lang"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "dense",
+      "reason": "Weak semantic match: relevant passage not in dense top 10"
+    },
+    {
+      "question_id": "bert_016",
+      "question": "What are the three main contributions of this paper?",
+      "question_type": "contribution",
+      "expected_concepts": [
+        "bidirectional pre-training",
+        "eliminating heavily-engineered task-specific architectures",
+        "eleven nlp tasks state-of-the-art"
+      ],
+      "expected_section": [
+        "Introduction",
+        "contributions"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "Introduction",
+          "page": 1,
+          "preview": "\u2022 We demonstrate the importance of bidirectional pre-training for language representations. Unlike Radford et al. ( 2018"
+        },
+        {
+          "rank": 2,
+          "section": "Introduction",
+          "page": 1,
+          "preview": "Language model pre-training has been shown to be effective for improving many natural language processing tasks ( Dai an"
+        },
+        {
+          "rank": 3,
+          "section": "Conclusion",
+          "page": 9,
+          "preview": "Recent empirical improvements due to transfer learning with language models have demonstrated that rich, unsupervised pr"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "dense",
+      "reason": "Weak semantic match: relevant passage not in dense top 10"
+    },
+    {
+      "question_id": "bert_018",
+      "question": "What is the primary motivation for proposing bidirectional pre-training over unidirectional language models?",
+      "question_type": "contribution",
+      "expected_concepts": [
+        "unidirectional language models restrict",
+        "left-to-right",
+        "sub-optimal for sentence-level and token-level tasks"
+      ],
+      "expected_section": [
+        "Introduction",
+        "Abstract"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Unlike Peters et al. ( 2018a ) and Radford et al. ( 2018 ), we do not use traditional left-to-right or right-to-left lan"
+        },
+        {
+          "rank": 2,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Task #2: Next Sentence Prediction (NSP) Many important downstream tasks such as Question Answering (QA) and Natural Lang"
+        },
+        {
+          "rank": 3,
+          "section": "Introduction",
+          "page": 1,
+          "preview": "\u2022 We demonstrate the importance of bidirectional pre-training for language representations. Unlike Radford et al. ( 2018"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "dense",
+      "reason": "Weak semantic match: relevant passage not in dense top 10"
+    },
+    {
+      "question_id": "bert_020",
+      "question": "What major conclusion does the paper reach regarding deep bidirectional pre-training?",
+      "question_type": "contribution",
+      "expected_concepts": [
+        "deep bidirectionality",
+        "rich unsupervised pre-training",
+        "low-resource tasks"
+      ],
+      "expected_section": [
+        "Conclusion"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "Effect of Pre-training Tasks",
+          "page": 8,
+          "preview": "We demonstrate the importance of the deep bidirectionality of BERT by evaluating two pretraining objectives using exactl"
+        },
+        {
+          "rank": 2,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Unlike Peters et al. ( 2018a ) and Radford et al. ( 2018 ), we do not use traditional left-to-right or right-to-left lan"
+        },
+        {
+          "rank": 3,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Task #2: Next Sentence Prediction (NSP) Many important downstream tasks such as Question Answering (QA) and Natural Lang"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "final_evidence",
+      "reason": "Evidence selection failure: concept budget or anti-contamination omitted relevant chunk"
+    },
+    {
+      "question_id": "bert_028",
+      "question": "What is the effect of using a Left-to-Right model without NSP in the ablation study?",
+      "question_type": "comparison",
+      "expected_concepts": [
+        "LTR & No NSP",
+        "substantially worse than BERT",
+        "MRPC drops",
+        "unidirectional representation"
+      ],
+      "expected_section": [
+        "Effect of Pre-training Tasks",
+        "Table 5"
+      ],
+      "top_retrieved_chunks": [
+        {
+          "rank": 1,
+          "section": "Ablation Studies",
+          "page": 7,
+          "preview": "In this section, we perform ablation experiments over a number of facets of BERT in order to better understand their rel"
+        },
+        {
+          "rank": 2,
+          "section": "Effect of Pre-training Tasks",
+          "page": 8,
+          "preview": "We demonstrate the importance of the deep bidirectionality of BERT by evaluating two pretraining objectives using exactl"
+        },
+        {
+          "rank": 3,
+          "section": "Pre-training BERT",
+          "page": 4,
+          "preview": "Task #2: Next Sentence Prediction (NSP) Many important downstream tasks such as Question Answering (QA) and Natural Lang"
+        }
+      ],
+      "retrieval_stage_where_failure_occurred": "dense",
+      "reason": "Weak semantic match: relevant passage not in dense top 10"
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "timestamp": "2026-09-06T07:36:30.837235+00:00",
+  "dataset_name": "BERT Gold",
+  "dataset_version": "1.0",
+  "dataset_size": 30,
+  "document_id": "fe0ee73b-2daf-5064-be62-873a3d615a5a",
+  "configurations": {
+    "config_a": {
+      "name": "config_a",
+      "display_name": "A. Baseline (Dense 25 + BM25 25 -> RRF k=60 -> Top 25 -> Rerank 10)",
+      "description": "Equal-rank reciprocal rank fusion (RRF) top-25 followed by Cohere Rerank Top 10",
+      "dense_top_k": 25,
+      "bm25_top_k": 25,
+      "fusion_method": "RRF (k=60)",
+      "avg_pool_size_before_rerank": 25.0,
+      "min_pool_size_before_rerank": 25,
+      "max_pool_size_before_rerank": 25,
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7464,
+      "precision_at_5": 0.5,
+      "ndcg_at_10": 0.7681,
+      "avg_latency_ms": 18.46,
+      "p50_latency_ms": 17.94,
+      "p95_latency_ms": 23.98,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_api_calls": 60
+    },
+    "config_b": {
+      "name": "config_b",
+      "display_name": "B. Candidate Union (Dense 25 + BM25 25 -> Union -> Rerank 10)",
+      "description": "Deduplicated union of Dense 25 and BM25 25 followed by Cohere Rerank Top 10",
+      "dense_top_k": 25,
+      "bm25_top_k": 25,
+      "fusion_method": "Deduplicated Union",
+      "avg_pool_size_before_rerank": 31.07,
+      "min_pool_size_before_rerank": 29,
+      "max_pool_size_before_rerank": 33,
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7542,
+      "precision_at_5": 0.48,
+      "ndcg_at_10": 0.7627,
+      "avg_latency_ms": 20.3,
+      "p50_latency_ms": 19.17,
+      "p95_latency_ms": 26.24,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_api_calls": 60
+    },
+    "config_c": {
+      "name": "config_c",
+      "display_name": "C. Larger Candidate Union (Dense 50 + BM25 50 -> Union -> Rerank 10)",
+      "description": "Deduplicated union of Dense 50 and BM25 50 followed by Cohere Rerank Top 10",
+      "dense_top_k": 50,
+      "bm25_top_k": 50,
+      "fusion_method": "Deduplicated Union",
+      "avg_pool_size_before_rerank": 33.0,
+      "min_pool_size_before_rerank": 33,
+      "max_pool_size_before_rerank": 33,
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7561,
+      "precision_at_5": 0.4733,
+      "ndcg_at_10": 0.7591,
+      "avg_latency_ms": 21.25,
+      "p50_latency_ms": 20.54,
+      "p95_latency_ms": 27.67,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_api_calls": 60
+    },
+    "config_d": {
+      "name": "config_d",
+      "display_name": "D. BM25-Heavy Union (BM25 25 + Dense 10 -> Union -> Rerank 10)",
+      "description": "Deduplicated union favoring BM25 25 with smaller Dense 10 followed by Cohere Rerank Top 10",
+      "dense_top_k": 10,
+      "bm25_top_k": 25,
+      "fusion_method": "Deduplicated Union",
+      "avg_pool_size_before_rerank": 27.5,
+      "min_pool_size_before_rerank": 25,
+      "max_pool_size_before_rerank": 30,
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7556,
+      "precision_at_5": 0.48,
+      "ndcg_at_10": 0.766,
+      "avg_latency_ms": 20.18,
+      "p50_latency_ms": 18.76,
+      "p95_latency_ms": 26.4,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_api_calls": 60
+    },
+    "config_e": {
+      "name": "config_e",
+      "display_name": "E. BM25-Heavy Larger Union (BM25 50 + Dense 25 -> Union -> Rerank 10)",
+      "description": "Deduplicated union favoring BM25 50 with Dense 25 followed by Cohere Rerank Top 10",
+      "dense_top_k": 25,
+      "bm25_top_k": 50,
+      "fusion_method": "Deduplicated Union",
+      "avg_pool_size_before_rerank": 32.97,
+      "min_pool_size_before_rerank": 32,
+      "max_pool_size_before_rerank": 33,
+      "recall_at_5": 0.9333,
+      "recall_at_10": 0.9667,
+      "mrr_at_10": 0.7561,
+      "precision_at_5": 0.4733,
+      "ndcg_at_10": 0.7591,
+      "avg_latency_ms": 21.4,
+      "p50_latency_ms": 19.94,
+      "p95_latency_ms": 28.43,
+      "embed_calls_per_query": 1,
+      "rerank_calls_per_query": 1,
+      "total_api_calls": 60
+    }
+  },
+  "deltas_vs_baseline": [
+    {
+      "config_name": "config_b",
+      "display_name": "B. Candidate Union (Dense 25 + BM25 25 -> Union -> Rerank 10)",
+      "delta_recall_at_5_pp": 0.0,
+      "delta_recall_at_10_pp": 0.0,
+      "delta_mrr_at_10": 0.0078,
+      "rel_change_mrr_pct": 1.05,
+      "delta_precision_at_5_pp": -2.0,
+      "rel_change_precision_pct": -4.0,
+      "delta_ndcg_at_10": -0.0054,
+      "rel_change_ndcg_pct": -0.7,
+      "delta_avg_latency_ms": 1.84,
+      "rel_change_latency_pct": 9.97,
+      "delta_avg_pool_size": 6.07
+    },
+    {
+      "config_name": "config_c",
+      "display_name": "C. Larger Candidate Union (Dense 50 + BM25 50 -> Union -> Rerank 10)",
+      "delta_recall_at_5_pp": 0.0,
+      "delta_recall_at_10_pp": 0.0,
+      "delta_mrr_at_10": 0.0097,
+      "rel_change_mrr_pct": 1.3,
+      "delta_precision_at_5_pp": -2.67,
+      "rel_change_precision_pct": -5.34,
+      "delta_ndcg_at_10": -0.009,
+      "rel_change_ndcg_pct": -1.17,
+      "delta_avg_latency_ms": 2.79,
+      "rel_change_latency_pct": 15.11,
+      "delta_avg_pool_size": 8.0
+    },
+    {
+      "config_name": "config_d",
+      "display_name": "D. BM25-Heavy Union (BM25 25 + Dense 10 -> Union -> Rerank 10)",
+      "delta_recall_at_5_pp": 0.0,
+      "delta_recall_at_10_pp": 0.0,
+      "delta_mrr_at_10": 0.0092,
+      "rel_change_mrr_pct": 1.23,
+      "delta_precision_at_5_pp": -2.0,
+      "rel_change_precision_pct": -4.0,
+      "delta_ndcg_at_10": -0.0021,
+      "rel_change_ndcg_pct": -0.27,
+      "delta_avg_latency_ms": 1.72,
+      "rel_change_latency_pct": 9.32,
+      "delta_avg_pool_size": 2.5
+    },
+    {
+      "config_name": "config_e",
+      "display_name": "E. BM25-Heavy Larger Union (BM25 50 + Dense 25 -> Union -> Rerank 10)",
+      "delta_recall_at_5_pp": 0.0,
+      "delta_recall_at_10_pp": 0.0,
+      "delta_mrr_at_10": 0.0097,
+      "rel_change_mrr_pct": 1.3,
+      "delta_precision_at_5_pp": -2.67,
+      "rel_change_precision_pct": -5.34,
+      "delta_ndcg_at_10": -0.009,
+      "rel_change_ndcg_pct": -1.17,
+      "delta_avg_latency_ms": 2.94,
+      "rel_change_latency_pct": 15.93,
+      "delta_avg_pool_size": 7.97
+    }
+  ],
+  "tracked_query_traces": {
+    "bert_003": {
+      "question_id": "bert_003",
+      "question": "What does the acronym BERT stand for?",
+      "question_type": "definition",
+      "ranks_config_a": [
+        7,
+        10
+      ],
+      "ranks_config_b": [
+        8
+      ],
+      "ranks_config_c": [
+        10
+      ],
+      "ranks_config_d": [
+        6,
+        10
+      ],
+      "ranks_config_e": [
+        10
+      ],
+      "pool_size_b": 29,
+      "pool_size_c": 33
+    },
+    "bert_005": {
+      "question_id": "bert_005",
+      "question": "What is SQuAD v1.1 as described in the paper?",
+      "question_type": "definition",
+      "ranks_config_a": [
+        3
+      ],
+      "ranks_config_b": [
+        3
+      ],
+      "ranks_config_c": [
+        3
+      ],
+      "ranks_config_d": [
+        3
+      ],
+      "ranks_config_e": [
+        3
+      ],
+      "pool_size_b": 33,
+      "pool_size_c": 33
+    },
+    "bert_013": {
+      "question_id": "bert_013",
+      "question": "What pre-training corpora were used to train BERT?",
+      "question_type": "methodology",
+      "ranks_config_a": [
+        2,
+        6
+      ],
+      "ranks_config_b": [
+        2,
+        6
+      ],
+      "ranks_config_c": [
+        2,
+        6
+      ],
+      "ranks_config_d": [
+        2,
+        6
+      ],
+      "ranks_config_e": [
+        2,
+        6
+      ],
+      "pool_size_b": 30,
+      "pool_size_c": 33
+    },
+    "bert_015": {
+      "question_id": "bert_015",
+      "question": "What activation function is used in BERT intermediate layers?",
+      "question_type": "methodology",
+      "ranks_config_a": [],
+      "ranks_config_b": [],
+      "ranks_config_c": [],
+      "ranks_config_d": [],
+      "ranks_config_e": [],
+      "pool_size_b": 31,
+      "pool_size_c": 33
+    },
+    "bert_016": {
+      "question_id": "bert_016",
+      "question": "What are the three main contributions of this paper?",
+      "question_type": "contribution",
+      "ranks_config_a": [
+        1,
+        2
+      ],
+      "ranks_config_b": [
+        1,
+        2
+      ],
+      "ranks_config_c": [
+        1,
+        2
+      ],
+      "ranks_config_d": [
+        1,
+        2
+      ],
+      "ranks_config_e": [
+        1,
+        2
+      ],
+      "pool_size_b": 32,
+      "pool_size_c": 33
+    },
+    "bert_018": {
+      "question_id": "bert_018",
+      "question": "What is the primary motivation for proposing bidirectional pre-training over unidirectional language models?",
+      "question_type": "contribution",
+      "ranks_config_a": [
+        3,
+        4
+      ],
+      "ranks_config_b": [
+        3,
+        4
+      ],
+      "ranks_config_c": [
+        3,
+        4
+      ],
+      "ranks_config_d": [
+        3,
+        4
+      ],
+      "ranks_config_e": [
+        3,
+        4
+      ],
+      "pool_size_b": 32,
+      "pool_size_c": 33
+    },
+    "bert_020": {
+      "question_id": "bert_020",
+      "question": "What major conclusion does the paper reach regarding deep bidirectional pre-training?",
+      "question_type": "contribution",
+      "ranks_config_a": [
+        3
+      ],
+      "ranks_config_b": [
+        4
+      ],
+      "ranks_config_c": [
+        4
+      ],
+      "ranks_config_d": [
+        4
+      ],
+      "ranks_config_e": [
+        4
+      ],
+      "pool_size_b": 30,
+      "pool_size_c": 33
+    },
+    "bert_028": {
+      "question_id": "bert_028",
+      "question": "What is the effect of using a Left-to-Right model without NSP in the ablation study?",
+      "question_type": "comparison",
+      "ranks_config_a": [
+        2
+      ],
+      "ranks_config_b": [
+        2
+      ],
+      "ranks_config_c": [
+        2
+      ],
+      "ranks_config_d": [
+        2
+      ],
+      "ranks_config_e": [
+        2
+      ],
+      "pool_size_b": 32,
+      "pool_size_c": 33
+    }
+  },
+  "in_depth_traces": {
+    "bert_015": {
+      "question_id": "bert_015",
+      "question": "What activation function is used in BERT's intermediate feed-forward layers?",
+      "bm25_presence": "BM25 retrieved the GELU activation chunk at Rank 6 (Appendix) and Rank 7 (Model Architecture).",
+      "dense_presence": "Dense ranked the Model Architecture chunk at Rank 23 due to lack of semantic emphasis on GELU.",
+      "candidate_union_behavior": "Both chunks were successfully preserved in the candidate union pool (at indices 6 and 7, pool size 31).",
+      "cohere_rerank_scoring": "When scoring all 31 union candidates, Cohere Rerank assigned score 0.1344 (Rank 18) to the Model Architecture chunk and score 0.0100 (Rank 25) to the Appendix chunk.",
+      "recovery_verdict": "Candidate-union fusion PRESERVED the chunk in the pre-rerank pool, but Cohere Rerank DID NOT recover it into the Top 10 because the cross-encoder favored broader architectural paragraphs.",
+      "root_cause": "Reranker semantic bias toward general transformer encoder terms over specific activation acronyms."
+    },
+    "bert_028": {
+      "question_id": "bert_028",
+      "question": "What does the left-to-right model comparison show about the NSP ablation?",
+      "bm25_presence": "BM25 retrieved the Left-to-Right ablation chunk at Rank 8.",
+      "dense_presence": "Dense ranked the chunk low at Rank 24.",
+      "rrf_fusion_behavior": "RRF fusion degraded the chunk to Rank 11.",
+      "rerank_behavior_in_baseline": "Cohere Rerank rescued the chunk from Rank 11 to Rank 2 in Baseline Configuration A.",
+      "candidate_union_behavior": "Candidate union preserved the chunk at Index 8 (pool size 32). Cohere Rerank ranked it at Rank 2.",
+      "recovery_verdict": "Candidate union maintained Rank 2, identical to Baseline RRF + Rerank. No incremental gain was achieved."
+    }
+  },
+  "conclusions": {
+    "hypothesis_supported": false,
+    "best_performing_configuration": "config_a",
+    "production_recommendation": "config_a"
+  }
+}
