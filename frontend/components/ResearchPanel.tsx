@@ -67,93 +67,384 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
     return `Research Corpus · 2024 · ${activeDocument.page_count} Pages`;
   };
 
-  // Render paragraph text with interactive citation links [1], [2]
-  const renderParagraphWithCitations = (text: string) => {
+  // Helper to strip stray or unclosed asterisks that are not numeric multiplication
+  const cleanStrayAsterisks = (str: string): string => {
+    return str.replace(/(?<!\d)\*+|\*+(?!\d)/g, "");
+  };
+
+  // Render inline formatting: citations [1], [2], bold ***text***, **text**, *text*, inline code, and math
+  const renderFormattedInline = (text: string, keyPrefix: string = "inline"): React.ReactNode => {
     if (!text) return null;
 
-    const citationRegex = /\[(\d+(?:,\s*\d+)*)\]/g;
+    // Regex matches:
+    // 1. Citations: [1] or [1, 2]
+    // 3. Bold-Italic: ***text***
+    // 5. Bold: **text**
+    // 7. Italic: *text*
+    // 9. Inline code: `code`
+    // 11. Inline math: $formula$
+    const INLINE_REGEX = /(\[(\d+(?:,\s*\d+)*)\])|(\*\*\*([^*]+)\*\*\*)|(\*\*([^*]+)\*\*)|(\*([^*\n]+)\*)|(`([^`]+)`)|(\$([^$\n]+)\$)/g;
+
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
-    while ((match = citationRegex.exec(text)) !== null) {
+    while ((match = INLINE_REGEX.exec(text)) !== null) {
       const matchStart = match.index;
       const matchEnd = matchStart + match[0].length;
 
       if (matchStart > lastIndex) {
-        parts.push(text.substring(lastIndex, matchStart));
+        const plain = cleanStrayAsterisks(text.substring(lastIndex, matchStart));
+        if (plain) {
+          parts.push(plain);
+        }
       }
 
-      const citeNumbers = match[1].split(",").map((n) => parseInt(n.trim(), 10));
+      if (match[1]) {
+        // Citation pills [1] or [1, 2]
+        const citeNumbers = match[2]
+          .split(",")
+          .map((n) => parseInt(n.trim(), 10))
+          .filter((n) => !isNaN(n));
 
-      parts.push(
-        <span key={`cite-${matchStart}`} className="inline-flex items-center gap-0.5 mx-1 align-baseline">
-          {citeNumbers.map((num) => {
-            const isSelected = selectedCitationIndex === num;
-            return (
-              <button
-                key={`cite-btn-${matchStart}-${num}`}
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onCitationClick(num);
-                }}
-                className={`inline-flex items-center justify-center text-[11px] font-mono font-semibold px-2 py-0.5 rounded-[5px] transition-all cursor-pointer relative touch-manipulation before:absolute before:-inset-2 before:content-[''] ${
-                  isSelected
-                    ? "bg-cri-orange text-white ring-1 ring-cri-orange shadow-xs scale-105"
-                    : "bg-cri-surfaceElevated text-cri-info border border-cri-border hover:bg-cri-info hover:text-white"
-                }`}
-                title={`Jump to supporting passage [${num}] in Evidence panel`}
-              >
-                [{num}]
-              </button>
-            );
-          })}
-        </span>
-      );
+        parts.push(
+          <span key={`${keyPrefix}-cite-${matchStart}`} className="inline-flex items-center gap-0.5 mx-1 align-baseline">
+            {citeNumbers.map((num) => {
+              const isSelected = selectedCitationIndex === num;
+              return (
+                <button
+                  key={`${keyPrefix}-cite-btn-${matchStart}-${num}`}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onCitationClick(num);
+                  }}
+                  className={`inline-flex items-center justify-center text-[11px] font-mono font-semibold px-2 py-0.5 rounded-[5px] transition-all cursor-pointer relative touch-manipulation before:absolute before:-inset-2 before:content-[''] ${
+                    isSelected
+                      ? "bg-cri-orange text-white ring-1 ring-cri-orange shadow-xs scale-105"
+                      : "bg-cri-surfaceElevated text-cri-info border border-cri-border hover:bg-cri-info hover:text-white"
+                  }`}
+                  title={`Jump to supporting passage [${num}] in Evidence panel`}
+                >
+                  [{num}]
+                </button>
+              );
+            })}
+          </span>
+        );
+      } else if (match[3]) {
+        // ***Bold Italic***
+        parts.push(
+          <strong
+            key={`${keyPrefix}-bolditalic-${matchStart}`}
+            className="font-semibold italic text-cri-textPrimary"
+          >
+            {cleanStrayAsterisks(match[4])}
+          </strong>
+        );
+      } else if (match[5]) {
+        // **Bold**
+        parts.push(
+          <strong
+            key={`${keyPrefix}-bold-${matchStart}`}
+            className="font-semibold text-cri-textPrimary"
+          >
+            {cleanStrayAsterisks(match[6])}
+          </strong>
+        );
+      } else if (match[7]) {
+        // *Italic*
+        parts.push(
+          <em
+            key={`${keyPrefix}-italic-${matchStart}`}
+            className="italic text-cri-textPrimary"
+          >
+            {cleanStrayAsterisks(match[8])}
+          </em>
+        );
+      } else if (match[9]) {
+        // `Inline Code`
+        parts.push(
+          <code
+            key={`${keyPrefix}-code-${matchStart}`}
+            className="px-1.5 py-0.5 rounded bg-cri-surfaceElevated border border-cri-border font-mono text-[13px] text-cri-orange"
+          >
+            {match[10]}
+          </code>
+        );
+      } else if (match[11]) {
+        // $Inline Math$
+        parts.push(
+          <span
+            key={`${keyPrefix}-math-${matchStart}`}
+            className="font-mono text-[13.5px] italic text-cri-textPrimary"
+          >
+            {match[12]}
+          </span>
+        );
+      }
 
       lastIndex = matchEnd;
     }
 
     if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
+      const plain = cleanStrayAsterisks(text.substring(lastIndex));
+      if (plain) {
+        parts.push(plain);
+      }
     }
 
-    return parts.length > 0 ? parts : text;
+    return parts.length > 0 ? parts : null;
   };
 
-  // Render answer text with interactive citation links
+  const renderParagraphWithCitations = (text: string) => renderFormattedInline(text, "para");
+
+  type ContentBlock =
+    | { type: "h1"; content: string }
+    | { type: "h2"; content: string }
+    | { type: "h3"; content: string }
+    | { type: "h4"; content: string }
+    | { type: "ul"; items: string[] }
+    | { type: "ol"; items: string[] }
+    | { type: "p"; content: string };
+
+  const KNOWN_HEADERS = [
+    "Technical Breakdown & Core Architecture",
+    "Technical Breakdown & Mechanism",
+    "Technical Breakdown",
+    "Key Empirical Findings & Contributions",
+    "Key Empirical Findings & Trade-offs",
+    "Key Empirical Findings",
+    "Key Contributions & Empirical Findings",
+    "Technical Elaboration & Mechanisms",
+    "Benchmark & Empirical Context",
+    "Limitations & Open Questions",
+    "High-Level Technical Mechanism",
+    "Direct Factual Answer",
+    "Technical Summary",
+    "Methodology Details",
+    "Problem Addressed",
+    "Proposed Solution",
+    "Mechanism",
+    "Architecture",
+    "Background",
+    "Overview",
+    "Conclusion",
+  ];
+
+  // Render answer text with professional typography, Markdown headings, lists, inline emphasis, and citations
   const renderAnswerWithCitations = (answerText: string) => {
     if (!answerText) return null;
 
+    // Normalization and splitting of glued headers or malformed markdown wrappers
+    const titleRegexStr = KNOWN_HEADERS.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+    const splitPattern = new RegExp(
+      `^\\s*(?:\\*{2,3}|#{1,4}\\s*)?\\s*(${titleRegexStr})(?:\\*{2,3})?(?:\\s*[:\\-–—]\\s*|\\s+)(.+)$`,
+      "i"
+    );
+    const standalonePattern = new RegExp(
+      `^\\s*(?:\\*{2,3}|#{1,4}\\s*)?\\s*(${titleRegexStr})(?:\\*{2,3})?\\s*[:\\-–—]?\\s*$`,
+      "i"
+    );
+
+    const rawLines = answerText.split("\n");
+    const preprocessedLines: string[] = [];
+
+    for (const raw of rawLines) {
+      const line = raw.trim();
+      if (!line) {
+        preprocessedLines.push("");
+        continue;
+      }
+
+      // Preserve existing markdown list syntax or heading syntax
+      if (/^[-*•]\s+/.test(line) || /^\d+\.\s+/.test(line) || /^#{1,6}\s+/.test(line)) {
+        preprocessedLines.push(line);
+        continue;
+      }
+
+      let curr = line;
+      while (curr) {
+        const mSplit = curr.match(splitPattern);
+        if (mSplit) {
+          const header = mSplit[1].trim();
+          let remainder = mSplit[2].trim();
+          remainder = remainder.replace(/\*{2,3}\s*$/, "").trim();
+          preprocessedLines.push(`### ${header}`);
+          curr = remainder;
+          continue;
+        }
+
+        const mStand = curr.match(standalonePattern);
+        if (mStand) {
+          const header = mStand[1].trim();
+          preprocessedLines.push(`### ${header}`);
+          curr = "";
+          break;
+        }
+
+        // If a long line is entirely wrapped in **...** or ***...***, strip the outer wrap
+        if (
+          ((curr.startsWith("**") && curr.endsWith("**")) ||
+            (curr.startsWith("***") && curr.endsWith("***"))) &&
+          curr.length > 50
+        ) {
+          curr = curr.replace(/^\*{2,3}\s*/, "").replace(/\s*\*{2,3}$/, "");
+          continue;
+        }
+
+        // If line is a short standalone bold title (e.g. **Title** or ***Title***)
+        const mShortBold = curr.match(/^\*{2,3}([^*:]+)\*{2,3}:?\s*$/);
+        if (mShortBold && mShortBold[1].length <= 50 && !mShortBold[1].endsWith(".")) {
+          preprocessedLines.push(`### ${mShortBold[1].trim()}`);
+          curr = "";
+          break;
+        }
+
+        preprocessedLines.push(curr);
+        break;
+      }
+    }
+
+    // Group lines into structured blocks
+    const blocks: ContentBlock[] = [];
+    let currentParagraph: string[] = [];
+
+    const flushParagraph = () => {
+      if (currentParagraph.length > 0) {
+        const text = currentParagraph.join(" ").trim();
+        if (text) {
+          blocks.push({ type: "p", content: text });
+        }
+        currentParagraph = [];
+      }
+    };
+
+    for (const line of preprocessedLines) {
+      if (!line) {
+        flushParagraph();
+        continue;
+      }
+
+      if (line.startsWith("# ")) {
+        flushParagraph();
+        blocks.push({ type: "h1", content: line.replace(/^#\s+/, "") });
+        continue;
+      }
+      if (line.startsWith("## ")) {
+        flushParagraph();
+        blocks.push({ type: "h2", content: line.replace(/^##\s+/, "") });
+        continue;
+      }
+      if (line.startsWith("### ")) {
+        flushParagraph();
+        blocks.push({ type: "h3", content: line.replace(/^###\s+/, "") });
+        continue;
+      }
+      if (line.startsWith("#### ")) {
+        flushParagraph();
+        blocks.push({ type: "h4", content: line.replace(/^####\s+/, "") });
+        continue;
+      }
+
+      const bulletMatch = line.match(/^[-*•]\s+(.*)$/);
+      if (bulletMatch) {
+        flushParagraph();
+        const lastBlock = blocks[blocks.length - 1];
+        if (lastBlock && lastBlock.type === "ul") {
+          lastBlock.items.push(bulletMatch[1]);
+        } else {
+          blocks.push({ type: "ul", items: [bulletMatch[1]] });
+        }
+        continue;
+      }
+
+      const numMatch = line.match(/^\d+\.\s+(.*)$/);
+      if (numMatch) {
+        flushParagraph();
+        const lastBlock = blocks[blocks.length - 1];
+        if (lastBlock && lastBlock.type === "ol") {
+          lastBlock.items.push(numMatch[1]);
+        } else {
+          blocks.push({ type: "ol", items: [numMatch[1]] });
+        }
+        continue;
+      }
+
+      currentParagraph.push(line);
+    }
+
+    flushParagraph();
+
     return (
-      <div className="space-y-4 text-cri-textPrimary text-[15.5px] leading-[1.65] font-sans">
-        {answerText.split("\n\n").map((para, idx) => {
-          if (para.startsWith("### ")) {
-            return (
-              <h3 key={idx} className="text-base font-bold text-cri-textPrimary mt-4 mb-2 tracking-tight">
-                {para.replace("### ", "")}
-              </h3>
-            );
+      <div className="space-y-4 text-cri-textPrimary font-normal font-sans">
+        {blocks.map((block, bIdx) => {
+          switch (block.type) {
+            case "h1":
+            case "h2":
+              return (
+                <h2
+                  key={`block-h2-${bIdx}`}
+                  className="text-[17px] sm:text-[18px] font-semibold text-cri-textPrimary mt-5 mb-2.5 tracking-tight font-sans"
+                >
+                  {renderFormattedInline(block.content, `h2-${bIdx}`)}
+                </h2>
+              );
+            case "h3":
+              return (
+                <h3
+                  key={`block-h3-${bIdx}`}
+                  className="text-[15.5px] sm:text-[16px] font-semibold text-cri-textPrimary mt-4 mb-2 tracking-tight font-sans"
+                >
+                  {renderFormattedInline(block.content, `h3-${bIdx}`)}
+                </h3>
+              );
+            case "h4":
+              return (
+                <h4
+                  key={`block-h4-${bIdx}`}
+                  className="text-[14.5px] font-semibold text-cri-textPrimary mt-3 mb-1.5 tracking-tight font-sans"
+                >
+                  {renderFormattedInline(block.content, `h4-${bIdx}`)}
+                </h4>
+              );
+            case "ul":
+              return (
+                <ul
+                  key={`block-ul-${bIdx}`}
+                  className="list-disc pl-5 space-y-2 my-3 text-[14.5px] sm:text-[15px] font-normal leading-[1.65] text-cri-textPrimary"
+                >
+                  {block.items.map((item, iIdx) => (
+                    <li key={`ul-${bIdx}-${iIdx}`} className="font-normal pl-1">
+                      {renderFormattedInline(item, `ul-${bIdx}-${iIdx}`)}
+                    </li>
+                  ))}
+                </ul>
+              );
+            case "ol":
+              return (
+                <ol
+                  key={`block-ol-${bIdx}`}
+                  className="list-decimal pl-5 space-y-2 my-3 text-[14.5px] sm:text-[15px] font-normal leading-[1.65] text-cri-textPrimary"
+                >
+                  {block.items.map((item, iIdx) => (
+                    <li key={`ol-${bIdx}-${iIdx}`} className="font-normal pl-1">
+                      {renderFormattedInline(item, `ol-${bIdx}-${iIdx}`)}
+                    </li>
+                  ))}
+                </ol>
+              );
+            case "p":
+            default:
+              return (
+                <p
+                  key={`block-p-${bIdx}`}
+                  className="font-normal text-[15px] sm:text-[15.5px] leading-[1.7] text-cri-textPrimary my-2.5 font-sans"
+                >
+                  {renderFormattedInline(block.content, `p-${bIdx}`)}
+                </p>
+              );
           }
-          if (para.startsWith("## ")) {
-            return (
-              <h2 key={idx} className="text-lg font-bold text-cri-textPrimary mt-5 mb-2.5 tracking-tight">
-                {para.replace("## ", "")}
-              </h2>
-            );
-          }
-          if (para.startsWith("- ") || para.startsWith("* ")) {
-            const items = para.split("\n").filter((l) => l.trim().length > 0);
-            return (
-              <ul key={idx} className="list-disc pl-5 space-y-1.5 my-2 text-[14.5px]">
-                {items.map((it, iIdx) => (
-                  <li key={iIdx}>{renderParagraphWithCitations(it.replace(/^[-*]\s*/, ""))}</li>
-                ))}
-              </ul>
-            );
-          }
-          return <p key={idx}>{renderParagraphWithCitations(para)}</p>;
         })}
       </div>
     );
@@ -421,13 +712,13 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         <div className="text-[10px] font-bold uppercase tracking-widest text-cri-orange font-mono mb-1.5">
                           Research Synthesis
                         </div>
-                        <h2 className="text-[18px] sm:text-[20px] font-bold text-cri-textPrimary leading-snug font-sans">
+                        <h2 className="text-[18px] sm:text-[20px] font-semibold text-cri-textPrimary leading-snug font-sans">
                           {queryResponse.query}
                         </h2>
                       </div>
 
                       {/* Supporting Explanation with Provenance Citations */}
-                      <div className="cri-answer-body">
+                      <div className="cri-answer-body font-normal text-[15px] sm:text-[15.5px] leading-[1.7] text-cri-textPrimary">
                         {renderAnswerWithCitations(queryResponse.answer)}
                       </div>
 
@@ -451,7 +742,9 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                               <div className="w-5 h-5 rounded-full bg-cri-orange/15 text-cri-orange font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-mono">
                                 {fIdx + 1}
                               </div>
-                              <span className="text-cri-textPrimary leading-relaxed">{finding}</span>
+                              <span className="text-cri-textPrimary leading-relaxed">
+                                {renderFormattedInline(finding, `finding-${fIdx}`)}
+                              </span>
                             </div>
                           ))}
                         </div>

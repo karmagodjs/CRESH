@@ -155,3 +155,32 @@ html, body {
   background-color: var(--surface-hover) !important;
 }
 
+/* Research Synthesis Answer Typography & Markdown Styling */
+.cri-answer-body {
+  font-weight: 400 !important;
+}
+
+.cri-answer-body p,
+.cri-answer-body li {
+  font-weight: 400 !important;
+}
+
+.cri-answer-body h1,
+.cri-answer-body h2,
+.cri-answer-body h3,
+.cri-answer-body h4 {
+  font-weight: 600 !important;
+}
+
+.cri-answer-body strong {
+  font-weight: 600 !important;
+}
+
+.cri-answer-body em {
+  font-style: italic;
+}
+
+.cri-answer-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+

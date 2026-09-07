@@ -26,8 +26,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
   className,
 }) => {
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const [activeTab, setActiveTab] = useState<"all" | "supporting" | "contradicting" | "neutral">("all");
-  const [showVerificationDetails, setShowVerificationDetails] = useState(false);
+  const [activeTab, setActiveTab] = useState<"all" | "supporting" | "contradicting">("all");
 
   // Scroll active passage into view when citation is clicked
   useEffect(() => {
@@ -54,14 +53,12 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
 
   // Classify citations: in scientific research without controversy, citations supporting the answer are supporting
   const supportingCount = citations.length;
-  const neutralCount = 0;
   const contradictingCount = 0;
 
   const filteredCitations = citations.filter((c) => {
     if (activeTab === "all") return true;
     if (activeTab === "supporting") return true;
     if (activeTab === "contradicting") return false;
-    if (activeTab === "neutral") return false;
     return true;
   });
 
@@ -91,10 +88,10 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
         )}
       </div>
 
-      {/* SECTION 22: Evidence Tabs (All, Supporting, Contradicting, Neutral) - Only shown after query when evidence exists */}
+      {/* SECTION 22: Evidence Tabs (All, Supporting, Contradicting) - Only shown after query when evidence exists */}
       {hasEvidence && (
         <div className="p-2.5 border-b border-[#2A2F35] bg-[#15171A] shrink-0">
-          <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
+          <div className="grid grid-cols-3 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
             <button
               type="button"
               onClick={() => setActiveTab("all")}
@@ -130,27 +127,15 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
             >
               Contradicting {contradictingCount}
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("neutral")}
-              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer truncate ${
-                activeTab === "neutral"
-                  ? "bg-[#171A1D] text-cri-info shadow-xs font-semibold border border-[#2A2F35]"
-                  : "text-cri-textMuted hover:text-cri-textSecondary"
-              }`}
-              title="Neutral evidence"
-            >
-              Neutral {neutralCount}
-            </button>
           </div>
         </div>
       )}
 
       {/* Scrollable Evidence Content */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 flex flex-col">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
         {/* SECTION 21: BEFORE QUERY / NO EVIDENCE STATE (Calm, centered, clean, no tabs) */}
         {!hasEvidence && !isAbstention && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-2">
+          <div className="h-full min-h-[160px] flex flex-col items-center justify-center text-center p-6 space-y-2">
             <p className="text-xs font-semibold text-cri-textPrimary">No evidence yet</p>
             <p className="text-[11px] text-cri-textMuted leading-relaxed max-w-[210px] mx-auto">
               Ask a question to see supporting evidence.
@@ -256,42 +241,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {/* SECTION 23: Verification Summary */}
-        {queryResponse && !isAbstention && (
-          <div className="pt-2.5 border-t border-[#2A2F35] space-y-2 mt-auto">
-            <div className="p-3 rounded-[10px] bg-[#1C2024] border border-[#2A2F35] space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-cri-success font-semibold text-xs">
-                  <ShieldCheck className="w-4 h-4 text-cri-success shrink-0" />
-                  <span>Evidence verified</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowVerificationDetails(!showVerificationDetails)}
-                  className="text-[11px] text-cri-orange hover:underline font-medium cursor-pointer"
-                >
-                  {showVerificationDetails ? "Hide details" : "View details →"}
-                </button>
-              </div>
-
-              {showVerificationDetails ? (
-                <div className="pt-2 border-t border-[#2A2F35]/60 text-[11px] text-cri-textSecondary space-y-1.5 leading-relaxed">
-                  <p>Every claim in the generated answer is directly backed by cited passages in the scoped source document.</p>
-                  <div className="text-cri-textMuted flex items-center justify-between pt-0.5">
-                    <span>Citation grounding</span>
-                    <span className="text-cri-success font-semibold">Well supported</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 text-[11px] text-cri-textMuted pt-0.5">
-                  <ShieldCheck className="w-3 h-3 text-cri-success" />
-                  <span>Strict document isolation preserved</span>
-                </div>
-              )}
-            </div>
           </div>
         )}
       </div>
