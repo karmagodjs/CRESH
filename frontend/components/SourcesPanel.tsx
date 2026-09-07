@@ -41,7 +41,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "papers" | "web">("all");
-  const [showIngestionItem, setShowIngestionItem] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Web source input states
@@ -501,84 +500,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           })
         )}
       </div>
-
-      {/* SECTION 9: INGESTION (Near bottom, compact small rounded container) */}
-      {showIngestionItem && (
-        <div className="px-3 pt-2.5 pb-2 border-t border-[#2A2F35] bg-[#171A1D] shrink-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
-              INGESTION
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowIngestionItem(false)}
-              className="text-cri-textMuted hover:text-cri-textPrimary p-0.5 cursor-pointer"
-              title="Dismiss ingestion banner"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-
-          <div className="p-3 rounded-[10px] bg-[#1C2024] border border-[#2A2F35] space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-cri-textPrimary truncate text-[12px]" title={activeUpload?.filename || "The Future of AI Compute.pdf"}>
-                {activeUpload?.filename || "The Future of AI Compute.pdf"}
-              </span>
-              <span className="text-[11px] font-mono text-cri-orange shrink-0">
-                {activeUpload ? `${activeUpload.progress}%` : "Ready"}
-              </span>
-            </div>
-
-            {/* Progress bar if uploading */}
-            {activeUpload && activeUpload.progress < 100 && (
-              <div className="w-full bg-[#171A1D] h-1.5 rounded-full overflow-hidden border border-[#2A2F35]">
-                <div
-                  className="bg-cri-orange h-full rounded-full transition-all duration-300"
-                  style={{ width: `${activeUpload.progress}%` }}
-                />
-              </div>
-            )}
-
-            <div className="flex items-center justify-between text-[11px] text-cri-textMuted pt-0.5">
-              <span>{activeUpload ? "Processing document" : "Ready"}</span>
-              <span className="text-cri-success font-medium">Synced</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SECTION 10: RESEARCH SCOPE (Only displayed when a document is selected) */}
-      {activeDoc && (
-        <div className="p-3 border-t border-[#2A2F35] bg-[#171A1D] shrink-0 text-xs">
-          <div className="p-3 rounded-[10px] bg-[#1A1E22] border border-[#2A2F35] space-y-1.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-cri-orange inline-block" />
-                <span className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary font-sans">
-                  RESEARCH SCOPE
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => onSelectDocument(null)}
-                className="text-[11px] text-cri-orange hover:text-cri-orange-hover font-semibold flex items-center gap-0.5 transition-colors cursor-pointer"
-                title="Clear scope"
-              >
-                <span>Clear scope</span>
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-
-            <div className="text-xs font-semibold text-cri-textPrimary">
-              This document only
-            </div>
-
-            <p className="text-[11px] text-cri-textSecondary leading-relaxed">
-              Answers use evidence from the selected document.
-            </p>
-          </div>
-        </div>
-      )}
     </aside>
   );
 };
