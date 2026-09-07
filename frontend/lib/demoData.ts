@@ -7,14 +7,6 @@ export interface DemoQuestion {
   expected_citations: string[];
 }
 
-export const SUGGESTED_QUESTIONS: string[] = [
-  "What is Masked Language Modeling in BERT?",
-  "What are the three main contributions of this paper?",
-  "What results did BERT achieve on GLUE and SQuAD?",
-  "What is the purpose of Next Sentence Prediction?",
-  "Why did the authors introduce BERT?",
-];
-
 export const ALL_DEMO_QUESTIONS: DemoQuestion[] = [
   {
     id: "demo_001",

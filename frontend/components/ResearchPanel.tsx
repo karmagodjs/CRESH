@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from "react";
 import { DocumentResponse, QueryResponse } from "@/lib/types";
-import { SUGGESTED_QUESTIONS } from "@/lib/demoData";
 import {
   FileText,
   ArrowRight,
@@ -448,30 +447,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     <p className="text-xs text-cri-textSecondary">
                       Retrieving evidence passages, reranking context, and synthesizing grounded answer...
                     </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Curated Suggested Questions (only shown when document is selected and no query executed) */}
-              {!queryResponse && !isLoading && (
-                <div className="space-y-2.5 pt-1">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
-                    Curated Research Questions
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {SUGGESTED_QUESTIONS.map((q, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleSelectSuggested(q)}
-                        className="text-left p-3 rounded-[10px] bg-cri-surface hover:bg-cri-surfaceSecondary border border-cri-border hover:border-cri-borderLight text-xs text-cri-textPrimary flex items-center justify-between group transition-colors cursor-pointer"
-                      >
-                        <span className="group-hover:text-cri-orange transition-colors truncate pr-2 font-medium">
-                          {q}
-                        </span>
-                        <ArrowRight className="w-3.5 h-3.5 text-cri-textMuted group-hover:text-cri-orange shrink-0" />
-                      </button>
-                    ))}
                   </div>
                 </div>
               )}
