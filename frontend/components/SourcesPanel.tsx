@@ -26,6 +26,7 @@ interface SourcesPanelProps {
     progress: number;
     status: string;
   } | null;
+  className?: string;
 }
 
 export const SourcesPanel: React.FC<SourcesPanelProps> = ({
@@ -36,6 +37,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   onDeleteDocument,
   isDemoMode,
   activeUpload,
+  className,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "papers" | "web">("all");
@@ -146,16 +148,16 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
   return (
     <aside
-      className="h-full flex flex-col bg-[#171A1D] border border-[#2A2F35] rounded-[14px] select-none overflow-hidden shadow-xs"
+      className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-[14px] select-none overflow-hidden shadow-xs ${className || ""}`}
       aria-label="Sources Library"
     >
       {/* SECTION 5: Panel Header with Single Add Source button and Dropdown Menu */}
-      <div className="p-4 border-b border-[#2A2F35] flex items-center justify-between shrink-0 relative">
+      <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0 relative">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
             Sources
           </h2>
-          <span className="text-[11px] font-mono px-1.5 py-0.5 bg-[#1C2024] text-cri-textSecondary rounded-[6px] border border-[#2A2F35] font-medium">
+          <span className="text-[11px] font-mono px-1.5 py-0.5 bg-cri-surfaceElevated text-cri-textSecondary rounded-[6px] border border-cri-border font-medium">
             {documents.length}
           </span>
         </div>

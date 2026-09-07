@@ -14,6 +14,7 @@ interface EvidencePanelProps {
   onSelectCitation: (index: number) => void;
   activeDocumentFilename?: string;
   onOpenCitationDocument?: (pageNumber: number) => void;
+  className?: string;
 }
 
 export const EvidencePanel: React.FC<EvidencePanelProps> = ({
@@ -22,6 +23,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
   onSelectCitation,
   activeDocumentFilename,
   onOpenCitationDocument,
+  className,
 }) => {
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [activeTab, setActiveTab] = useState<"all" | "supporting" | "contradicting" | "neutral">("all");
@@ -65,17 +67,17 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
 
   return (
     <aside
-      className="h-full flex flex-col bg-[#171A1D] border border-[#2A2F35] rounded-[14px] select-none overflow-hidden shadow-xs transition-colors"
+      className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-[14px] select-none overflow-hidden shadow-xs transition-colors ${className || ""}`}
       aria-label="Evidence & Verification Workspace"
     >
       {/* SECTION 21: Header with Verification Badge */}
-      <div className="p-4 border-b border-[#2A2F35] flex items-center justify-between shrink-0">
+      <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
             Evidence
           </h2>
           {hasEvidence && (
-            <span className="text-[11px] font-mono px-1.5 py-0.5 bg-[#1C2024] text-cri-textSecondary rounded-[6px] border border-[#2A2F35] font-medium">
+            <span className="text-[11px] font-mono px-1.5 py-0.5 bg-cri-surfaceElevated text-cri-textSecondary rounded-[6px] border border-cri-border font-medium">
               {citations.length}
             </span>
           )}

@@ -142,52 +142,51 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] p-3 sm:p-4 select-none animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] p-2 sm:p-4 select-none animate-in fade-in duration-200"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="doc-viewer-title"
     >
       <div
-        className="relative flex flex-col bg-[#15181C] border border-[#2A2F35] rounded-[14px] shadow-2xl overflow-hidden w-full max-w-[1100px] h-[90vh] max-h-[850px]"
-        style={{ width: "min(1100px, 92vw)", height: "min(850px, 90vh)" }}
+        className="relative flex flex-col bg-cri-surface border border-cri-border rounded-[12px] sm:rounded-[14px] shadow-2xl overflow-hidden w-full max-w-[1100px] h-[94vh] sm:h-[90vh] max-h-[850px]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* SECTION 7: VIEWER HEADER */}
-        <div className="h-[60px] px-5 border-b border-[#2A2F35] bg-[#171A1D] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-[8px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0">
+        <div className="h-[60px] px-3.5 sm:px-5 border-b border-cri-border bg-cri-surface flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-[8px] bg-cri-surfaceElevated border border-cri-border flex items-center justify-center text-cri-orange shrink-0">
               <FileText className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <h2
                 id="doc-viewer-title"
-                className="text-sm sm:text-base font-bold text-cri-textPrimary font-sans truncate max-w-md sm:max-w-xl"
+                className="text-xs sm:text-sm font-bold text-cri-textPrimary font-sans truncate max-w-[180px] sm:max-w-md lg:max-w-xl"
                 title={document?.title || document?.filename || "Document Viewer"}
               >
                 {document?.title || document?.filename || "Document Viewer"}
               </h2>
-              <div className="flex items-center gap-2 text-[11px] text-cri-textSecondary">
+              <div className="flex items-center gap-1.5 text-[11px] text-cri-textSecondary">
                 <span>
                   {totalPages} {totalPages === 1 ? "page" : "pages"} · {isTextFile ? "Text" : "PDF"}
                 </span>
                 {document?.created_at && (
                   <>
                     <span>·</span>
-                    <span>{new Date(document.created_at).toLocaleDateString()}</span>
+                    <span className="hidden xs:inline">{new Date(document.created_at).toLocaleDateString()}</span>
                   </>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {resolvedUrl && (
               <a
                 href={resolvedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-8 px-2.5 rounded-[8px] bg-[#1C2024] hover:bg-[#22272D] border border-[#2A2F35] text-xs text-cri-textSecondary hover:text-cri-textPrimary flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="h-10 min-h-[40px] px-2.5 rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surface border border-cri-border text-xs text-cri-textSecondary hover:text-cri-textPrimary flex items-center gap-1.5 transition-colors cursor-pointer"
                 title="Open original document in new window"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-cri-orange" />
@@ -198,7 +197,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-[8px] bg-[#1C2024] hover:bg-[#22272D] border border-[#2A2F35] flex items-center justify-center text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surface border border-cri-border flex items-center justify-center text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
               title="Close viewer (Esc)"
               aria-label="Close"
             >
@@ -209,8 +208,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
         {/* SECTION 14: NO DOCUMENT STATE */}
         {!document ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-[#15181C]">
-            <div className="w-10 h-10 rounded-[10px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-textMuted">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-cri-surface">
+            <div className="w-10 h-10 rounded-[10px] bg-cri-surfaceElevated border border-cri-border flex items-center justify-center text-cri-textMuted">
               <FileText className="w-5 h-5 text-cri-orange opacity-60" />
             </div>
             <div className="space-y-1">
@@ -222,15 +221,15 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="h-8 px-4 rounded-[8px] bg-[#1C2024] hover:bg-[#22272D] border border-[#2A2F35] text-xs font-semibold text-cri-textPrimary cursor-pointer transition-colors"
+              className="h-[44px] min-h-[44px] px-5 rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surface border border-cri-border text-xs font-semibold text-cri-textPrimary cursor-pointer transition-colors"
             >
               Close
             </button>
           </div>
         ) : hasError ? (
           /* SECTION 12: ERROR STATE (Graceful in-app error, no 404!) */
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-[#15181C]">
-            <div className="w-10 h-10 rounded-[10px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-cri-surface">
+            <div className="w-10 h-10 rounded-[10px] bg-cri-surfaceElevated border border-cri-border flex items-center justify-center text-cri-orange">
               <AlertCircle className="w-5 h-5 text-cri-orange" />
             </div>
             <div className="space-y-1">
@@ -245,7 +244,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               <button
                 type="button"
                 onClick={handleRetry}
-                className="h-8 px-3.5 rounded-[8px] bg-cri-orange hover:bg-cri-orange-hover text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                className="h-[44px] min-h-[44px] px-4 rounded-[8px] bg-cri-orange hover:bg-cri-orange-hover text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Try again</span>
@@ -253,7 +252,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="h-8 px-3.5 rounded-[8px] bg-[#1C2024] hover:bg-[#22272D] border border-[#2A2F35] text-xs text-cri-textSecondary hover:text-cri-textPrimary cursor-pointer transition-colors"
+                className="h-[44px] min-h-[44px] px-4 rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surface border border-cri-border text-xs text-cri-textSecondary hover:text-cri-textPrimary cursor-pointer transition-colors"
               >
                 Close
               </button>
@@ -261,17 +260,17 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           </div>
         ) : (
           /* VIEWER BODY: PDF or TEXT */
-          <div className="relative flex-1 w-full h-full overflow-hidden bg-[#101214]">
+          <div className="relative flex-1 w-full h-full overflow-hidden bg-cri-bg">
             {/* SECTION 13: LOADING STATE */}
             {isLoading && (
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#15181C] space-y-2">
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-cri-surface space-y-2">
                 <Loader2 className="w-6 h-6 animate-spin text-cri-orange" />
                 <p className="text-xs text-cri-textSecondary font-medium">Opening document...</p>
               </div>
             )}
 
             {isTextFile ? (
-              <div className="w-full h-full overflow-y-auto p-6 text-xs font-mono text-cri-textPrimary leading-relaxed whitespace-pre-wrap selection:bg-cri-orange/30">
+              <div className="w-full h-full overflow-y-auto p-4 sm:p-6 text-xs font-mono text-cri-textPrimary leading-relaxed whitespace-pre-wrap selection:bg-cri-orange/30">
                 {textContent}
               </div>
             ) : pdfFrameUrl ? (
@@ -297,12 +296,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
         {/* SECTION 8: PAGE CONTROLS */}
         {document && !hasError && totalPages > 1 && (
-          <div className="h-[48px] px-5 border-t border-[#2A2F35] bg-[#171A1D] flex items-center justify-between shrink-0 text-xs">
+          <div className="h-[52px] px-3 sm:px-5 border-t border-cri-border bg-cri-surface flex items-center justify-between shrink-0 text-xs">
             <button
               type="button"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-[#1C2024] hover:bg-[#22272D] disabled:opacity-40 disabled:cursor-not-allowed border border-[#2A2F35] text-cri-textPrimary font-medium transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-[40px] px-3.5 rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surface disabled:opacity-40 disabled:cursor-not-allowed border border-cri-border text-cri-textPrimary font-medium transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5 text-cri-orange" />
               <span>Previous</span>
@@ -316,7 +315,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               type="button"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] bg-[#1C2024] hover:bg-[#22272D] disabled:opacity-40 disabled:cursor-not-allowed border border-[#2A2F35] text-cri-textPrimary font-medium transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-[40px] px-3.5 rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surface disabled:opacity-40 disabled:cursor-not-allowed border border-cri-border text-cri-textPrimary font-medium transition-colors cursor-pointer"
             >
               <span>Next</span>
               <ChevronRight className="w-3.5 h-3.5 text-cri-orange" />

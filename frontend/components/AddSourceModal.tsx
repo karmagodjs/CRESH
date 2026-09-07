@@ -138,17 +138,17 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] p-4 select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] p-3 sm:p-4 select-none animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-[#171A1D] border border-[#2A2F35] rounded-[14px] shadow-2xl p-5 space-y-4"
+        className="w-full max-w-lg bg-cri-surface border border-cri-border rounded-[14px] shadow-2xl p-4 sm:p-5 space-y-4 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#2A2F35] pb-3.5">
+        <div className="flex items-center justify-between border-b border-cri-border pb-3.5">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-[8px] bg-[#1C2024] border border-[#2A2F35] text-cri-orange">
+            <div className="p-2 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-cri-orange">
               <UploadCloud className="w-4 h-4" />
             </div>
             <div>
@@ -163,20 +163,21 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-cri-textMuted hover:text-cri-textPrimary p-1.5 rounded-[8px] hover:bg-[#1C2024] transition-colors cursor-pointer"
+            aria-label="Close"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] text-cri-textMuted hover:text-cri-textPrimary rounded-[8px] hover:bg-cri-surfaceElevated flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher: [ Upload file | Add web URL ] */}
-        <div className="grid grid-cols-2 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-xs">
+        <div className="grid grid-cols-2 gap-1 p-0.5 bg-cri-surfaceElevated rounded-[8px] border border-cri-border text-xs">
           <button
             type="button"
             onClick={() => setActiveTab("file")}
-            className={`py-1.5 text-center font-semibold rounded-[6px] transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`py-2 text-center font-semibold rounded-[6px] transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === "file"
-                ? "bg-[#171A1D] text-cri-textPrimary shadow-xs border border-[#2A2F35]"
+                ? "bg-cri-surface text-cri-textPrimary shadow-xs border border-cri-border"
                 : "text-cri-textMuted hover:text-cri-textSecondary"
             }`}
           >
@@ -186,13 +187,13 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab("url")}
-            className={`py-1.5 text-center font-semibold rounded-[6px] transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`py-2 text-center font-semibold rounded-[6px] transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === "url"
-                ? "bg-[#171A1D] text-cri-textPrimary shadow-xs border border-[#2A2F35]"
+                ? "bg-cri-surface text-cri-textPrimary shadow-xs border border-cri-border"
                 : "text-cri-textMuted hover:text-cri-textSecondary"
             }`}
           >
-            <Globe className="w-3.5 h-3.5 text-[#58A6FF]" />
+            <Globe className="w-3.5 h-3.5 text-cri-info" />
             <span>Add web URL</span>
           </button>
         </div>
@@ -205,10 +206,10 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-[12px] p-7 text-center cursor-pointer transition-colors ${
+              className={`border-2 border-dashed rounded-[12px] p-6 sm:p-7 text-center cursor-pointer transition-colors ${
                 isDragOver
-                  ? "border-cri-orange bg-[#1C2024]"
-                  : "border-[#2A2F35] hover:border-[#3A4048] bg-[#15181C]"
+                  ? "border-cri-orange bg-cri-surfaceElevated"
+                  : "border-cri-border hover:border-cri-textMuted bg-cri-surfaceSecondary"
               }`}
             >
               <input
@@ -241,17 +242,17 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-xs text-cri-error bg-[#1C2024] p-3 rounded-[10px] border border-cri-error/40">
+              <div className="flex items-center gap-2 text-xs text-cri-error bg-cri-surfaceElevated p-3 rounded-[10px] border border-cri-error/40">
                 <AlertCircle className="w-4 h-4 shrink-0 text-cri-error" />
                 <span>{error}</span>
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2A2F35]">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-cri-border">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-1.5 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-[#1C2024] border border-[#2A2F35] transition-colors cursor-pointer"
+                className="h-[44px] min-h-[44px] px-4 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated border border-cri-border transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -259,9 +260,9 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                 type="button"
                 disabled={!file || isUploading}
                 onClick={handleUpload}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold transition-all ${
+                className={`h-[44px] min-h-[44px] flex items-center gap-1.5 px-4 rounded-[9px] text-xs font-semibold transition-all ${
                   !file || isUploading
-                    ? "bg-[#1C2024] text-cri-textMuted cursor-not-allowed border border-[#2A2F35]"
+                    ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
                     : "bg-cri-orange hover:bg-cri-orange-hover text-white shadow-xs cursor-pointer"
                 }`}
               >
@@ -279,7 +280,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         ) : (
           /* Tab 2: Web URL */
           <form onSubmit={handleAddWebUrl} className="space-y-4">
-            <div className="p-4 rounded-[12px] bg-[#15181C] border border-[#2A2F35] space-y-3">
+            <div className="p-4 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-3">
               <div className="space-y-1">
                 <h3 className="text-xs font-semibold text-cri-textPrimary">
                   Add a web source
@@ -299,10 +300,10 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                     if (webBackendMessage) setWebBackendMessage(null);
                   }}
                   placeholder="https://example.com/article"
-                  className={`w-full h-[38px] bg-[#171A1D] border text-xs text-cri-textPrimary placeholder-cri-textMuted px-3 rounded-[8px] focus:outline-none transition-colors ${
+                  className={`w-full h-[40px] bg-cri-surface border text-xs text-cri-textPrimary placeholder-cri-textMuted px-3 rounded-[8px] focus:outline-none transition-colors ${
                     webUrlError
                       ? "border-cri-error focus:border-cri-error"
-                      : "border-[#2A2F35] focus:border-cri-orange"
+                      : "border-cri-border focus:border-cri-orange"
                   }`}
                 />
 
@@ -315,27 +316,27 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               </div>
 
               {webBackendMessage && (
-                <div className="p-3 rounded-[8px] bg-[#221815] border border-cri-orange/40 text-[11px] text-cri-textSecondary leading-relaxed flex items-start gap-2.5">
+                <div className="p-3 rounded-[8px] bg-cri-surfaceElevated border border-cri-orange/40 text-[11px] text-cri-textSecondary leading-relaxed flex items-start gap-2.5">
                   <AlertCircle className="w-4 h-4 text-cri-orange shrink-0 mt-0.5" />
                   <span>{webBackendMessage}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2A2F35]">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-cri-border">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-1.5 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-[#1C2024] border border-[#2A2F35] transition-colors cursor-pointer"
+                className="h-[44px] min-h-[44px] px-4 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated border border-cri-border transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isAddingWeb || !webUrl.trim()}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold transition-all ${
+                className={`h-[44px] min-h-[44px] flex items-center gap-1.5 px-4 rounded-[9px] text-xs font-semibold transition-all ${
                   isAddingWeb || !webUrl.trim()
-                    ? "bg-[#1C2024] text-cri-textMuted cursor-not-allowed border border-[#2A2F35]"
+                    ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
                     : "bg-cri-orange hover:bg-cri-orange-hover text-white shadow-xs cursor-pointer"
                 }`}
               >
