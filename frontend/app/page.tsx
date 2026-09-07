@@ -18,6 +18,7 @@ export default function WorkspacePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCitationIndex, setSelectedCitationIndex] = useState<number | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadTab, setUploadTab] = useState<"file" | "url">("file");
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState<number>(1);
   const [uploadedFileUrls, setUploadedFileUrls] = useState<Record<string, string>>({});
@@ -199,7 +200,10 @@ export default function WorkspacePage() {
                 setSelectedCitationIndex(null);
                 if (window.innerWidth < 1024) setMobileTab("research");
               }}
-              onOpenUpload={() => setIsUploadOpen(true)}
+              onOpenUpload={(tab = "file") => {
+                setUploadTab(tab);
+                setIsUploadOpen(true);
+              }}
               isDemoMode={Boolean(activeDoc?.filename.includes("1810.04805"))}
             />
           </div>
@@ -244,6 +248,7 @@ export default function WorkspacePage() {
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onDocumentUploaded={handleDocumentUploaded}
+        initialTab={uploadTab}
       />
 
       {/* CRI Document Viewer Modal */}

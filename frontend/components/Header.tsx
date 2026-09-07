@@ -43,24 +43,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* RIGHT: Ends cleanly without clutter */}
+      {/* RIGHT: Minimal clean termination */}
       <div className="flex items-center justify-end">
-        {activeDocument ? (
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-[9px] bg-[#1C2024] border border-[#2A2F35] text-xs text-cri-textSecondary max-w-[240px]">
-            <FileText className="w-3.5 h-3.5 text-cri-orange shrink-0" />
-            <span className="text-cri-textPrimary font-medium truncate" title={activeDocument.filename}>
-              {activeDocument.filename}
-            </span>
-            <span className="text-[10px] font-mono text-cri-textMuted shrink-0">
-              {activeDocument.page_count}p
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5 text-xs text-cri-textMuted font-mono">
-            <span className="w-2 h-2 rounded-full bg-cri-success inline-block" />
-            <span>Ready</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1.5 text-xs text-cri-textMuted font-mono">
+          <span className="w-2 h-2 rounded-full bg-cri-success inline-block" />
+          <span>Ready</span>
+        </div>
       </div>
     </header>
   );

@@ -1,19 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { DocumentResponse } from "@/lib/types";
 import {
   FileText,
   Plus,
   Search,
   X,
+  Globe,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+  FileUp,
 } from "lucide-react";
 
 interface SourcesPanelProps {
   documents: DocumentResponse[];
   activeDocumentId: string | null;
   onSelectDocument: (documentId: string | null) => void;
-  onOpenUpload: () => void;
+  onOpenUpload: (tab?: "file" | "url") => void;
   onDeleteDocument?: (documentId: string) => void;
   isDemoMode: boolean;
   activeUpload?: {
@@ -35,6 +40,39 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "papers" | "web" | "others">("all");
   const [showIngestionItem, setShowIngestionItem] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Web source input states
+  const [webUrl, setWebUrl] = useState("");
+  const [webUrlError, setWebUrlError] = useState<string | null>(null);
+  const [isAddingWeb, setIsAddingWeb] = useState(false);
+  const [webBackendMessage, setWebBackendMessage] = useState<string | null>(null);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const urlInputRef = useRef<HTMLInputElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  const isWebDoc = (doc: DocumentResponse) =>
+    doc.filename.startsWith("http://") ||
+    doc.filename.startsWith("https://") ||
+    doc.filename.endsWith(".html") ||
+    doc.filename.includes("web") ||
+    doc.title.startsWith("http://") ||
+    doc.title.startsWith("https://");
 
   const filteredDocs = documents.filter((doc) => {
     const q = searchQuery.toLowerCase();
@@ -45,17 +83,21 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
     if (!matchesSearch) return false;
 
     if (activeFilter === "papers") {
-      return doc.filename.endsWith(".pdf") || doc.filename.includes("1810.04805");
+      return (
+        (doc.filename.endsWith(".pdf") || doc.filename.includes("1810.04805")) &&
+        !isWebDoc(doc)
+      );
     }
     if (activeFilter === "web") {
-      return doc.filename.includes(".html") || doc.filename.includes("web");
+      return isWebDoc(doc);
     }
     if (activeFilter === "others") {
-      return !doc.filename.endsWith(".pdf");
+      return !doc.filename.endsWith(".pdf") && !isWebDoc(doc);
     }
     return true;
   });
 
+  const webDocs = documents.filter(isWebDoc);
   const activeDoc = documents.find((d) => d.document_id === activeDocumentId);
 
   // Helper to extract clean author/year metadata for display
@@ -69,13 +111,49 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
     return "Research Corpus · 2024";
   };
 
+  // Submit Web URL handler
+  const handleAddWebUrl = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = webUrl.trim();
+    setWebUrlError(null);
+    setWebBackendMessage(null);
+
+    if (!trimmed) {
+      setWebUrlError("Please enter a valid URL (e.g. https://...)");
+      return;
+    }
+
+    if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+      setWebUrlError("Please enter a valid URL (e.g. https://...)");
+      return;
+    }
+
+    try {
+      new URL(trimmed);
+    } catch {
+      setWebUrlError("Please enter a valid URL (e.g. https://...)");
+      return;
+    }
+
+    setIsAddingWeb(true);
+
+    // As audited: FastAPI backend does NOT support web scraping or URL ingestion endpoints.
+    // Per Section 7: show clear, honest in-app message:
+    setTimeout(() => {
+      setIsAddingWeb(false);
+      setWebBackendMessage(
+        "Could not add this source. Web ingestion requires a backend URL connector (FastAPI endpoint not yet configured). Try another source or upload a paper."
+      );
+    }, 600);
+  };
+
   return (
     <aside
       className="h-full flex flex-col bg-[#171A1D] border border-[#2A2F35] rounded-[14px] select-none overflow-hidden shadow-xs"
       aria-label="Sources Library"
     >
-      {/* SECTION 5: Panel Header */}
-      <div className="p-4 border-b border-[#2A2F35] flex items-center justify-between shrink-0">
+      {/* SECTION 5: Panel Header with Single Add Source button and Dropdown Menu */}
+      <div className="p-4 border-b border-[#2A2F35] flex items-center justify-between shrink-0 relative">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
             Sources
@@ -85,19 +163,61 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           </span>
         </div>
 
-        {/* Add Source button: 36px height, 14px padding, 9px radius, orange */}
-        <button
-          type="button"
-          onClick={onOpenUpload}
-          className="h-[36px] px-[14px] flex items-center gap-1.5 text-xs font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[9px] transition-colors shadow-xs cursor-pointer"
-          title="Add new research source (PDF, TXT, MD)"
-        >
-          <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-          <span>+ Add sources</span>
-        </button>
+        {/* Primary Add Source Button Container */}
+        <div className="relative" ref={menuRef}>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="h-[36px] px-[14px] flex items-center gap-1.5 text-[14px] font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[9px] transition-colors shadow-xs cursor-pointer"
+            title="Add research source"
+          >
+            <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+            <span>Add source</span>
+          </button>
+
+          {/* Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-52 bg-[#1A1E22] border border-[#2A2F35] rounded-[10px] shadow-2xl p-1.5 z-40 space-y-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onOpenUpload("file");
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
+              >
+                <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0">
+                  <FileUp className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-semibold text-cri-textPrimary">Upload file</span>
+                  <span className="text-[10px] text-cri-textMuted truncate">PDF, TXT, MD files</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setActiveFilter("web");
+                  setTimeout(() => urlInputRef.current?.focus(), 100);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
+              >
+                <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-[#58A6FF] shrink-0">
+                  <Globe className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-semibold text-cri-textPrimary">Add web URL</span>
+                  <span className="text-[10px] text-cri-textMuted truncate">Articles, docs & pages</span>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* SECTION 6: Source Search & Filters */}
+      {/* Source Search & Filters */}
       <div className="p-3 border-b border-[#2A2F35] space-y-2.5 shrink-0">
         <div className="relative">
           <Search className="w-4 h-4 text-cri-textMuted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -111,7 +231,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           {searchQuery ? (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-cri-textMuted hover:text-cri-textPrimary"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-cri-textMuted hover:text-cri-textPrimary cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -123,7 +243,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           )}
         </div>
 
-        {/* Small rounded segmented controls (8px radius) */}
+        {/* Segmented Controls (8px radius) */}
         <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
           {(["all", "papers", "web", "others"] as const).map((filter) => {
             const isActive = activeFilter === filter;
@@ -145,37 +265,177 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         </div>
       </div>
 
-      {/* SECTION 7 & 8: Sources List / Empty State */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 flex flex-col">
-        {filteredDocs.length === 0 ? (
-          /* SECTION 8: Vertically Centered Empty State */
+      {/* Main Panel Content: Sources List or Dedicated Web View */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 flex flex-col">
+        {/* If WEB tab is active: Render Dedicated Web Source Input Container */}
+        {activeFilter === "web" ? (
+          <div className="space-y-3 flex-1 flex flex-col">
+            {/* Dedicated Web Source Input Card */}
+            <div className="bg-[#1C2024] border border-[#2A2F35] rounded-[12px] p-3.5 space-y-3 shrink-0">
+              <div className="flex items-center justify-between border-b border-[#2A2F35] pb-2">
+                <div className="flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-[#58A6FF]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
+                    WEB SOURCES
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="text-xs font-semibold text-cri-textPrimary">
+                  Add a web source
+                </h3>
+                <p className="text-[11px] text-cri-textSecondary leading-relaxed">
+                  Index documentation, blog posts, or research pages for grounding.
+                </p>
+              </div>
+
+              <form onSubmit={handleAddWebUrl} className="space-y-2">
+                <div className="relative">
+                  <input
+                    ref={urlInputRef}
+                    type="url"
+                    value={webUrl}
+                    onChange={(e) => {
+                      setWebUrl(e.target.value);
+                      if (webUrlError) setWebUrlError(null);
+                      if (webBackendMessage) setWebBackendMessage(null);
+                    }}
+                    placeholder="https://example.com/article"
+                    className={`w-full h-[36px] bg-[#171A1D] border text-xs text-cri-textPrimary placeholder-cri-textMuted px-3 rounded-[8px] focus:outline-none transition-colors ${
+                      webUrlError
+                        ? "border-cri-error focus:border-cri-error"
+                        : "border-[#2A2F35] focus:border-cri-orange"
+                    }`}
+                  />
+                </div>
+
+                {webUrlError && (
+                  <p className="text-[11px] text-cri-error flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{webUrlError}</span>
+                  </p>
+                )}
+
+                {webBackendMessage && (
+                  <div className="p-2.5 rounded-[8px] bg-[#221815] border border-cri-orange/40 text-[11px] text-cri-textSecondary leading-relaxed flex items-start gap-2">
+                    <AlertCircle className="w-3.5 h-3.5 text-cri-orange shrink-0 mt-0.5" />
+                    <span>{webBackendMessage}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end pt-0.5">
+                  <button
+                    type="submit"
+                    disabled={isAddingWeb || !webUrl.trim()}
+                    className={`h-[32px] px-3 rounded-[8px] text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      isAddingWeb || !webUrl.trim()
+                        ? "bg-[#252A30] text-cri-textMuted cursor-not-allowed border border-[#2A2F35]"
+                        : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer shadow-xs"
+                    }`}
+                  >
+                    {isAddingWeb ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Adding source...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Add URL</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* List of Web Sources or Empty Notice */}
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {webDocs.length > 0 ? (
+                webDocs.map((doc) => {
+                  const isActive = doc.document_id === activeDocumentId;
+                  return (
+                    <div
+                      key={doc.document_id}
+                      onClick={() => onSelectDocument(isActive ? null : doc.document_id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectDocument(isActive ? null : doc.document_id);
+                        }
+                      }}
+                      className={`group relative text-left min-h-[84px] p-3 rounded-[12px] border cursor-pointer transition-all flex flex-col justify-between ${
+                        isActive
+                          ? "bg-[#1A1E22] border-[#2A2F35] border-l-[3px] border-l-cri-orange shadow-xs"
+                          : "bg-[#171A1D] border-[#2A2F35] hover:bg-[#1A1E22] border-l-[3px] border-l-transparent"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-[30px] h-[30px] rounded-[8px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-[#58A6FF] shrink-0 mt-0.5">
+                          <Globe className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[13px] font-semibold text-cri-textPrimary leading-snug line-clamp-1">
+                            {doc.title || doc.filename}
+                          </div>
+                          <div className="text-[11px] text-cri-textSecondary truncate mt-0.5">
+                            {doc.filename}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 pt-1.5 border-t border-[#2A2F35]/50 flex items-center justify-between text-[11px] text-cri-textMuted">
+                        <span>Web page</span>
+                        <span className="flex items-center gap-1.5 text-cri-success font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cri-success inline-block" />
+                          Indexed
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-2 text-cri-textMuted">
+                  <Globe className="w-5 h-5 opacity-40 text-[#58A6FF]" />
+                  <p className="text-xs font-medium text-cri-textSecondary">
+                    No web sources added yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : filteredDocs.length === 0 ? (
+          /* SECTION 5: Differentiated Contextual Empty States (NO duplicate button!) */
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3.5">
             <div className="w-9 h-9 rounded-[10px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center mx-auto text-cri-textMuted">
               <FileText className="w-4 h-4 opacity-50 text-cri-orange" />
             </div>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-cri-textPrimary">
-                {searchQuery ? "No matching sources" : "No sources yet"}
+                {searchQuery
+                  ? "No matching sources"
+                  : activeFilter === "papers"
+                  ? "No papers yet"
+                  : activeFilter === "others"
+                  ? "No other sources yet"
+                  : "No sources yet"}
               </p>
-              <p className="text-xs text-cri-textSecondary leading-relaxed max-w-[210px] mx-auto">
-                {searchQuery ? "Try refining your search query." : "Add your first research document to begin."}
+              <p className="text-xs text-cri-textSecondary leading-relaxed max-w-[220px] mx-auto">
+                {searchQuery
+                  ? "Try refining your search query."
+                  : activeFilter === "papers"
+                  ? "Add a research paper to begin."
+                  : activeFilter === "others"
+                  ? "Add a supported source from the Add source menu."
+                  : "Add your first research source to begin."}
               </p>
             </div>
-            {!searchQuery && (
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={onOpenUpload}
-                  className="h-[36px] px-[14px] inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[10px] transition-colors cursor-pointer shadow-xs"
-                >
-                  <Plus className="w-3.5 h-3.5 text-white" />
-                  <span>+ Add source</span>
-                </button>
-              </div>
-            )}
           </div>
         ) : (
-          /* SECTION 7: Source items styled like notebook entries (90-100px approx, 14px padding, 12px radius) */
+          /* Normal Sources List */
           filteredDocs.map((doc) => {
             const isActive = doc.document_id === activeDocumentId;
             const authorYear = getDocAuthorYear(doc);
@@ -199,13 +459,11 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 }`}
               >
                 <div className="flex items-start gap-2.5">
-                  {/* 32px Document Icon */}
                   <div className="w-[32px] h-[32px] rounded-[8px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0 mt-0.5">
                     <FileText className="w-4 h-4" />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    {/* Title: 14px semibold */}
                     <div
                       className="text-[14px] font-semibold text-cri-textPrimary leading-snug line-clamp-2"
                       title={doc.title || doc.filename}
@@ -213,14 +471,12 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                       {doc.title || doc.filename}
                     </div>
 
-                    {/* Metadata: 12px */}
                     <div className="text-[12px] text-cri-textSecondary truncate mt-1">
                       {authorYear}
                     </div>
                   </div>
                 </div>
 
-                {/* Status: 11px & page count */}
                 <div className="mt-2.5 pt-2 border-t border-[#2A2F35]/50 flex items-center justify-between text-[11px] text-cri-textMuted">
                   <span>{doc.page_count} {doc.page_count === 1 ? "page" : "pages"}</span>
                   <span className="flex items-center gap-1.5 text-cri-success font-medium">
