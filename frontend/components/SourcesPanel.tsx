@@ -149,9 +149,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary font-sans">
             Sources
           </h2>
-          <span className="text-xs font-mono text-cri-textMuted font-medium">
-            ({documents.length})
-          </span>
         </div>
 
         {filteredDocs.length > 0 && (
