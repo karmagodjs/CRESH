@@ -37,25 +37,25 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-[1px] transition-opacity select-none"
+      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-[2px] transition-opacity select-none"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-cri-ink border-l border-cri-border h-full flex flex-col shadow-2xl"
+        className="w-full max-w-md bg-cri-surface border-l border-cri-border h-full flex flex-col shadow-2xl transition-transform"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-cri-border flex items-center justify-between">
+        <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-cri-orange" />
-            <h2 className="text-sm font-bold tracking-tight text-cri-paper">
+            <h2 className="text-sm font-bold tracking-tight text-cri-textPrimary font-sans">
               Research Trace & Latency Audit
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded text-cri-textMuted hover:text-cri-paper hover:bg-cri-surface transition-colors"
+            className="p-1.5 rounded-[8px] text-cri-textMuted hover:text-cri-textPrimary hover:bg-cri-surfaceSecondary transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -64,33 +64,33 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-5">
           {!queryResponse ? (
-            <div className="py-12 text-center text-xs text-cri-textMuted">
+            <div className="py-16 text-center text-xs text-cri-textMuted">
               No query executed yet. Submit a research question to inspect live request execution trace and latencies.
             </div>
           ) : (
             <>
               {/* Correlation Identifiers */}
-              <div className="p-3 rounded bg-cri-surface border border-cri-border space-y-2 text-xs">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted">
+              <div className="p-3.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2 text-xs">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   Trace Identifiers
                 </div>
-                <div className="space-y-1 font-mono text-[11px]">
+                <div className="space-y-1.5 font-mono text-[11px]">
                   <div className="flex justify-between">
                     <span className="text-cri-textMuted">request_id:</span>
-                    <span className="text-cri-paper truncate max-w-[220px]" title={queryResponse.request_id}>
+                    <span className="text-cri-textPrimary truncate max-w-[220px]" title={queryResponse.request_id}>
                       {queryResponse.request_id || "req-local"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-cri-textMuted">trace_id:</span>
-                    <span className="text-cri-paper truncate max-w-[220px]" title={queryResponse.trace_id}>
+                    <span className="text-cri-textPrimary truncate max-w-[220px]" title={queryResponse.trace_id}>
                       {queryResponse.trace_id || "trc-local"}
                     </span>
                   </div>
                   {queryResponse.question_id && (
                     <div className="flex justify-between">
                       <span className="text-cri-textMuted">question_id:</span>
-                      <span className="text-cri-paper">{queryResponse.question_id}</span>
+                      <span className="text-cri-textPrimary">{queryResponse.question_id}</span>
                     </div>
                   )}
                 </div>
@@ -98,28 +98,28 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
 
               {/* Stage Latencies */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   <span>Stage Latencies</span>
                   <span>Duration</span>
                 </div>
 
-                <div className="rounded border border-cri-border bg-cri-surface divide-y divide-cri-border text-xs">
+                <div className="rounded-[12px] border border-cri-border bg-cri-surfaceSecondary divide-y divide-cri-border/60 text-xs overflow-hidden">
                   {stages.map((st) => {
                     const rawMs = timings[st.key] || 0;
                     const pct = totalLatency > 0 ? Math.min(100, (rawMs / totalLatency) * 100) : 0;
 
                     return (
-                      <div key={st.key} className="p-2.5 space-y-1">
+                      <div key={st.key} className="p-2.5 space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-cri-paper font-medium">{st.label}</span>
+                          <span className="text-cri-textPrimary font-medium text-[12px]">{st.label}</span>
                           <span className="font-mono text-cri-textMuted text-[11px]">
                             {formatMs(rawMs)}
                           </span>
                         </div>
                         {rawMs > 0 && (
-                          <div className="w-full bg-cri-ink h-1 rounded overflow-hidden">
+                          <div className="w-full bg-cri-surface h-1.5 rounded-full overflow-hidden">
                             <div
-                              className="bg-cri-orange h-full rounded transition-all duration-300"
+                              className="bg-cri-orange h-full rounded-full transition-all duration-300"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -129,40 +129,40 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                   })}
 
                   {/* Total row */}
-                  <div className="p-2.5 bg-cri-surfaceActive flex items-center justify-between font-semibold">
-                    <span className="text-cri-paper">Total Latency</span>
-                    <span className="font-mono text-cri-orange">{formatMs(totalLatency)}</span>
+                  <div className="p-3 bg-cri-surfaceElevated flex items-center justify-between font-semibold">
+                    <span className="text-cri-textPrimary text-xs">Total Latency</span>
+                    <span className="font-mono text-cri-orange text-xs">{formatMs(totalLatency)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Resource & Cost Accounting */}
-              <div className="p-3 rounded bg-cri-surface border border-cri-border space-y-2.5 text-xs">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted">
+              <div className="p-3.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2.5 text-xs">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   Token Accounting & Cost
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2 rounded bg-cri-ink border border-cri-border">
-                    <div className="text-cri-textMuted text-[10px] uppercase">Prompt Tokens</div>
-                    <div className="font-mono font-semibold text-cri-paper mt-0.5">
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                    <div className="text-cri-textMuted text-[9px] uppercase">Prompt Tokens</div>
+                    <div className="font-bold text-cri-textPrimary mt-0.5">
                       {queryResponse.token_usage?.prompt_tokens ?? 0}
                     </div>
                   </div>
-                  <div className="p-2 rounded bg-cri-ink border border-cri-border">
-                    <div className="text-cri-textMuted text-[10px] uppercase">Completion Tokens</div>
-                    <div className="font-mono font-semibold text-cri-paper mt-0.5">
+                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                    <div className="text-cri-textMuted text-[9px] uppercase">Completion Tokens</div>
+                    <div className="font-bold text-cri-textPrimary mt-0.5">
                       {queryResponse.token_usage?.completion_tokens ?? 0}
                     </div>
                   </div>
-                  <div className="p-2 rounded bg-cri-ink border border-cri-border">
-                    <div className="text-cri-textMuted text-[10px] uppercase">Total Tokens</div>
-                    <div className="font-mono font-semibold text-cri-paper mt-0.5">
+                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                    <div className="text-cri-textMuted text-[9px] uppercase">Total Tokens</div>
+                    <div className="font-bold text-cri-textPrimary mt-0.5">
                       {queryResponse.token_usage?.total_tokens ?? 0}
                     </div>
                   </div>
-                  <div className="p-2 rounded bg-cri-ink border border-cri-border">
-                    <div className="text-cri-textMuted text-[10px] uppercase">Estimated Cost</div>
-                    <div className="font-mono font-semibold text-emerald-400 mt-0.5">
+                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                    <div className="text-cri-textMuted text-[9px] uppercase">Estimated Cost</div>
+                    <div className="font-bold text-cri-success mt-0.5">
                       ${(queryResponse.estimated_cost_usd || 0).toFixed(6)}
                     </div>
                   </div>
@@ -172,13 +172,13 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
               {/* Execution Trace Steps */}
               {queryResponse.execution_trace && queryResponse.execution_trace.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                     Graph Execution Steps ({queryResponse.execution_trace.length})
                   </div>
-                  <div className="rounded border border-cri-border bg-cri-surface p-2 space-y-1 font-mono text-[10px] text-cri-paper/80 max-h-40 overflow-y-auto">
+                  <div className="rounded-[12px] border border-cri-border bg-cri-surfaceSecondary p-3 space-y-1 font-mono text-[10px] text-cri-textSecondary max-h-40 overflow-y-auto">
                     {queryResponse.execution_trace.map((step, sIdx) => (
-                      <div key={sIdx} className="flex items-center gap-1.5 py-0.5 border-b border-cri-border/40 last:border-0">
-                        <span className="text-cri-orange">{sIdx + 1}.</span>
+                      <div key={sIdx} className="flex items-center gap-2 py-0.5 border-b border-cri-border/40 last:border-0">
+                        <span className="text-cri-orange font-bold">{sIdx + 1}.</span>
                         <span className="truncate">{step}</span>
                       </div>
                     ))}

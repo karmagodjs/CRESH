@@ -37,25 +37,26 @@ export const ObservabilityView: React.FC = () => {
   }, []);
 
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-8 bg-cri-ink text-cri-paper max-w-5xl mx-auto">
+    <div className="h-full overflow-y-auto p-6 md:p-8 space-y-8 bg-cri-bg text-cri-textPrimary max-w-5xl mx-auto custom-scrollbar">
       {/* Header */}
-      <div className="border-b border-cri-border pb-4 flex items-center justify-between">
+      <div className="border-b border-cri-border pb-5 flex items-center justify-between">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-cri-textMuted mb-1">
-            Production Telemetry
+          <div className="text-[11px] font-mono uppercase tracking-wider text-cri-orange font-semibold mb-1 flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5" />
+            <span>Production Telemetry</span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-cri-paper">
+          <h1 className="text-2xl font-bold tracking-tight text-cri-textPrimary">
             System Metrics & Health Observability
           </h1>
-          <p className="text-xs text-cri-textMuted mt-1">
-            Live telemetry harvested from /health, /ready, and /metrics FastAPI endpoints.
+          <p className="text-xs text-cri-textSecondary mt-1.5">
+            Live telemetry harvested from <code className="font-mono text-cri-textPrimary bg-cri-surface px-1.5 py-0.5 rounded">/health</code>, <code className="font-mono text-cri-textPrimary bg-cri-surface px-1.5 py-0.5 rounded">/ready</code>, and <code className="font-mono text-cri-textPrimary bg-cri-surface px-1.5 py-0.5 rounded">/metrics</code> FastAPI endpoints.
           </p>
         </div>
         <button
           type="button"
           onClick={loadData}
           disabled={isLoading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-cri-border bg-cri-surface hover:bg-cri-surfaceActive text-xs font-medium text-cri-paper transition-colors"
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-[10px] border border-cri-border bg-cri-surface hover:bg-cri-surfaceElevated text-xs font-mono font-medium text-cri-textPrimary transition-colors"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-cri-orange ${isLoading ? "animate-spin" : ""}`} />
           <span>Refresh</span>
@@ -63,63 +64,64 @@ export const ObservabilityView: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-3 rounded border border-cri-orange bg-cri-surface text-xs text-cri-orange">
-          Warning: Could not fetch real-time telemetry from backend ({error}). Ensure FastAPI server is running.
+        <div className="p-3.5 rounded-[10px] border border-cri-orange/40 bg-cri-orange/10 text-xs text-cri-orange flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 shrink-0 text-cri-orange" />
+          <span>Notice: Could not fetch real-time telemetry from backend ({error}). Live FastAPI server recommended.</span>
         </div>
       )}
 
       {/* System Status Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
         {/* Status */}
-        <div className="p-3.5 rounded border border-cri-border bg-cri-surface space-y-1">
-          <div className="text-[10px] font-semibold uppercase text-cri-textMuted flex items-center justify-between">
+        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+          <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>API Health</span>
             <span
               className={`w-2 h-2 rounded-full ${
-                health?.status === "healthy" ? "bg-emerald-400" : "bg-cri-orange"
+                health?.status === "healthy" ? "bg-cri-green" : "bg-cri-orange"
               }`}
             />
           </div>
-          <div className="text-base font-bold text-cri-paper uppercase">
+          <div className="text-base font-mono font-bold text-cri-textPrimary uppercase">
             {health?.status || "CONNECTED"}
           </div>
-          <div className="text-[10px] text-cri-textMuted">Version: {health?.version || "1.0.0"}</div>
+          <div className="text-[10px] font-mono text-cri-textMuted">Version: {health?.version || "1.0.0"}</div>
         </div>
 
         {/* Cohere Status */}
-        <div className="p-3.5 rounded border border-cri-border bg-cri-surface space-y-1">
-          <div className="text-[10px] font-semibold uppercase text-cri-textMuted flex items-center justify-between">
+        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+          <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Cohere Provider</span>
             <Cpu className="w-3.5 h-3.5 text-cri-orange" />
           </div>
-          <div className="text-base font-bold text-cri-paper">
+          <div className="text-base font-mono font-bold text-cri-textPrimary">
             {health?.cohere_live ? "LIVE" : "SIMULATOR"}
           </div>
-          <div className="text-[10px] text-cri-textMuted">Rerank v3.5 & Embed v3</div>
+          <div className="text-[10px] font-mono text-cri-textMuted">Rerank v3.5 & Embed v3</div>
         </div>
 
         {/* Vector Store */}
-        <div className="p-3.5 rounded border border-cri-border bg-cri-surface space-y-1">
-          <div className="text-[10px] font-semibold uppercase text-cri-textMuted flex items-center justify-between">
+        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+          <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Vector Store</span>
             <Database className="w-3.5 h-3.5 text-cri-blue" />
           </div>
-          <div className="text-base font-bold text-cri-paper">
+          <div className="text-base font-mono font-bold text-cri-textPrimary">
             {health?.total_indexed_chunks ?? 0} Chunks
           </div>
-          <div className="text-[10px] text-cri-textMuted">Qdrant In-Memory Payload</div>
+          <div className="text-[10px] font-mono text-cri-textMuted">Qdrant In-Memory Payload</div>
         </div>
 
         {/* Total Queries */}
-        <div className="p-3.5 rounded border border-cri-border bg-cri-surface space-y-1">
-          <div className="text-[10px] font-semibold uppercase text-cri-textMuted flex items-center justify-between">
+        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+          <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Total Queries</span>
-            <Activity className="w-3.5 h-3.5 text-emerald-400" />
+            <Activity className="w-3.5 h-3.5 text-cri-green" />
           </div>
-          <div className="text-base font-bold text-cri-paper font-mono">
+          <div className="text-base font-bold text-cri-textPrimary font-mono">
             {metrics?.total_queries ?? 0}
           </div>
-          <div className="text-[10px] text-cri-textMuted">
+          <div className="text-[10px] font-mono text-cri-textMuted">
             Avg: {formatMs(metrics?.average_latency_ms ?? 0)}
           </div>
         </div>
@@ -127,33 +129,33 @@ export const ObservabilityView: React.FC = () => {
 
       {/* Latency Percentiles */}
       <div className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-paper flex items-center gap-1.5">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary flex items-center gap-2">
           <Clock className="w-4 h-4 text-cri-orange" />
           <span>Latency Distribution (Global Profile)</span>
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-          <div className="p-3 rounded border border-cri-border bg-cri-surface">
-            <div className="text-[10px] font-sans text-cri-textMuted uppercase">p50 Latency</div>
-            <div className="text-base font-semibold text-cri-paper mt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 font-mono text-xs">
+          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+            <div className="text-[10px] text-cri-textSecondary uppercase">p50 Latency</div>
+            <div className="text-base font-mono font-semibold text-cri-textPrimary mt-1">
               {formatMs(metrics?.latency_percentiles?.p50_ms ?? 41.32)}
             </div>
           </div>
-          <div className="p-3 rounded border border-cri-border bg-cri-surface">
-            <div className="text-[10px] font-sans text-cri-textMuted uppercase">p90 Latency</div>
-            <div className="text-base font-semibold text-cri-paper mt-1">
+          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+            <div className="text-[10px] text-cri-textSecondary uppercase">p90 Latency</div>
+            <div className="text-base font-mono font-semibold text-cri-textPrimary mt-1">
               {formatMs(metrics?.latency_percentiles?.p90_ms ?? 53.21)}
             </div>
           </div>
-          <div className="p-3 rounded border border-cri-border bg-cri-surface">
-            <div className="text-[10px] font-sans text-cri-textMuted uppercase">p95 Latency</div>
-            <div className="text-base font-semibold text-cri-orange mt-1">
+          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+            <div className="text-[10px] text-cri-textSecondary uppercase">p95 Latency</div>
+            <div className="text-base font-mono font-semibold text-cri-orange mt-1">
               {formatMs(metrics?.latency_percentiles?.p95_ms ?? 61.43)}
             </div>
           </div>
-          <div className="p-3 rounded border border-cri-border bg-cri-surface">
-            <div className="text-[10px] font-sans text-cri-textMuted uppercase">p99 Latency</div>
-            <div className="text-base font-semibold text-cri-orange mt-1">
+          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+            <div className="text-[10px] text-cri-textSecondary uppercase">p99 Latency</div>
+            <div className="text-base font-mono font-semibold text-cri-orange mt-1">
               {formatMs(metrics?.latency_percentiles?.p99_ms ?? 75.8)}
             </div>
           </div>
@@ -162,28 +164,28 @@ export const ObservabilityView: React.FC = () => {
 
       {/* Resource & Accounting */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-4 rounded border border-cri-border bg-cri-surface space-y-2">
-          <div className="text-xs font-semibold uppercase text-cri-paper flex items-center gap-1.5">
+        <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-2">
+          <div className="text-xs font-semibold uppercase text-cri-textPrimary flex items-center gap-2">
             <Cpu className="w-4 h-4 text-cri-blue" />
             <span>Tokens Processed</span>
           </div>
-          <div className="text-2xl font-mono font-bold text-cri-paper">
+          <div className="text-2xl font-mono font-bold text-cri-textPrimary">
             {(metrics?.total_tokens_processed ?? 0).toLocaleString()}
           </div>
-          <p className="text-[11px] text-cri-textMuted">
+          <p className="text-[11px] text-cri-textSecondary">
             Aggregated tokens across dense embedding queries, reranker evaluations, and synthesis generation.
           </p>
         </div>
 
-        <div className="p-4 rounded border border-cri-border bg-cri-surface space-y-2">
-          <div className="text-xs font-semibold uppercase text-cri-paper flex items-center gap-1.5">
-            <DollarSign className="w-4 h-4 text-emerald-400" />
+        <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-2">
+          <div className="text-xs font-semibold uppercase text-cri-textPrimary flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-cri-green" />
             <span>Estimated Spend (USD)</span>
           </div>
-          <div className="text-2xl font-mono font-bold text-emerald-400">
+          <div className="text-2xl font-mono font-bold text-cri-green">
             ${(metrics?.total_estimated_cost_usd ?? 0).toFixed(6)}
           </div>
-          <p className="text-[11px] text-cri-textMuted">
+          <p className="text-[11px] text-cri-textSecondary">
             Calculated via Cohere pricing model ($2.50 / 1M prompt, $10.00 / 1M completion).
           </p>
         </div>

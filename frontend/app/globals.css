@@ -1,19 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-ibm-plex-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* Global Reset & Research Instrument Styling */
+/* Global Reset & Premium Research Workspace Styling */
 html, body {
-  background-color: #101214;
-  color: #F6F5F0;
-  font-family: var(--font-ibm-plex-sans);
-  letter-spacing: -0.01em;
+  background-color: #0B0D0F;
+  color: #F2F4F5;
+  font-family: var(--font-inter);
+  letter-spacing: -0.011em;
   height: 100%;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -22,7 +23,7 @@ html, body {
 
 /* Accessible Visible Focus */
 :focus-visible {
-  outline: 2px solid #D86A3A;
+  outline: 2px solid #FF6B2C;
   outline-offset: 2px;
 }
 
@@ -38,34 +39,40 @@ html, body {
 
 /* Clean Custom Scrollbar for Desktop Research Application */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #101214;
+  background: #0B0D0F;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #25282B;
-  border-radius: 3px;
+  background: #262C32;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #383D43;
+  background: #353D46;
 }
 
 /* Citation highlight animation (single deliberate pulse) */
 @keyframes citationPulse {
   0% {
-    background-color: rgba(65, 105, 225, 0.25);
-    border-color: #4169E1;
+    background-color: rgba(255, 107, 44, 0.20);
+    border-color: #FF6B2C;
+    transform: scale(1.005);
+  }
+  50% {
+    background-color: rgba(76, 141, 255, 0.15);
+    border-color: #4C8DFF;
   }
   100% {
     background-color: transparent;
+    transform: scale(1);
   }
 }
 
 .highlight-evidence {
-  animation: citationPulse 1.5s ease-out;
+  animation: citationPulse 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }

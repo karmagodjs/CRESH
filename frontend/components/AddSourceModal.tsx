@@ -77,23 +77,28 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[1px] p-4 select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] p-4 select-none"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-cri-ink border border-cri-border rounded-sm shadow-2xl p-5 space-y-4"
+        className="w-full max-w-lg bg-cri-surface border border-cri-border rounded-[14px] shadow-2xl p-5 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-cri-border pb-3">
-          <div className="flex items-center gap-2">
-            <UploadCloud className="w-4 h-4 text-cri-orange" />
-            <h2 className="text-sm font-bold text-cri-paper">Add Source Document</h2>
+        <div className="flex items-center justify-between border-b border-cri-border pb-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-[8px] bg-cri-surfaceSecondary border border-cri-border text-cri-orange">
+              <UploadCloud className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-cri-textPrimary font-sans">Add Source Document</h2>
+              <p className="text-[11px] text-cri-textMuted">PDF, TXT, or Markdown for isolated research indexing</p>
+            </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-cri-textMuted hover:text-cri-paper p-1 rounded"
+            className="text-cri-textMuted hover:text-cri-textPrimary p-1.5 rounded-[8px] hover:bg-cri-surfaceSecondary transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -105,10 +110,10 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded p-6 text-center cursor-pointer transition-colors ${
+          className={`border-2 border-dashed rounded-[12px] p-7 text-center cursor-pointer transition-colors ${
             isDragOver
-              ? "border-cri-orange bg-cri-surfaceActive"
-              : "border-cri-border hover:border-cri-borderLight bg-cri-surface"
+              ? "border-cri-orange bg-cri-surfaceSecondary"
+              : "border-cri-border hover:border-cri-borderLight bg-cri-surfaceSecondary/60"
           }`}
         >
           <input
@@ -119,17 +124,17 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             className="hidden"
           />
 
-          <FileText className="w-8 h-8 text-cri-textMuted mx-auto mb-2" />
+          <FileText className="w-8 h-8 text-cri-textMuted mx-auto mb-2.5 opacity-60" />
           {file ? (
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-cri-paper">{file.name}</p>
-              <p className="text-[11px] text-cri-textMuted">
+              <p className="text-xs font-semibold text-cri-textPrimary">{file.name}</p>
+              <p className="text-[11px] text-cri-textMuted font-mono">
                 {(file.size / 1024).toFixed(1)} KB · Click or drag to change
               </p>
             </div>
           ) : (
             <div className="space-y-1">
-              <p className="text-xs font-medium text-cri-paper">
+              <p className="text-xs font-medium text-cri-textPrimary">
                 Drop your research paper here, or <span className="text-cri-orange font-semibold">browse</span>
               </p>
               <p className="text-[11px] text-cri-textMuted">
@@ -140,8 +145,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 text-xs text-cri-orange bg-cri-surface p-2.5 rounded border border-cri-orange">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-cri-error bg-cri-surfaceSecondary p-3 rounded-[10px] border border-cri-error/40">
+            <AlertCircle className="w-4 h-4 shrink-0 text-cri-error" />
             <span>{error}</span>
           </div>
         )}
@@ -151,7 +156,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded text-xs text-cri-textMuted hover:text-cri-paper hover:bg-cri-surface border border-cri-border"
+            className="px-3.5 py-1.5 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceSecondary border border-cri-border transition-colors"
           >
             Cancel
           </button>
@@ -159,16 +164,16 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             type="button"
             disabled={!file || isUploading}
             onClick={handleUpload}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-semibold ${
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold transition-all ${
               !file || isUploading
-                ? "bg-cri-surfaceActive text-cri-textMuted cursor-not-allowed border border-cri-border"
-                : "bg-cri-orange hover:bg-cri-orange-hover text-white"
+                ? "bg-cri-surfaceSecondary text-cri-textMuted cursor-not-allowed border border-cri-border"
+                : "bg-cri-orange hover:bg-cri-orange-hover text-white shadow-xs cursor-pointer"
             }`}
           >
             {isUploading ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Indexing...</span>
+                <span>Indexing chunks...</span>
               </>
             ) : (
               <span>Add source</span>

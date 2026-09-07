@@ -102,7 +102,7 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-cri-ink text-cri-paper">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-cri-bg text-cri-textPrimary font-sans">
       {/* Top Header */}
       <Header
         activeView={activeView}
@@ -114,7 +114,7 @@ export default function WorkspacePage() {
 
       {/* Backend Connection Error Banner */}
       {apiError && (
-        <div className="px-4 py-2 bg-cri-surface border-b border-cri-orange flex items-center justify-between text-xs text-cri-orange">
+        <div className="px-4 py-2 bg-cri-surface border-b border-cri-orange/30 flex items-center justify-between text-xs text-cri-orange">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{apiError}</span>
@@ -135,10 +135,10 @@ export default function WorkspacePage() {
           <button
             type="button"
             onClick={() => setMobileTab("sources")}
-            className={`flex-1 py-2 text-center font-medium flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 text-center font-medium flex items-center justify-center gap-1.5 transition-colors ${
               mobileTab === "sources"
-                ? "text-cri-paper border-b-2 border-cri-orange bg-cri-surfaceActive"
-                : "text-cri-textMuted hover:text-cri-paper"
+                ? "text-cri-textPrimary border-b-2 border-cri-orange bg-cri-surfaceElevated"
+                : "text-cri-textSecondary hover:text-cri-textPrimary"
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -147,10 +147,10 @@ export default function WorkspacePage() {
           <button
             type="button"
             onClick={() => setMobileTab("research")}
-            className={`flex-1 py-2 text-center font-medium flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 text-center font-medium flex items-center justify-center gap-1.5 transition-colors ${
               mobileTab === "research"
-                ? "text-cri-paper border-b-2 border-cri-orange bg-cri-surfaceActive"
-                : "text-cri-textMuted hover:text-cri-paper"
+                ? "text-cri-textPrimary border-b-2 border-cri-orange bg-cri-surfaceElevated"
+                : "text-cri-textSecondary hover:text-cri-textPrimary"
             }`}
           >
             <span>Research</span>
@@ -158,10 +158,10 @@ export default function WorkspacePage() {
           <button
             type="button"
             onClick={() => setMobileTab("evidence")}
-            className={`flex-1 py-2 text-center font-medium flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 text-center font-medium flex items-center justify-center gap-1.5 transition-colors ${
               mobileTab === "evidence"
-                ? "text-cri-paper border-b-2 border-cri-orange bg-cri-surfaceActive"
-                : "text-cri-textMuted hover:text-cri-paper"
+                ? "text-cri-textPrimary border-b-2 border-cri-orange bg-cri-surfaceElevated"
+                : "text-cri-textSecondary hover:text-cri-textPrimary"
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -181,10 +181,10 @@ export default function WorkspacePage() {
 
         {/* PRIMARY RESEARCH WORKSPACE (3-COLUMN NOTEBOOKLM-STYLE) */}
         {activeView === "research" && (
-          <div className="h-full w-full flex overflow-hidden">
-            {/* LEFT COLUMN: Sources (~20% width) */}
+          <div className="h-full w-full overflow-hidden flex flex-col lg:grid lg:grid-cols-[minmax(280px,22%)_minmax(600px,1fr)_minmax(320px,24%)]">
+            {/* LEFT COLUMN: Sources (22% width) */}
             <div
-              className={`h-full w-full lg:w-[20%] min-w-[240px] max-w-[340px] shrink-0 ${
+              className={`h-full min-w-0 overflow-hidden ${
                 mobileTab === "sources" ? "block" : "hidden lg:block"
               }`}
             >
@@ -202,9 +202,9 @@ export default function WorkspacePage() {
               />
             </div>
 
-            {/* CENTER COLUMN: Research Workspace (~55% width) */}
+            {/* CENTER COLUMN: Research Workspace (54% width) */}
             <div
-              className={`h-full flex-1 min-w-0 ${
+              className={`h-full min-w-0 overflow-hidden ${
                 mobileTab === "research" ? "block" : "hidden lg:block"
               }`}
             >
@@ -215,12 +215,13 @@ export default function WorkspacePage() {
                 onRunQuery={handleRunQuery}
                 onCitationClick={handleCitationClick}
                 selectedCitationIndex={selectedCitationIndex}
+                onOpenTrace={() => setIsTraceOpen(true)}
               />
             </div>
 
-            {/* RIGHT COLUMN: Evidence & Verification (~25% width) */}
+            {/* RIGHT COLUMN: Evidence & Verification (24% width) */}
             <div
-              className={`h-full w-full lg:w-[25%] min-w-[280px] max-w-[420px] shrink-0 ${
+              className={`h-full min-w-0 overflow-hidden ${
                 mobileTab === "evidence" ? "block" : "hidden lg:block"
               }`}
             >
@@ -229,6 +230,7 @@ export default function WorkspacePage() {
                 selectedCitationIndex={selectedCitationIndex}
                 onSelectCitation={setSelectedCitationIndex}
                 activeDocumentFilename={activeDoc?.filename}
+                onOpenTrace={() => setIsTraceOpen(true)}
               />
             </div>
           </div>
