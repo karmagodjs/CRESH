@@ -163,58 +163,60 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           </span>
         </div>
 
-        {/* Primary Add Source Button Container */}
-        <div className="relative" ref={menuRef}>
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="h-[36px] px-[14px] flex items-center gap-1.5 text-[14px] font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[9px] transition-colors shadow-xs cursor-pointer"
-            title="Add research source"
-          >
-            <Plus className="w-4 h-4 text-white stroke-[2.5]" />
-            <span>Add source</span>
-          </button>
+        {/* Primary Add Source Button Container (Shown ONLY when sources exist) */}
+        {filteredDocs.length > 0 && (
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="h-[36px] px-[14px] flex items-center gap-1.5 text-[14px] font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[9px] transition-colors shadow-xs cursor-pointer"
+              title="Add research source"
+            >
+              <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+              <span>Add source</span>
+            </button>
 
-          {/* Dropdown Menu */}
-          {isMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-52 bg-[#1A1E22] border border-[#2A2F35] rounded-[10px] shadow-2xl p-1.5 z-40 space-y-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onOpenUpload("file");
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
-              >
-                <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0">
-                  <FileUp className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-cri-textPrimary">Upload file</span>
-                  <span className="text-[10px] text-cri-textMuted truncate">PDF, TXT, MD files</span>
-                </div>
-              </button>
+            {/* Dropdown Menu */}
+            {isMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 bg-[#1A1E22] border border-[#2A2F35] rounded-[10px] shadow-2xl p-1.5 z-40 space-y-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onOpenUpload("file");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
+                >
+                  <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0">
+                    <FileUp className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-semibold text-cri-textPrimary">Upload file</span>
+                    <span className="text-[10px] text-cri-textMuted truncate">PDF, TXT, MD files</span>
+                  </div>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  setActiveFilter("web");
-                  setTimeout(() => urlInputRef.current?.focus(), 100);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
-              >
-                <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-[#58A6FF] shrink-0">
-                  <Globe className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-cri-textPrimary">Add web URL</span>
-                  <span className="text-[10px] text-cri-textMuted truncate">Articles, docs & pages</span>
-                </div>
-              </button>
-            </div>
-          )}
-        </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setActiveFilter("web");
+                    setTimeout(() => urlInputRef.current?.focus(), 100);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
+                >
+                  <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-[#58A6FF] shrink-0">
+                    <Globe className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-semibold text-cri-textPrimary">Add web URL</span>
+                    <span className="text-[10px] text-cri-textMuted truncate">Articles, docs & pages</span>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Source Search & Filters */}
@@ -408,31 +410,46 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
             </div>
           </div>
         ) : filteredDocs.length === 0 ? (
-          /* SECTION 5: Differentiated Contextual Empty States (NO duplicate button!) */
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3.5">
-            <div className="w-9 h-9 rounded-[10px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center mx-auto text-cri-textMuted">
-              <FileText className="w-4 h-4 opacity-50 text-cri-orange" />
+          /* Centered Empty State with Add Source Button */
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 select-none">
+            {/* Document Icon: icon → title: 16px */}
+            <div className="w-12 h-12 rounded-[12px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center mx-auto text-cri-orange mb-4 shadow-xs">
+              <FileText className="w-6 h-6 text-cri-orange stroke-[1.75]" />
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-cri-textPrimary">
-                {searchQuery
-                  ? "No matching sources"
-                  : activeFilter === "papers"
-                  ? "No papers yet"
-                  : activeFilter === "others"
-                  ? "No other sources yet"
-                  : "No sources yet"}
-              </p>
-              <p className="text-xs text-cri-textSecondary leading-relaxed max-w-[220px] mx-auto">
-                {searchQuery
-                  ? "Try refining your search query."
-                  : activeFilter === "papers"
-                  ? "Add a research paper to begin."
-                  : activeFilter === "others"
-                  ? "Add a supported source from the Add source menu."
-                  : "Add your first research source to begin."}
-              </p>
-            </div>
+
+            {/* Title: title → description: 8px */}
+            <h3 className="text-sm font-semibold text-cri-textPrimary leading-tight mb-2">
+              {searchQuery
+                ? "No matching sources"
+                : activeFilter === "papers"
+                ? "No papers yet"
+                : activeFilter === "others"
+                ? "No other sources yet"
+                : "No sources yet"}
+            </h3>
+
+            {/* Description: description → button: 18px */}
+            <p className="text-xs text-cri-textSecondary leading-relaxed max-w-[220px] mx-auto mb-[18px]">
+              {searchQuery
+                ? "Try refining your search query."
+                : activeFilter === "papers"
+                ? "Add a research paper to begin."
+                : activeFilter === "others"
+                ? "Add a supported source from the Add source menu."
+                : "Add your first research source to begin."}
+            </p>
+
+            {/* Centered Add Source Button */}
+            {!searchQuery && (
+              <button
+                type="button"
+                onClick={() => onOpenUpload("file")}
+                className="h-[40px] px-[18px] inline-flex items-center justify-center gap-2 text-[14px] font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[10px] transition-colors shadow-xs cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+                <span>Add source</span>
+              </button>
+            )}
           </div>
         ) : (
           /* Normal Sources List */
