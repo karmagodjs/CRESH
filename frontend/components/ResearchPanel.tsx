@@ -10,17 +10,11 @@ import {
   ExternalLink,
   Loader2,
   CheckCircle2,
-  Plus,
-  Sliders,
   ChevronDown,
-  ChevronUp,
   MoreHorizontal,
   Paperclip,
   Check,
-  ShieldCheck,
-  Cpu,
   BookOpen,
-  Sparkles,
 } from "lucide-react";
 
 interface ResearchPanelProps {
@@ -45,6 +39,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
   const [questionInput, setQuestionInput] = useState("");
   const [activeTab, setActiveTab] = useState<"ask" | "summary" | "takeaways" | "citations" | "related">("ask");
   const [showAllFindings, setShowAllFindings] = useState(false);
+  const [showConfidenceWhy, setShowConfidenceWhy] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
@@ -75,7 +70,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
     if (activeDocument.filename.includes("1810.04805") || activeDocument.title.toLowerCase().includes("bert")) {
       return "Google AI · 2018 · 16 Pages · arXiv:1810.04805 · NAACL 2019";
     }
-    return `Research Corpus · 2024 · ${activeDocument.page_count} Pages · ${activeDocument.chunk_count} Chunks · Strict Isolation`;
+    return `Research Corpus · 2024 · ${activeDocument.page_count} Pages · Strict Isolation`;
   };
 
   // Render answer text with interactive citation links [1], [2]
@@ -376,9 +371,9 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               <div className="p-6 rounded-[14px] bg-cri-surface border border-cri-border flex flex-col items-center justify-center space-y-3 text-center">
                 <Loader2 className="w-6 h-6 text-cri-orange animate-spin" />
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-cri-textPrimary">Executing Reasoning Graph</p>
-                  <p className="text-xs text-cri-textMuted font-mono">
-                    Dense + BM25 Retrieval → RRF Fusion (k=60) → Cohere Rerank v3.5 → 3-Tier Evidence Gate
+                  <p className="text-sm font-semibold text-cri-textPrimary">Analyzing Research Document</p>
+                  <p className="text-xs text-cri-textSecondary">
+                    Retrieving evidence passages, reranking context, and synthesizing grounded answer...
                   </p>
                 </div>
               </div>
@@ -390,7 +385,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 <div className="p-5 rounded-[14px] bg-cri-surface border border-cri-border space-y-2.5">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-cri-orange" />
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary font-mono">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary font-sans">
                       {activeDocument ? activeDocument.filename : "Isolated Research Environment"}
                     </h2>
                   </div>
@@ -436,12 +431,17 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Analysis complete</span>
                   </div>
-                  <div className="text-[11px] font-mono text-cri-textMuted">
-                    <span>{queryResponse.candidate_passages?.length || 12} sources scanned</span>
-                    <span className="mx-1.5">·</span>
-                    <span className="text-cri-orange font-semibold">
-                      {(queryResponse.total_latency_ms / 1000).toFixed(2)}s
-                    </span>
+                  <div className="flex items-center gap-2 text-xs text-cri-textSecondary">
+                    <span>Grounded synthesis</span>
+                    {onOpenTrace && (
+                      <button
+                        type="button"
+                        onClick={onOpenTrace}
+                        className="text-[11px] font-medium text-cri-orange hover:underline flex items-center gap-0.5 transition-colors"
+                      >
+                        <span>View trace →</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -519,18 +519,23 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
                 {/* SECTION 15, 16, 17: Confidence Panel, Evidence Used, Methodology */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* SECTION 15: Confidence Panel */}
-                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border space-y-3">
+                  {/* SECTION 15: Simplified Confidence Panel */}
+                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
                         Confidence
                       </span>
-                      <span className="text-xs font-bold text-cri-success font-mono">
-                        {confidencePct}%
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowConfidenceWhy(!showConfidenceWhy)}
+                        className="text-[11px] font-medium text-cri-orange hover:underline cursor-pointer"
+                        title="Explain confidence score calculation"
+                      >
+                        Why?
+                      </button>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3.5">
                       {/* Circular Gauge */}
                       <div className="relative w-12 h-12 shrink-0">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -554,38 +559,39 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         </span>
                       </div>
 
-                      {/* Checklist */}
-                      <div className="space-y-1 text-[11px] text-cri-textSecondary">
-                        <div className="flex items-center gap-1.5 text-cri-success font-medium">
-                          <Check className="w-3 h-3" />
+                      <div className="space-y-0.5">
+                        <div className="text-base font-bold text-cri-textPrimary font-mono">
+                          {confidencePct}%
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-cri-success font-medium">
+                          <Check className="w-3.5 h-3.5 text-cri-success" />
                           <span>Well supported</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-cri-success font-medium">
-                          <Check className="w-3 h-3" />
-                          <span>Document-isolated</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-cri-success font-medium">
-                          <Check className="w-3 h-3" />
-                          <span>Evidence Gate: PASS</span>
                         </div>
                       </div>
                     </div>
+
+                    {showConfidenceWhy && (
+                      <p className="text-[11px] text-cri-textSecondary leading-relaxed pt-1.5 border-t border-cri-border/60">
+                        Calculated from citation grounding, evidence relevance scores, and absence of ungrounded assertions.
+                      </p>
+                    )}
                   </div>
 
                   {/* SECTION 16: Evidence Used */}
-                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
-                        Evidence Used
-                      </span>
-                      <span className="text-[10px] font-mono text-cri-textMuted">
-                        {queryResponse.citations?.length || 0} citations
-                      </span>
+                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
+                          Evidence Used
+                        </span>
+                        <span className="text-[10px] font-mono text-cri-textMuted">
+                          {queryResponse.citations?.length || 0} citations
+                        </span>
+                      </div>
+                      <p className="text-xs text-cri-textSecondary leading-relaxed mt-1">
+                        {queryResponse.citations?.length || 0} supporting passages from {activeDocument ? "selected document" : "sources"}
+                      </p>
                     </div>
-
-                    <p className="text-[11px] text-cri-textMuted">
-                      {queryResponse.citations?.length || 0} relevant passages from {activeDocument ? "1 source" : "sources"}
-                    </p>
 
                     {/* Source Chips */}
                     <div className="flex flex-wrap gap-1.5 pt-1">
@@ -607,39 +613,25 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     </div>
                   </div>
 
-                  {/* SECTION 17: Methodology */}
-                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border space-y-2">
-                    <div className="flex items-center justify-between">
+                  {/* SECTION 17: Simplified Methodology */}
+                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
+                    <div>
                       <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
                         Methodology
                       </span>
+                      <p className="text-xs text-cri-textSecondary leading-relaxed mt-2">
+                        Evidence-based synthesis using document retrieval, reranking, and citation verification.
+                      </p>
+                    </div>
+                    <div className="pt-1">
                       <button
                         type="button"
                         onClick={onOpenTrace}
-                        className="text-[11px] font-semibold text-cri-orange hover:underline flex items-center gap-0.5"
+                        className="text-xs font-semibold text-cri-orange hover:text-cri-orange-hover hover:underline inline-flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <span>View trace</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </button>
-                    </div>
-
-                    <div className="space-y-1 text-[11px] font-mono text-cri-textMuted">
-                      <div className="flex justify-between">
-                        <span>Model:</span>
-                        <span className="text-cri-textPrimary font-semibold">Command R+</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Retrieved:</span>
-                        <span className="text-cri-textPrimary">{queryResponse.candidate_passages?.length || 12} passages</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Reranked:</span>
-                        <span className="text-cri-textPrimary">{queryResponse.reranked_passages?.length || 5}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Generated:</span>
-                        <span className="text-cri-success">1 answer</span>
-                      </div>
                     </div>
                   </div>
                 </div>

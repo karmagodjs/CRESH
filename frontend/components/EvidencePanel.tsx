@@ -7,10 +7,6 @@ import {
   AlertCircle,
   Layers,
   ExternalLink,
-  CheckCircle2,
-  Clock,
-  ArrowRight,
-  Filter,
 } from "lucide-react";
 
 interface EvidencePanelProps {
@@ -241,98 +237,33 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
           </div>
         )}
 
-        {/* Verification Summary Box */}
-        {queryResponse && (
+        {/* Verification Summary */}
+        {queryResponse && !isAbstention && (
           <div className="pt-2 border-t border-cri-border space-y-2">
             <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono flex items-center justify-between">
-              <span>Verification Audit</span>
+              <span>Verification</span>
               <span className="text-[10px] text-cri-success flex items-center gap-1 font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-cri-success" />
-                Passed
+                Verified
               </span>
             </div>
 
             <div className="bg-cri-surfaceSecondary rounded-[10px] border border-cri-border divide-y divide-cri-border/60 text-xs">
-              <div className="p-2 flex items-center justify-between">
-                <span className="text-cri-textMuted text-[11px]">Evidence Gate</span>
-                <span className={`text-[11px] font-semibold ${queryResponse.evidence_sufficient ? "text-cri-success" : "text-cri-orange"}`}>
-                  {queryResponse.evidence_sufficient ? "PASS" : "INSUFFICIENT"}
-                </span>
-              </div>
-              <div className="p-2 flex items-center justify-between">
-                <span className="text-cri-textMuted text-[11px]">Grounding Score</span>
+              <div className="p-2.5 flex items-center justify-between">
+                <span className="text-cri-textSecondary text-[11px]">Citation Grounding</span>
                 <span className="text-[11px] font-semibold text-cri-success">
-                  {queryResponse.grounding_status || "GROUNDED"}
+                  Well supported
                 </span>
               </div>
-              <div className="p-2 flex items-center justify-between">
-                <span className="text-cri-textMuted text-[11px]">Document Isolation</span>
-                <span className="text-[11px] font-semibold text-cri-textPrimary font-mono truncate max-w-[130px]">
-                  {activeDocumentFilename || "Scoped"}
+              <div className="p-2.5 flex items-center justify-between">
+                <span className="text-cri-textSecondary text-[11px]">Scope Enforced</span>
+                <span className="text-[11px] font-semibold text-cri-textPrimary truncate max-w-[140px]">
+                  {activeDocumentFilename || "This document only"}
                 </span>
               </div>
             </div>
           </div>
         )}
-      </div>
-
-      {/* SECTION 21: AUDIT TRAIL AT BOTTOM */}
-      <div className="p-3 border-t border-cri-border bg-cri-surface shrink-0 space-y-2 text-xs">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
-            Audit Trail
-          </span>
-          <button
-            type="button"
-            onClick={onOpenTrace}
-            className="text-[11px] font-semibold text-cri-orange hover:underline flex items-center gap-0.5"
-          >
-            <span>View all</span>
-            <ArrowRight className="w-3 h-3" />
-          </button>
-        </div>
-
-        <div className="space-y-1.5 text-[11px] font-mono">
-          <div className="flex items-center justify-between text-cri-textSecondary">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cri-success" />
-              <span>Query analyzed</span>
-            </div>
-            <span className="text-cri-textMuted text-[10px]">
-              {queryResponse ? `${(queryResponse.latency_breakdown?.query_expansion || 1.2).toFixed(1)}ms` : "—"}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-cri-textSecondary">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cri-success" />
-              <span>{queryResponse?.candidate_passages?.length || 12} passages retrieved</span>
-            </div>
-            <span className="text-cri-textMuted text-[10px]">
-              {queryResponse ? `${(queryResponse.latency_breakdown?.dense_retrieval || 3.2).toFixed(1)}ms` : "—"}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-cri-textSecondary">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cri-success" />
-              <span>{queryResponse?.reranked_passages?.length || 5} passages reranked</span>
-            </div>
-            <span className="text-cri-textMuted text-[10px]">
-              {queryResponse ? `${(queryResponse.latency_breakdown?.cohere_rerank || 12.8).toFixed(1)}ms` : "—"}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-cri-textSecondary">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cri-success" />
-              <span>1 answer generated</span>
-            </div>
-            <span className="text-cri-textMuted text-[10px]">
-              {queryResponse ? `${(queryResponse.latency_breakdown?.generation || 22.4).toFixed(1)}ms` : "—"}
-            </span>
-          </div>
-        </div>
       </div>
     </aside>
   );

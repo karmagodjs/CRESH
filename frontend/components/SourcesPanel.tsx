@@ -2,19 +2,11 @@
 
 import React, { useState } from "react";
 import { DocumentResponse } from "@/lib/types";
-import { formatBytes } from "@/lib/utils";
 import {
   FileText,
   Plus,
   Search,
-  Check,
   X,
-  Layers,
-  Database,
-  Trash2,
-  UploadCloud,
-  CheckCircle2,
-  Sparkles,
 } from "lucide-react";
 
 interface SourcesPanelProps {
@@ -277,27 +269,27 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
             </div>
 
             <div className="flex items-center justify-between text-[10px] text-cri-textMuted">
-              <span>{activeUpload?.status || "Structure-aware chunking complete"}</span>
+              <span>{activeUpload?.status || "Document indexed successfully"}</span>
               <span className="text-cri-success font-medium">Synced</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* SCOPE INDICATOR & SYSTEM STATUS (Section 10) */}
+      {/* SCOPE INDICATOR & SYSTEM STATUS */}
       <div className="p-3 border-t border-cri-border bg-cri-surface shrink-0 text-xs">
         <div className="p-2.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-cri-orange inline-block" />
-              <span className="text-xs font-bold text-cri-textPrimary">Scope: Isolated</span>
+              <span className="text-xs font-bold text-cri-textPrimary font-sans">Research scope</span>
             </div>
             {activeDoc && (
               <button
                 type="button"
                 onClick={() => onSelectDocument(null)}
                 className="text-[11px] text-cri-orange hover:text-cri-orange-hover font-semibold flex items-center gap-0.5 transition-colors"
-                title="Deselect active source to test document isolation"
+                title="Deselect active source"
               >
                 <span>Clear scope</span>
                 <X className="w-3 h-3" />
@@ -305,24 +297,13 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
             )}
           </div>
 
-          <p className="text-[11px] text-cri-textSecondary leading-relaxed">
-            {activeDoc ? (
-              <span>
-                Routing queries strictly to <strong className="text-cri-textPrimary font-semibold">{activeDoc.filename}</strong> ({activeDoc.chunk_count} chunks).
-              </span>
-            ) : (
-              <span>
-                Select a source to route research questions. Without a scope, queries safely abstain.
-              </span>
-            )}
-          </p>
+          <div className="text-xs font-semibold text-cri-textPrimary">
+            {activeDoc ? "This document only" : "All sources (select one)"}
+          </div>
 
-          {isDemoMode && activeDoc && (
-            <div className="pt-1.5 border-t border-cri-border/60 flex items-center justify-between text-[10px] text-cri-textMuted font-mono">
-              <span>Demo Mode</span>
-              <span className="text-cri-info font-medium">BERT loaded</span>
-            </div>
-          )}
+          <p className="text-[11px] text-cri-textSecondary leading-relaxed">
+            Questions are answered using evidence from the selected document only.
+          </p>
         </div>
       </div>
     </aside>
