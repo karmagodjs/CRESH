@@ -63,15 +63,15 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
 
   return (
     <aside
-      className="h-full flex flex-col bg-[#171A1D] border-l border-[#2A2F35] select-none overflow-hidden transition-colors"
+      className="h-full flex flex-col bg-[#171A1D] border border-[#2A2F35] rounded-[14px] select-none overflow-hidden shadow-xs transition-colors"
       aria-label="Evidence & Verification Workspace"
     >
       {/* SECTION 21: Header with Verification Badge */}
       <div className="p-4 border-b border-[#2A2F35] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary font-sans">
-            EVIDENCE
-          </span>
+          <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
+            Evidence
+          </h2>
           {hasEvidence && (
             <span className="text-[11px] font-mono px-1.5 py-0.5 bg-[#1C2024] text-cri-textSecondary rounded-[6px] border border-[#2A2F35] font-medium">
               {citations.length}
@@ -149,7 +149,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-2">
             <p className="text-xs font-semibold text-cri-textPrimary">No evidence yet</p>
             <p className="text-[11px] text-cri-textMuted leading-relaxed max-w-[210px] mx-auto">
-              Ask a question to inspect the supporting passages.
+              Ask a question to see supporting evidence.
             </p>
           </div>
         )}

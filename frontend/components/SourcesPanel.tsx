@@ -71,29 +71,29 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
   return (
     <aside
-      className="h-full flex flex-col bg-cri-surface border-r border-[#2A2F35] select-none overflow-hidden"
+      className="h-full flex flex-col bg-[#171A1D] border border-[#2A2F35] rounded-[14px] select-none overflow-hidden shadow-xs"
       aria-label="Sources Library"
     >
       {/* SECTION 5: Panel Header */}
       <div className="p-4 border-b border-[#2A2F35] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary font-sans">
-            SOURCES
-          </span>
+          <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
+            Sources
+          </h2>
           <span className="text-[11px] font-mono px-1.5 py-0.5 bg-[#1C2024] text-cri-textSecondary rounded-[6px] border border-[#2A2F35] font-medium">
             {documents.length}
           </span>
         </div>
 
-        {/* Add Source button: 36px height, 14px padding, 10px radius, orange */}
+        {/* Add Source button: 36px height, 14px padding, 9px radius, orange */}
         <button
           type="button"
           onClick={onOpenUpload}
-          className="h-[36px] px-[14px] flex items-center gap-1.5 text-xs font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[10px] transition-colors shadow-xs cursor-pointer"
+          className="h-[36px] px-[14px] flex items-center gap-1.5 text-xs font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[9px] transition-colors shadow-xs cursor-pointer"
           title="Add new research source (PDF, TXT, MD)"
         >
           <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-          <span>+ Add source</span>
+          <span>+ Add sources</span>
         </button>
       </div>
 

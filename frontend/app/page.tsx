@@ -159,10 +159,10 @@ export default function WorkspacePage() {
         </button>
       </div>
 
-      {/* PRIMARY RESEARCH WORKSPACE (3-COLUMN NOTEBOOKLM-STYLE) */}
-      <div className="flex-1 overflow-hidden relative">
-        <div className="h-full w-full overflow-hidden flex flex-col lg:grid lg:grid-cols-[22%_minmax(0,1fr)_24%]">
-          {/* LEFT COLUMN: Sources (22% width) */}
+      {/* PRIMARY RESEARCH WORKSPACE: 3 LARGE NOTEBOOK-STYLE BOXES */}
+      <div className="flex-1 overflow-hidden p-3 pt-2 bg-[#101214]">
+        <div className="h-full w-full overflow-hidden flex flex-col lg:grid lg:grid-cols-[22%_minmax(0,1fr)_24%] gap-3">
+          {/* BOX 1: Sources (22% width) */}
           <div
             className={`h-full min-w-0 overflow-hidden ${
               mobileTab === "sources" ? "block" : "hidden lg:block"
@@ -182,7 +182,7 @@ export default function WorkspacePage() {
             />
           </div>
 
-          {/* CENTER COLUMN: Research Workspace (54% width) */}
+          {/* BOX 2: Research Workspace (54% width) */}
           <div
             className={`h-full min-w-0 overflow-hidden ${
               mobileTab === "research" ? "block" : "hidden lg:block"
@@ -198,7 +198,7 @@ export default function WorkspacePage() {
             />
           </div>
 
-          {/* RIGHT COLUMN: Evidence & Verification (24% width) */}
+          {/* BOX 3: Evidence & Verification (24% width) */}
           <div
             className={`h-full min-w-0 overflow-hidden ${
               mobileTab === "evidence" ? "block" : "hidden lg:block"

@@ -186,7 +186,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
   return (
     <main
-      className="h-full flex flex-col bg-cri-bg overflow-hidden border-r border-cri-border transition-colors"
+      className="h-full flex flex-col bg-[#171A1D] border border-[#2A2F35] rounded-[14px] overflow-hidden shadow-xs transition-colors"
       aria-label="Research Workspace"
     >
       {/* SECTION 11 & 12: Breadcrumb & Document Header */}
@@ -244,7 +244,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
         ) : (
           <div className="pb-3">
             <h1 className="text-[20px] font-bold text-cri-textPrimary tracking-tight font-sans">
-              Research Workspace
+              Research
             </h1>
             <p className="text-[13px] text-cri-textSecondary mt-0.5">
               Select a source from the left to begin.
