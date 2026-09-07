@@ -81,13 +81,13 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-cri-surface border border-cri-border rounded-[14px] shadow-2xl p-5 space-y-4"
+        className="w-full max-w-lg bg-[#171A1D] border border-[#2A2F35] rounded-[14px] shadow-2xl p-5 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-cri-border pb-3.5">
+        <div className="flex items-center justify-between border-b border-[#2A2F35] pb-3.5">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-[8px] bg-cri-surfaceSecondary border border-cri-border text-cri-orange">
+            <div className="p-1.5 rounded-[8px] bg-[#1C2024] border border-[#2A2F35] text-cri-orange">
               <UploadCloud className="w-4 h-4" />
             </div>
             <div>
@@ -98,7 +98,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-cri-textMuted hover:text-cri-textPrimary p-1.5 rounded-[8px] hover:bg-cri-surfaceSecondary transition-colors"
+            className="text-cri-textMuted hover:text-cri-textPrimary p-1.5 rounded-[8px] hover:bg-[#1C2024] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -112,8 +112,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-[12px] p-7 text-center cursor-pointer transition-colors ${
             isDragOver
-              ? "border-cri-orange bg-cri-surfaceSecondary"
-              : "border-cri-border hover:border-cri-borderLight bg-cri-surfaceSecondary/60"
+              ? "border-cri-orange bg-[#1C2024]"
+              : "border-[#2A2F35] hover:border-[#3A4048] bg-[#15181C]"
           }`}
         >
           <input
@@ -145,18 +145,18 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 text-xs text-cri-error bg-cri-surfaceSecondary p-3 rounded-[10px] border border-cri-error/40">
+          <div className="flex items-center gap-2 text-xs text-cri-error bg-[#1C2024] p-3 rounded-[10px] border border-cri-error/40">
             <AlertCircle className="w-4 h-4 shrink-0 text-cri-error" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-cri-border">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#2A2F35]">
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceSecondary border border-cri-border transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-[#1C2024] border border-[#2A2F35] transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -166,7 +166,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             onClick={handleUpload}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold transition-all ${
               !file || isUploading
-                ? "bg-cri-surfaceSecondary text-cri-textMuted cursor-not-allowed border border-cri-border"
+                ? "bg-[#1C2024] text-cri-textMuted cursor-not-allowed border border-[#2A2F35]"
                 : "bg-cri-orange hover:bg-cri-orange-hover text-white shadow-xs cursor-pointer"
             }`}
           >

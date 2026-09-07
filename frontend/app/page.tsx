@@ -161,7 +161,7 @@ export default function WorkspacePage() {
 
       {/* PRIMARY RESEARCH WORKSPACE (3-COLUMN NOTEBOOKLM-STYLE) */}
       <div className="flex-1 overflow-hidden relative">
-        <div className="h-full w-full overflow-hidden flex flex-col lg:grid lg:grid-cols-[minmax(280px,22%)_minmax(600px,1fr)_minmax(320px,24%)]">
+        <div className="h-full w-full overflow-hidden flex flex-col lg:grid lg:grid-cols-[22%_minmax(0,1fr)_24%]">
           {/* LEFT COLUMN: Sources (22% width) */}
           <div
             className={`h-full min-w-0 overflow-hidden ${

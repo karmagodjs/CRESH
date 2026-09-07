@@ -11,8 +11,8 @@
 
 /* Global Reset & Premium Research Workspace Styling */
 html, body {
-  background-color: #0B0D0F;
-  color: #F2F4F5;
+  background-color: #101214;
+  color: #F4F5F6;
   font-family: var(--font-inter);
   letter-spacing: -0.011em;
   height: 100%;
@@ -44,16 +44,16 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0D0F;
+  background: #101214;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #262C32;
+  background: #2A2F35;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #353D46;
+  background: #373D44;
 }
 
 /* Citation highlight animation (single deliberate pulse) */

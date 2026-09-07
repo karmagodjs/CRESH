@@ -71,27 +71,27 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
     return `Research Corpus · 2024 · ${activeDocument.page_count} Pages`;
   };
 
-  // Render answer text with interactive citation links [1], [2]
-  const renderAnswerWithCitations = (answerText: string) => {
-    if (!answerText) return null;
+  // Render paragraph text with interactive citation links [1], [2]
+  const renderParagraphWithCitations = (text: string) => {
+    if (!text) return null;
 
     const citationRegex = /\[(\d+(?:,\s*\d+)*)\]/g;
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
-    while ((match = citationRegex.exec(answerText)) !== null) {
+    while ((match = citationRegex.exec(text)) !== null) {
       const matchStart = match.index;
       const matchEnd = matchStart + match[0].length;
 
       if (matchStart > lastIndex) {
-        parts.push(answerText.substring(lastIndex, matchStart));
+        parts.push(text.substring(lastIndex, matchStart));
       }
 
       const citeNumbers = match[1].split(",").map((n) => parseInt(n.trim(), 10));
 
       parts.push(
-        <span key={`cite-${matchStart}`} className="inline-flex items-center gap-0.5 mx-1">
+        <span key={`cite-${matchStart}`} className="inline-flex items-center gap-0.5 mx-1 align-baseline">
           {citeNumbers.map((num) => {
             const isSelected = selectedCitationIndex === num;
             return (
@@ -102,10 +102,10 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   e.preventDefault();
                   onCitationClick(num);
                 }}
-                className={`inline-flex items-center justify-center text-[11px] font-mono font-semibold px-1.5 py-0.2 rounded-[5px] transition-all ${
+                className={`inline-flex items-center justify-center text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded-[5px] transition-all cursor-pointer ${
                   isSelected
                     ? "bg-cri-orange text-white ring-1 ring-cri-orange shadow-xs scale-105"
-                    : "bg-cri-surfaceElevated text-cri-info border border-cri-border hover:bg-cri-info hover:text-white"
+                    : "bg-[#1C2024] text-cri-info border border-[#2A2F35] hover:bg-cri-info hover:text-white"
                 }`}
                 title={`Jump to supporting passage [${num}] in Evidence panel`}
               >
@@ -119,13 +119,19 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       lastIndex = matchEnd;
     }
 
-    if (lastIndex < answerText.length) {
-      parts.push(answerText.substring(lastIndex));
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
     }
 
-    // Split paragraphs
+    return parts.length > 0 ? parts : text;
+  };
+
+  // Render answer text with interactive citation links
+  const renderAnswerWithCitations = (answerText: string) => {
+    if (!answerText) return null;
+
     return (
-      <div className="space-y-4 text-cri-textPrimary text-[15px] leading-[1.75]">
+      <div className="space-y-4 text-cri-textPrimary text-[15.5px] leading-[1.65] font-sans">
         {answerText.split("\n\n").map((para, idx) => {
           if (para.startsWith("### ")) {
             return (
@@ -144,14 +150,14 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           if (para.startsWith("- ") || para.startsWith("* ")) {
             const items = para.split("\n").filter((l) => l.trim().length > 0);
             return (
-              <ul key={idx} className="list-disc pl-5 space-y-1.5 my-2 text-[14px]">
+              <ul key={idx} className="list-disc pl-5 space-y-1.5 my-2 text-[14.5px]">
                 {items.map((it, iIdx) => (
-                  <li key={iIdx}>{it.replace(/^[-*]\s*/, "")}</li>
+                  <li key={iIdx}>{renderParagraphWithCitations(it.replace(/^[-*]\s*/, ""))}</li>
                 ))}
               </ul>
             );
           }
-          return <p key={idx}>{parts.length > 0 ? parts : para}</p>;
+          return <p key={idx}>{renderParagraphWithCitations(para)}</p>;
         })}
       </div>
     );
@@ -183,15 +189,15 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       className="h-full flex flex-col bg-cri-bg overflow-hidden border-r border-cri-border transition-colors"
       aria-label="Research Workspace"
     >
-      {/* Breadcrumb & Document Header */}
-      <div className="px-6 pt-4 pb-0 border-b border-cri-border bg-cri-surface shrink-0 space-y-2.5">
-        {/* Breadcrumb */}
+      {/* SECTION 11 & 12: Breadcrumb & Document Header */}
+      <div className="px-7 pt-5 pb-0 border-b border-[#2A2F35] bg-[#171A1D] shrink-0 space-y-3">
+        {/* Breadcrumb: Research > Document */}
         <div className="flex items-center gap-1.5 text-[11px] text-cri-textMuted font-mono">
           <span className="hover:text-cri-textSecondary cursor-pointer">Research</span>
           {activeDocument && (
             <>
               <span>&gt;</span>
-              <span className="text-cri-textSecondary truncate max-w-sm">
+              <span className="text-cri-textSecondary truncate max-w-sm font-sans">
                 {activeDocument.title || activeDocument.filename}
               </span>
             </>
@@ -200,31 +206,34 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
         {/* Document Header Row */}
         {activeDocument ? (
-          <div className="flex items-center justify-between gap-4 pb-2">
+          <div className="flex items-center justify-between gap-4 pb-2.5">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-cri-orange shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-[34px] h-[34px] rounded-[8px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0">
                   <FileText className="w-4 h-4" />
                 </div>
-                <h1 className="text-lg sm:text-xl font-bold text-cri-textPrimary tracking-tight truncate" title={activeDocument.title || activeDocument.filename}>
+                <h1
+                  className="text-[20px] font-bold text-cri-textPrimary tracking-tight truncate font-sans"
+                  title={activeDocument.title || activeDocument.filename}
+                >
                   {activeDocument.title || activeDocument.filename}
                 </h1>
               </div>
 
-              {/* Metadata row */}
-              <div className="mt-1 flex items-center gap-2 text-xs text-cri-textSecondary truncate pl-9 font-sans">
+              {/* Metadata row: Author · Year · Pages */}
+              <div className="mt-1 flex items-center gap-2 text-[12px] text-cri-textSecondary truncate pl-11 font-sans">
                 <span>{getDocMetadataString()}</span>
               </div>
             </div>
 
-            {/* Right Header Actions: View Document */}
+            {/* Right Header Actions: View Document (Section 12) */}
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   window.open(`/data/sample_papers/${activeDocument.filename}`, "_blank");
                 }}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-[9px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
+                className="hidden sm:flex items-center gap-1.5 h-[34px] px-3.5 rounded-[9px] bg-[#1C2024] hover:bg-[#20252A] border border-[#2A2F35] text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
                 title="View original research document"
               >
                 <BookOpen className="w-3.5 h-3.5 text-cri-orange" />
@@ -234,18 +243,18 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         ) : (
           <div className="pb-3">
-            <h1 className="text-lg font-bold text-cri-textPrimary tracking-tight">
+            <h1 className="text-[20px] font-bold text-cri-textPrimary tracking-tight font-sans">
               Research Workspace
             </h1>
-            <p className="text-xs text-cri-textSecondary mt-0.5">
-              Select a source from the Sources panel to begin research.
+            <p className="text-[13px] text-cri-textSecondary mt-0.5">
+              Select a source from the left to begin.
             </p>
           </div>
         )}
 
-        {/* Document Tabs (visible only when active document is selected) */}
+        {/* SECTION 13: Lightweight Document Tabs with thin orange underline */}
         {activeDocument && (
-          <div className="flex items-center gap-6 pt-2 border-t border-cri-border/60 text-xs">
+          <div className="flex items-center gap-7 pt-2 border-t border-[#2A2F35]/60 text-xs">
             {(
               [
                 { id: "ask", label: "Ask" },
@@ -261,7 +270,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`pb-2.5 font-medium transition-colors relative cursor-pointer ${
+                  className={`pb-2.5 text-[13px] font-medium transition-colors relative cursor-pointer ${
                     isActive
                       ? "text-cri-textPrimary font-semibold"
                       : "text-cri-textSecondary hover:text-cri-textPrimary"
@@ -278,29 +287,29 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
         )}
       </div>
 
-      {/* Scrollable Center Body */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-        {/* EMPTY STATE WHEN NO DOCUMENT IS SELECTED (Section 10) */}
+      {/* Scrollable Center Body with generous breathing room (24px padding) */}
+      <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-7">
+        {/* SECTION 15: EMPTY CENTER STATE (Visually centered and calm) */}
         {!activeDocument ? (
-          <div className="max-w-2xl mx-auto pt-8 pb-4 space-y-6 text-center">
-            <div className="space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-cri-textPrimary font-sans">
+          <div className="max-w-2xl mx-auto pt-14 pb-8 space-y-8 text-center">
+            <div className="space-y-2.5">
+              <h2 className="text-[26px] sm:text-[30px] font-bold tracking-tight text-cri-textPrimary font-sans">
                 Start your research
               </h2>
-              <p className="text-sm text-cri-textSecondary leading-relaxed max-w-md mx-auto">
-                Select a source from the Sources panel to begin.
+              <p className="text-[14px] text-cri-textSecondary leading-relaxed max-w-md mx-auto">
+                Select a source from the left to begin.
               </p>
             </div>
 
-            {/* Disabled question input box (Section 10) */}
-            <div className="rounded-[14px] border border-cri-border/60 bg-cri-surface/60 p-4 space-y-3 opacity-60 text-left shadow-xs">
+            {/* Disabled research input (14px radius, #15181C, border #2A2F35) */}
+            <div className="rounded-[14px] border border-[#2A2F35] bg-[#15181C] p-5 space-y-4 opacity-60 text-left shadow-sm min-h-[140px] flex flex-col justify-between">
               <textarea
                 disabled
                 rows={2}
                 placeholder="Select a source to ask research questions..."
-                className="w-full bg-transparent text-sm text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed cursor-not-allowed"
+                className="w-full bg-transparent text-[15px] text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed cursor-not-allowed"
               />
-              <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-cri-border/40 opacity-70 pointer-events-none">
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#2A2F35]/60 opacity-70 pointer-events-none">
                 {[
                   "What are the main findings?",
                   "How does this compare to previous work?",
@@ -308,25 +317,25 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 ].map((chip, cIdx) => (
                   <span
                     key={cIdx}
-                    className="text-[11px] px-2.5 py-1 rounded-[7px] bg-cri-surfaceSecondary border border-cri-border text-cri-textMuted"
+                    className="text-[11.5px] px-3 py-1 rounded-[8px] bg-[#1C2024] border border-[#2A2F35] text-cri-textMuted"
                   >
                     {chip}
                   </span>
                 ))}
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-cri-border/40 text-xs text-cri-textMuted">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1 text-[11px]">
+              <div className="flex items-center justify-between pt-2 border-t border-[#2A2F35]/60 text-xs text-cri-textMuted">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex items-center gap-1.5 text-[11.5px]">
                     <Paperclip className="w-3.5 h-3.5" />
                     <span>Add context</span>
                   </span>
-                  <span className="px-2 py-0.5 rounded-[6px] bg-cri-surfaceSecondary border border-cri-border text-[11px]">
+                  <span className="px-2.5 py-1 rounded-[7px] bg-[#1C2024] border border-[#2A2F35] text-[11px]">
                     Focus: No source
                   </span>
                 </div>
                 <button
                   disabled
-                  className="px-3.5 py-1.5 rounded-[8px] bg-cri-surfaceSecondary text-cri-textMuted text-xs font-semibold cursor-not-allowed border border-cri-border"
+                  className="h-[40px] px-5 rounded-[10px] bg-[#1C2024] text-cri-textMuted text-xs font-semibold cursor-not-allowed border border-[#2A2F35]"
                 >
                   Run analysis →
                 </button>
@@ -336,11 +345,11 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
         ) : (
           /* TAB 1: ASK (Primary Q&A Workspace) */
           activeTab === "ask" && (
-            <div className="space-y-6 max-w-4xl mx-auto">
-              {/* Research Question Input Container (Section 11) */}
+            <div className="space-y-7 max-w-4xl mx-auto">
+              {/* SECTION 14: RESEARCH INPUT — REBUILD (Height: 130-160px, rounded 14px, #15181C, border #2A2F35) */}
               <form onSubmit={handleSubmit} className="relative">
-                <div className="rounded-[14px] border border-cri-border bg-cri-surface shadow-xs focus-within:border-cri-orange focus-within:ring-1 focus-within:ring-cri-orange transition-all p-3.5 space-y-3">
-                  {/* Textarea */}
+                <div className="min-h-[145px] rounded-[14px] border border-[#2A2F35] bg-[#15181C] shadow-sm focus-within:border-cri-orange transition-all p-4 sm:p-5 flex flex-col justify-between space-y-3.5">
+                  {/* Textarea: comfortable 15px font */}
                   <textarea
                     ref={inputRef}
                     value={questionInput}
@@ -349,11 +358,11 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     disabled={isLoading}
                     rows={2}
                     placeholder="Ask a research question about this document..."
-                    className="w-full bg-transparent text-sm text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed"
+                    className="w-full bg-transparent text-[15px] text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed"
                   />
 
-                  {/* Example Suggestion Chips (Subtle) */}
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-cri-border/50">
+                  {/* Example questions: subtle rounded chips (Section 14) */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#2A2F35]/50">
                     {[
                       "What are the main findings?",
                       "How does this compare to previous work?",
@@ -363,56 +372,57 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         key={cIdx}
                         type="button"
                         onClick={() => handleSelectSuggested(chip)}
-                        className="text-[11px] px-2.5 py-1 rounded-[7px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary hover:text-cri-textPrimary transition-colors truncate max-w-xs cursor-pointer"
+                        className="text-[11.5px] px-3 py-1 rounded-[8px] bg-[#1C2024] hover:bg-[#22272D] border border-[#2A2F35] text-cri-textSecondary hover:text-cri-textPrimary transition-colors truncate max-w-xs cursor-pointer"
                       >
                         {chip}
                       </button>
                     ))}
                   </div>
 
-                  {/* Bottom Controls: Add Context, Focus, ⌘ Enter, Run Analysis */}
-                  <div className="flex items-center justify-between pt-2 border-t border-cri-border/50 text-xs">
-                    <div className="flex items-center gap-2">
+                  {/* Bottom Controls: Add context, Focus: This document, Run analysis 40px button (Section 14) */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[#2A2F35]/50 text-xs">
+                    <div className="flex items-center gap-2.5">
                       <button
                         type="button"
                         onClick={() => inputRef.current?.focus()}
-                        className="flex items-center gap-1 text-[11px] font-medium text-cri-textMuted hover:text-cri-textPrimary px-2 py-1 rounded-[7px] hover:bg-cri-surfaceSecondary transition-colors cursor-pointer"
+                        className="flex items-center gap-1.5 text-[12px] font-medium text-cri-textMuted hover:text-cri-textPrimary px-2.5 py-1.5 rounded-[8px] hover:bg-[#1C2024] transition-colors cursor-pointer"
                         title="Attach additional context"
                       >
                         <Paperclip className="w-3.5 h-3.5 text-cri-orange" />
                         <span>Add context</span>
                       </button>
 
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-[7px] bg-cri-surfaceSecondary border border-cri-border text-[11px] text-cri-textSecondary">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[8px] bg-[#1C2024] border border-[#2A2F35] text-[12px] text-cri-textSecondary">
                         <span>Focus: This document</span>
                         <ChevronDown className="w-3 h-3 text-cri-textMuted" />
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5">
-                      <kbd className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px]">
+                    <div className="flex items-center gap-3">
+                      <kbd className="hidden sm:flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono text-cri-textMuted bg-[#1C2024] border border-[#2A2F35] rounded-[5px]">
                         <span>⌘</span>
                         <span>Enter</span>
                       </kbd>
 
+                      {/* Run analysis button: orange, rounded 10px, height 40px (Section 14) */}
                       <button
                         type="submit"
                         disabled={isLoading || !questionInput.trim()}
-                        className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold tracking-tight transition-all shadow-xs ${
+                        className={`h-[40px] px-5 rounded-[10px] text-[13px] font-semibold tracking-tight transition-all shadow-xs flex items-center gap-2 ${
                           isLoading || !questionInput.trim()
-                            ? "bg-cri-surfaceSecondary text-cri-textMuted cursor-not-allowed border border-cri-border"
+                            ? "bg-[#1C2024] text-cri-textMuted cursor-not-allowed border border-[#2A2F35]"
                             : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer active:scale-98"
                         }`}
                       >
                         {isLoading ? (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <Loader2 className="w-4 h-4 animate-spin" />
                             <span>Analyzing...</span>
                           </>
                         ) : (
                           <>
                             <span>Run analysis</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <ArrowRight className="w-4 h-4" />
                           </>
                         )}
                       </button>
@@ -489,25 +499,25 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       </p>
                     </div>
                   ) : (
-                    /* Main Report Surface - Visually Dominant Document Experience (Section 12) */
-                    <div className="rounded-[14px] border border-cri-border bg-cri-surface p-6 sm:p-7 space-y-6 shadow-sm">
+                    /* Main Report Surface - Visually Dominant Document Experience (NotebookLM style) */
+                    <div className="rounded-[14px] border border-[#2A2F35] bg-[#171A1D] p-6 sm:p-7 space-y-6 shadow-sm">
                       {/* Research Conclusion Headline */}
-                      <div className="border-b border-cri-border pb-4">
+                      <div className="border-b border-[#2A2F35] pb-4">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-cri-orange font-mono mb-1.5">
                           Research Synthesis
                         </div>
-                        <h2 className="text-base sm:text-lg font-semibold text-cri-textPrimary leading-relaxed">
+                        <h2 className="text-[20px] font-bold text-cri-textPrimary leading-snug font-sans">
                           {queryResponse.query}
                         </h2>
                       </div>
 
                       {/* Supporting Explanation with Provenance Citations */}
-                      <div className="cri-answer-body text-cri-textPrimary">
+                      <div className="cri-answer-body">
                         {renderAnswerWithCitations(queryResponse.answer)}
                       </div>
 
-                      {/* KEY FINDINGS (Section 13) */}
-                      <div className="pt-5 border-t border-cri-border space-y-3">
+                      {/* KEY FINDINGS */}
+                      <div className="pt-6 border-t border-[#2A2F35] space-y-3.5">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
                             KEY FINDINGS
@@ -517,11 +527,11 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                           </span>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                           {visibleFindings.map((finding, fIdx) => (
                             <div
                               key={fIdx}
-                              className="flex items-start gap-3 p-2.5 rounded-[9px] bg-cri-surfaceSecondary border border-cri-border text-xs"
+                              className="flex items-start gap-3 p-3 rounded-[10px] bg-[#1A1E22] border border-[#2A2F35] text-[13px] transition-colors hover:border-[#383E46]"
                             >
                               <div className="w-5 h-5 rounded-full bg-cri-orange/15 text-cri-orange font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-mono">
                                 {fIdx + 1}
@@ -544,16 +554,16 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     </div>
                   )}
 
-                  {/* SECTION 14, 15, 16: Confidence, Evidence Used, Methodology Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* SECTION 14: Confidence */}
-                    <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-3">
+                  {/* SECTION 19 & 20: Confidence, Evidence Used, Methodology Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    {/* SECTION 19: Confidence */}
+                    <div className="p-4 rounded-[12px] bg-[#171A1D] border border-[#2A2F35] flex flex-col justify-between space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
                           Confidence
                         </span>
                         <div className="flex items-center gap-1 text-xs text-cri-success font-medium">
-                          <Check className="w-3.5 h-3.5 text-cri-success" />
+                          <Check className="w-3.5 h-3.5 text-cri-success stroke-[2.5]" />
                           <span>Well supported</span>
                         </div>
                       </div>
@@ -565,16 +575,16 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         <span className="text-xs text-cri-textSecondary font-medium">Confidence</span>
                       </div>
 
-                      <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1 border-t border-cri-border/60">
+                      <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1.5 border-t border-[#2A2F35]">
                         Calculated from verified evidence alignment in the scoped document.
                       </p>
                     </div>
 
-                    {/* SECTION 15: Evidence Used */}
-                    <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
+                    {/* SECTION 20: Evidence Used */}
+                    <div className="p-4 rounded-[12px] bg-[#171A1D] border border-[#2A2F35] flex flex-col justify-between space-y-2.5">
                       <div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
                             Evidence Used
                           </span>
                           <span className="text-[10px] font-mono text-cri-textMuted">
@@ -594,12 +604,12 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                               key={cite.citation_index}
                               type="button"
                               onClick={() => onCitationClick(cite.citation_index)}
-                              className="text-[10px] font-mono px-2 py-1 rounded-[6px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textPrimary flex items-center gap-1 transition-colors cursor-pointer"
+                              className="text-[10px] font-mono px-2 py-1 rounded-[6px] bg-[#1C2024] hover:bg-[#22272D] border border-[#2A2F35] text-cri-textPrimary flex items-center gap-1 transition-colors cursor-pointer"
                               title={`Jump to [${cite.citation_index}]`}
                             >
                               <span className="text-cri-orange font-bold">[{cite.citation_index}]</span>
                               <span className="truncate max-w-[90px]">
-                                {cite.filename ? `${cite.filename.slice(0, 8)} · p. ${cite.page_number}` : `p. ${cite.page_number}`}
+                                {cite.filename ? `${cite.filename.slice(0, 8)} · p.${cite.page_number}` : `p.${cite.page_number}`}
                               </span>
                             </button>
                           ))
@@ -609,10 +619,10 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       </div>
                     </div>
 
-                    {/* SECTION 16: Methodology */}
-                    <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
+                    {/* SECTION 20: Methodology */}
+                    <div className="p-4 rounded-[12px] bg-[#171A1D] border border-[#2A2F35] flex flex-col justify-between space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
                           Methodology
                         </span>
                         <button
@@ -627,12 +637,12 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         Answer synthesized from retrieved evidence and verified citations.
                       </p>
                       {showConfidenceWhy ? (
-                        <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1.5 border-t border-cri-border/60">
+                        <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1.5 border-t border-[#2A2F35]">
                           Every statement is grounded against cited passages with strict document isolation.
                         </p>
                       ) : (
                         <div className="flex items-center gap-1.5 text-xs text-cri-success font-medium pt-1">
-                          <Check className="w-3.5 h-3.5 text-cri-success" />
+                          <Check className="w-3.5 h-3.5 text-cri-success stroke-[2.5]" />
                           <span>Grounded output</span>
                         </div>
                       )}
