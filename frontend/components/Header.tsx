@@ -2,40 +2,22 @@
 
 import React from "react";
 import { DocumentResponse } from "@/lib/types";
-import { FileText } from "lucide-react";
 
 interface HeaderProps {
   activeDocument: DocumentResponse | null;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  activeDocument,
-}) => {
+export const Header: React.FC<HeaderProps> = () => {
   return (
-    <header className="h-[64px] border-b border-[#292D32] bg-[#15171A] px-4 lg:px-6 grid grid-cols-3 items-center shrink-0 select-none z-30">
-      {/* LEFT: Product Identity & Subtitle */}
-      <div className="flex items-center gap-3 min-w-0">
-        {/* Logo: 40x40px, 10px radius, orange */}
-        <div className="w-[40px] h-[40px] rounded-[10px] bg-cri-orange flex items-center justify-center text-white font-bold text-lg shadow-xs shrink-0">
-          C
-        </div>
-
-        <div className="flex flex-col justify-center min-w-0">
-          <div className="flex items-baseline gap-2 leading-none">
-            <span className="text-[20px] font-bold tracking-tight text-cri-textPrimary font-sans">
-              CRI
-            </span>
-            <span className="text-[13px] font-medium text-cri-textSecondary hidden sm:inline truncate">
-              Cohere Research Intelligence
-            </span>
-          </div>
-          <span className="text-[9.5px] uppercase tracking-[0.14em] text-cri-orange font-mono font-semibold leading-none mt-1.5">
-            FRONTIER RESEARCH · REAL ANSWERS.
-          </span>
-        </div>
+    <header className="h-[60px] border-b border-[#292D32] bg-[#15171A] px-4 lg:px-6 grid grid-cols-3 items-center shrink-0 select-none z-30">
+      {/* LEFT: Product Identity */}
+      <div className="flex items-center min-w-0">
+        <span className="text-[19px] font-bold tracking-tight text-cri-textPrimary font-sans">
+          CRI Research
+        </span>
       </div>
 
-      {/* CENTER: Research (Primary navigation item, dark elevated surface, subtle orange indicator, 10px radius) */}
+      {/* CENTER: Research (Primary navigation item) */}
       <div className="flex items-center justify-center">
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-[10px] bg-[#1C2024] border border-[#2A2F35] text-[13px] font-semibold text-cri-textPrimary shadow-xs">
           <span className="w-2 h-2 rounded-full bg-cri-orange shrink-0" />
@@ -53,3 +35,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+

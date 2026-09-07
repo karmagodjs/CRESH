@@ -9,7 +9,7 @@ import { AddSourceModal } from "@/components/AddSourceModal";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { fetchDocuments, executeQuery, getApiBaseUrl } from "@/lib/api";
 import { DocumentResponse, QueryResponse } from "@/lib/types";
-import { FileText, ShieldCheck, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export default function WorkspacePage() {
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
@@ -22,7 +22,6 @@ export default function WorkspacePage() {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [viewerPage, setViewerPage] = useState<number>(1);
   const [uploadedFileUrls, setUploadedFileUrls] = useState<Record<string, string>>({});
-  const [mobileTab, setMobileTab] = useState<"sources" | "research" | "evidence">("research");
   const [apiError, setApiError] = useState<string | null>(null);
 
   // Load documents on mount
@@ -89,10 +88,6 @@ export default function WorkspacePage() {
 
   const handleCitationClick = (idx: number) => {
     setSelectedCitationIndex(idx);
-    // On mobile screens, switch to evidence tab
-    if (window.innerWidth < 1024) {
-      setMobileTab("evidence");
-    }
   };
 
   const handleViewDocument = () => {
@@ -140,57 +135,11 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      {/* Mobile Tab Switcher (Visible only on small screens) */}
-      <div className="lg:hidden flex items-center border-b border-cri-border bg-cri-surface text-xs shrink-0">
-        <button
-          type="button"
-          onClick={() => setMobileTab("sources")}
-          className={`flex-1 py-2.5 text-center font-medium flex items-center justify-center gap-1.5 transition-colors ${
-            mobileTab === "sources"
-              ? "text-cri-textPrimary border-b-2 border-cri-orange bg-cri-surfaceElevated"
-              : "text-cri-textSecondary hover:text-cri-textPrimary"
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Sources ({documents.length})</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setMobileTab("research")}
-          className={`flex-1 py-2.5 text-center font-medium flex items-center justify-center gap-1.5 transition-colors ${
-            mobileTab === "research"
-              ? "text-cri-textPrimary border-b-2 border-cri-orange bg-cri-surfaceElevated"
-              : "text-cri-textSecondary hover:text-cri-textPrimary"
-          }`}
-        >
-          <span>Research</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setMobileTab("evidence")}
-          className={`flex-1 py-2.5 text-center font-medium flex items-center justify-center gap-1.5 transition-colors ${
-            mobileTab === "evidence"
-              ? "text-cri-textPrimary border-b-2 border-cri-orange bg-cri-surfaceElevated"
-              : "text-cri-textSecondary hover:text-cri-textPrimary"
-          }`}
-        >
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Evidence</span>
-          {queryResponse?.citations && queryResponse.citations.length > 0 && (
-            <span className="w-1.5 h-1.5 rounded-full bg-cri-blue inline-block" />
-          )}
-        </button>
-      </div>
-
       {/* PRIMARY RESEARCH WORKSPACE: 3 LARGE NOTEBOOK-STYLE BOXES */}
       <div className="flex-1 overflow-hidden p-3 pt-2 bg-[#101214]">
         <div className="h-full w-full overflow-hidden flex flex-col lg:grid lg:grid-cols-[22%_minmax(0,1fr)_24%] gap-3">
           {/* BOX 1: Sources (22% width) */}
-          <div
-            className={`h-full min-w-0 overflow-hidden ${
-              mobileTab === "sources" ? "block" : "hidden lg:block"
-            }`}
-          >
+          <div className="h-full min-w-0 overflow-hidden">
             <SourcesPanel
               documents={documents}
               activeDocumentId={activeDocumentId}
@@ -198,7 +147,6 @@ export default function WorkspacePage() {
                 setActiveDocumentId(id);
                 setQueryResponse(null);
                 setSelectedCitationIndex(null);
-                if (window.innerWidth < 1024) setMobileTab("research");
               }}
               onOpenUpload={(tab = "file") => {
                 setUploadTab(tab);
@@ -209,11 +157,7 @@ export default function WorkspacePage() {
           </div>
 
           {/* BOX 2: Research Workspace (54% width) */}
-          <div
-            className={`h-full min-w-0 overflow-hidden ${
-              mobileTab === "research" ? "block" : "hidden lg:block"
-            }`}
-          >
+          <div className="h-full min-w-0 overflow-hidden">
             <ResearchPanel
               activeDocument={activeDoc}
               queryResponse={queryResponse}
@@ -227,11 +171,7 @@ export default function WorkspacePage() {
           </div>
 
           {/* BOX 3: Evidence & Verification (24% width) */}
-          <div
-            className={`h-full min-w-0 overflow-hidden ${
-              mobileTab === "evidence" ? "block" : "hidden lg:block"
-            }`}
-          >
+          <div className="h-full min-w-0 overflow-hidden">
             <EvidencePanel
               queryResponse={queryResponse}
               selectedCitationIndex={selectedCitationIndex}

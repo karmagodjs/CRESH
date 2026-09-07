@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CRI — Cohere Research Intelligence",
-  description: "Evidence-first research workspace powered by Cohere and LangGraph",
+  title: "CRI Research",
+  description: "Evidence-first research workspace",
 };
 
 export default function RootLayout({

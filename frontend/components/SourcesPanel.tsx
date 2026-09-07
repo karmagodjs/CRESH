@@ -38,7 +38,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   activeUpload,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | "papers" | "web" | "others">("all");
+  const [activeFilter, setActiveFilter] = useState<"all" | "papers" | "web">("all");
   const [showIngestionItem, setShowIngestionItem] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -90,9 +90,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
     }
     if (activeFilter === "web") {
       return isWebDoc(doc);
-    }
-    if (activeFilter === "others") {
-      return !doc.filename.endsWith(".pdf") && !isWebDoc(doc);
     }
     return true;
   });
@@ -246,8 +243,8 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         </div>
 
         {/* Segmented Controls (8px radius) */}
-        <div className="grid grid-cols-4 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
-          {(["all", "papers", "web", "others"] as const).map((filter) => {
+        <div className="grid grid-cols-3 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
+          {(["all", "papers", "web"] as const).map((filter) => {
             const isActive = activeFilter === filter;
             return (
               <button
@@ -423,8 +420,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 ? "No matching sources"
                 : activeFilter === "papers"
                 ? "No papers yet"
-                : activeFilter === "others"
-                ? "No other sources yet"
                 : "No sources yet"}
             </h3>
 
@@ -434,8 +429,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 ? "Try refining your search query."
                 : activeFilter === "papers"
                 ? "Add a research paper to begin."
-                : activeFilter === "others"
-                ? "Add a supported source from the Add source menu."
                 : "Add your first research source to begin."}
             </p>
 
