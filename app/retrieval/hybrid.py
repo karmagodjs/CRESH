@@ -43,7 +43,6 @@ class HybridRetriever:
         elif document_id:
             target_doc_ids = [document_id]
 
-        # HARD PRECONDITION: Require explicit selected document scope
         if not target_doc_ids:
             logger.warning("HybridRetriever.retrieve: No selected document IDs provided. Aborting retrieval and reranking.")
             return ([], [])
@@ -65,14 +64,12 @@ class HybridRetriever:
             )
         fused_candidates = self._reciprocal_rank_fusion(dense_results=dense_results, lexical_results=lexical_results, top_k=k)
 
-        # STRICT PROVENANCE FILTER: Reject any candidate not in allowed_document_ids
         target_set = set(target_doc_ids)
         filtered_candidates = [c for c in fused_candidates if c.metadata.document_id in target_set]
         if len(filtered_candidates) != len(fused_candidates):
             logger.warning(f"Filtered out {len(fused_candidates) - len(filtered_candidates)} candidates outside document scope {target_doc_ids}")
         fused_candidates = filtered_candidates
 
-        # If candidate list is empty: DO NOT call Cohere Rerank
         if not fused_candidates:
             logger.debug("HybridRetriever: Fused candidate list is empty. Skipping Cohere Rerank.")
             return ([], [])
@@ -99,7 +96,6 @@ class HybridRetriever:
 
         reranked = self.reranker.rerank(query=query, candidates=fused_candidates, top_n=rk)
 
-        # Extra safety validation: Cohere Rerank must NEVER introduce documents outside allowed scope
         reranked = [r for r in reranked if r.metadata.document_id in target_set]
         return (fused_candidates, reranked)
 
@@ -111,13 +107,13 @@ class HybridRetriever:
         document_id: Optional[str] = None,
         allowed_document_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """
-        Read-only evaluation and diagnostic interface exposing all intermediate candidate stages:
-        - dense_candidates: Top raw dense similarity search results
-        - bm25_candidates: Top raw BM25 lexical search results
-        - fused_candidates: Reciprocal rank fusion candidates
-        - reranked_candidates: Cohere Rerank candidates
-        """
+\
+\
+\
+\
+\
+\
+
         k = top_k or self.retrieval_top_k
         rk = rerank_top_k or self.rerank_top_k
         dense_k = max(k, self.dense_top_k)
@@ -172,7 +168,6 @@ class HybridRetriever:
             "fused_candidates": fused_candidates,
             "reranked_candidates": reranked
         }
-
 
     def _reciprocal_rank_fusion(self, dense_results: List[SearchResult], lexical_results: List[SearchResult], top_k: int=30, rrf_k: int=60) -> List[SearchResult]:
         if not lexical_results:

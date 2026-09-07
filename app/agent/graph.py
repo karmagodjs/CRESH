@@ -27,7 +27,6 @@ def create_research_graph():
     workflow.add_node('citation', citation_node)
     workflow.add_node('verification', verification_node)
 
-    # Entry point is the document scope validator guard
     workflow.add_edge(START, 'validate_document_scope')
     workflow.add_conditional_edges(
         'validate_document_scope',

@@ -5,13 +5,11 @@ from app.observability.logging import get_logger
 
 logger = get_logger('node.document_scope')
 
-
 def validate_document_scope_node(state: ResearchState) -> Dict[str, Any]:
     start_time = time.perf_counter()
     trace = list(state.get('execution_trace', []))
     trace.append('Validate Document Scope')
 
-    # Extract current document IDs strictly from state and metadata
     raw_doc_ids: List[str] = list(state.get('current_document_ids', []))
     if not raw_doc_ids:
         meta = state.get('metadata', {})
@@ -20,7 +18,6 @@ def validate_document_scope_node(state: ResearchState) -> Dict[str, Any]:
         elif meta.get('document_id'):
             raw_doc_ids = [meta['document_id']]
 
-    # Clean and filter non-empty valid IDs
     cleaned_doc_ids = [str(d).strip() for d in raw_doc_ids if d and str(d).strip()]
 
     duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
@@ -64,7 +61,6 @@ def validate_document_scope_node(state: ResearchState) -> Dict[str, Any]:
         'execution_trace': trace,
         'latency': latency
     }
-
 
 def blocked_response_node(state: ResearchState) -> Dict[str, Any]:
     trace = list(state.get('execution_trace', []))

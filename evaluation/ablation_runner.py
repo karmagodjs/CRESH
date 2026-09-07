@@ -55,10 +55,8 @@ from evaluation.retrieval_evaluator import (
 
 logger = get_logger("ablation_runner")
 
-# Published list rates for Cohere API (for transparent estimation)
-COHERE_EMBED_V3_PER_1M_TOKENS_USD = 0.10     # $0.10 per 1M tokens
-COHERE_RERANK_V35_PER_1K_QUERIES_USD = 2.00  # $2.00 per 1k queries = $0.002 per search query
-
+COHERE_EMBED_V3_PER_1M_TOKENS_USD = 0.10
+COHERE_RERANK_V35_PER_1K_QUERIES_USD = 2.00
 
 class ConfigurationMetrics(BaseModel):
     name: str
@@ -80,7 +78,6 @@ class ConfigurationMetrics(BaseModel):
     instrumented_cost_usd: float
     estimated_api_cost_usd: float
 
-
 class TransitionDelta(BaseModel):
     transition: str
     from_config: str
@@ -96,7 +93,6 @@ class TransitionDelta(BaseModel):
     ndcg_at_10_delta: float
     ndcg_at_10_rel_change_pct: float
     avg_latency_delta_ms: float
-
 
 def compute_delta(from_m: ConfigurationMetrics, to_m: ConfigurationMetrics, label: str) -> TransitionDelta:
     def rel_pct(from_val: float, to_val: float) -> float:
@@ -121,7 +117,6 @@ def compute_delta(from_m: ConfigurationMetrics, to_m: ConfigurationMetrics, labe
         avg_latency_delta_ms=round(to_m.avg_latency_ms - from_m.avg_latency_ms, 2)
     )
 
-
 def run_ablation_study(
     dataset_path: Path,
     bert_pdf_path: Path,
@@ -137,7 +132,6 @@ def run_ablation_study(
     gold_queries = [GoldQuery(**item) for item in raw_gold]
     n_queries = len(gold_queries)
 
-    # Ingest document
     with open(bert_pdf_path, "rb") as fp:
         bert_bytes = fp.read()
     doc_resp = ingest_document_safely(file_bytes=bert_bytes, filename=bert_pdf_path.name)
@@ -145,8 +139,6 @@ def run_ablation_study(
 
     retriever = HybridRetriever()
 
-    # Trackers for the 5 configurations
-    # Config keys: dense, bm25, hybrid, rerank, evidence
     config_keys = ["dense", "bm25", "hybrid", "rerank", "evidence"]
     config_meta = {
         "dense": {
@@ -184,7 +176,7 @@ def run_ablation_study(
         "evidence": {
             "display_name": "Dense + BM25 + Rerank + Evidence Selection",
             "description": "Full LangGraph pipeline with query decomposition & final evidence assembly",
-            "pool_size": 8,  # Budget-allocated evidence chunks (typically 4-8)
+            "pool_size": 8,
             "embed_per_query": 1,
             "rerank_per_query": 1,
             "generate_per_query": 0
@@ -200,9 +192,6 @@ def run_ablation_study(
     for idx, gold in enumerate(gold_queries, 1):
         q = gold.question
 
-        # -------------------------------------------------------------
-        # 1. Configuration A: Dense Only
-        # -------------------------------------------------------------
         t0_dense = time.perf_counter()
         q_vec = retriever.cohere_client.embed([q], input_type="search_query")[0]
         dense_results = retriever.vector_store.similarity_search(
@@ -214,9 +203,6 @@ def run_ablation_study(
         t1_dense = time.perf_counter()
         lat_dense_ms = (t1_dense - t0_dense) * 1000.0
 
-        # -------------------------------------------------------------
-        # 2. Configuration B: BM25 Only
-        # -------------------------------------------------------------
         t0_bm25 = time.perf_counter()
         bm25_results = retriever.bm25_index.search(
             query=q,
@@ -227,9 +213,6 @@ def run_ablation_study(
         t1_bm25 = time.perf_counter()
         lat_bm25_ms = (t1_bm25 - t0_bm25) * 1000.0
 
-        # -------------------------------------------------------------
-        # 3. Configuration C: Dense + BM25 Fusion (RRF)
-        # -------------------------------------------------------------
         t0_fusion = time.perf_counter()
         fused_results = retriever._reciprocal_rank_fusion(
             dense_results=dense_results,
@@ -239,12 +222,9 @@ def run_ablation_study(
         fused_results = [c for c in fused_results if c.metadata.document_id == target_doc_id]
         t1_fusion = time.perf_counter()
         lat_fusion_overhead_ms = (t1_fusion - t0_fusion) * 1000.0
-        # Total latency for hybrid is both searches + fusion calculation
+
         lat_hybrid_ms = lat_dense_ms + lat_bm25_ms + lat_fusion_overhead_ms
 
-        # -------------------------------------------------------------
-        # 4. Configuration D: Dense + BM25 + Cohere Rerank
-        # -------------------------------------------------------------
         t0_rerank = time.perf_counter()
         reranked_results = retriever.reranker.rerank(
             query=q,
@@ -256,9 +236,6 @@ def run_ablation_study(
         lat_rerank_overhead_ms = (t1_rerank - t0_rerank) * 1000.0
         lat_rerank_ms = lat_hybrid_ms + lat_rerank_overhead_ms
 
-        # -------------------------------------------------------------
-        # 5. Configuration E: Dense + BM25 + Rerank + Final Evidence Selection
-        # -------------------------------------------------------------
         t0_ev = time.perf_counter()
         initial_state = {
             "query": q,
@@ -274,14 +251,12 @@ def run_ablation_study(
         t1_ev = time.perf_counter()
         lat_ev_ms = (t1_ev - t0_ev) * 1000.0
 
-        # Record latencies
         per_config_latencies["dense"].append(lat_dense_ms)
         per_config_latencies["bm25"].append(lat_bm25_ms)
         per_config_latencies["hybrid"].append(lat_hybrid_ms)
         per_config_latencies["rerank"].append(lat_rerank_ms)
         per_config_latencies["evidence"].append(lat_ev_ms)
 
-        # Binary relevance matching
         bin_d = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in dense_results]
         bin_b = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in bm25_results]
         bin_h = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in fused_results]
@@ -294,7 +269,6 @@ def run_ablation_study(
         per_config_bins["rerank"].append(bin_r)
         per_config_bins["evidence"].append(bin_e)
 
-        # Per query summary
         per_query_records.append({
             "id": gold.id,
             "question": gold.question,
@@ -306,9 +280,6 @@ def run_ablation_study(
             "evidence_recall_at_10": bool(any(bin_e[:10]))
         })
 
-    # =================================================================
-    # Calculate Configuration Metrics
-    # =================================================================
     config_metric_objects: Dict[str, ConfigurationMetrics] = {}
 
     for k in config_keys:
@@ -331,8 +302,6 @@ def run_ablation_study(
         total_generate = meta["generate_per_query"] * n_queries
         total_calls = total_embed + total_rerank + total_generate
 
-        # Estimated cost calculation:
-        # Avg query is ~10 tokens. 30 queries = ~300 tokens.
         est_embed_cost = (total_embed * 10 / 1_000_000.0) * COHERE_EMBED_V3_PER_1M_TOKENS_USD
         est_rerank_cost = (total_rerank / 1000.0) * COHERE_RERANK_V35_PER_1K_QUERIES_USD
         total_est_cost = round(est_embed_cost + est_rerank_cost, 6)
@@ -354,14 +323,10 @@ def run_ablation_study(
             total_rerank_calls=total_rerank,
             total_generate_calls=total_generate,
             total_api_calls=total_calls,
-            instrumented_cost_usd=0.0,  # Pure retrieval does not invoke generation models
+            instrumented_cost_usd=0.0,
             estimated_api_cost_usd=total_est_cost
         )
 
-    # =================================================================
-    # Calculate Inter-Stage Deltas
-    # Transitions: B - A, C - B, D - C, E - D
-    # =================================================================
     deltas = [
         compute_delta(config_metric_objects["dense"], config_metric_objects["bm25"], "B - A (BM25 vs Dense)"),
         compute_delta(config_metric_objects["bm25"], config_metric_objects["hybrid"], "C - B (Hybrid vs BM25)"),
@@ -369,12 +334,9 @@ def run_ablation_study(
         compute_delta(config_metric_objects["rerank"], config_metric_objects["evidence"], "E - D (Evidence vs Rerank)")
     ]
 
-    # =================================================================
-    # Failure Analysis: Specific inspections (bert_013, bert_015) and others
-    # =================================================================
     detailed_failures = []
     for rec in per_query_records:
-        # If not 100% recall across all stages, record it
+
         all_passed = (
             rec["dense_recall_at_10"]
             and rec["bm25_recall_at_10"]
@@ -383,7 +345,7 @@ def run_ablation_study(
             and rec["evidence_recall_at_10"]
         )
         if not all_passed:
-            # Determine earliest failure stage
+
             earliest = "dense" if not rec["dense_recall_at_10"] else (
                 "bm25" if not rec["bm25_recall_at_10"] else (
                     "hybrid" if not rec["hybrid_recall_at_10"] else (
@@ -392,7 +354,6 @@ def run_ablation_study(
                 )
             )
 
-            # Diagnosis explanation
             if rec["id"] == "bert_013":
                 root_cause = "retrieval (dense)"
                 diag = "Dense failed to capture corpora terms (BooksCorpus/Wikipedia) in top 10 (rank 13). BM25, Hybrid, Rerank, and Evidence correctly retrieved the chunk."
@@ -429,9 +390,6 @@ def run_ablation_study(
                 "diagnostic": diag
             })
 
-    # =================================================================
-    # Compile Report
-    # =================================================================
     report = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "dataset_name": "BERT Gold",
@@ -451,15 +409,11 @@ def run_ablation_study(
         }
     }
 
-    # Save JSON report
     output_report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
     logger.info(f"Saved ablation JSON report to {output_report_path}")
 
-    # =================================================================
-    # Generate Markdown Summary
-    # =================================================================
     md_content = generate_markdown_summary(report, config_metric_objects, deltas, detailed_failures)
     output_summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_summary_path, "w", encoding="utf-8") as f:
@@ -467,7 +421,6 @@ def run_ablation_study(
     logger.info(f"Saved ablation summary markdown to {output_summary_path}")
 
     return report
-
 
 def generate_markdown_summary(
     report: Dict[str, Any],
@@ -579,7 +532,6 @@ def generate_markdown_summary(
 
     return "\n".join(lines)
 
-
 def main():
     parser = argparse.ArgumentParser(description="Run Phase 2 CRI Retrieval Ablation Study")
     parser.add_argument("--dataset", type=Path, default=Path("evaluation/datasets/bert_gold.json"))
@@ -604,7 +556,6 @@ def main():
     print(f"JSON Report:    {args.report}")
     print(f"Summary Report: {args.summary}")
     print("=" * 50)
-
 
 if __name__ == "__main__":
     main()

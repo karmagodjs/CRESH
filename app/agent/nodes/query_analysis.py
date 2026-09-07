@@ -11,7 +11,6 @@ logger = get_logger('node.query_analysis')
 def classify_intent_rules(query: str) -> Tuple[str, str, bool]:
     q = query.lower().strip()
 
-    # 1. Contribution
     if any(k in q for k in [
         'three main contributions', 'main contributions', 'contributions of this paper',
         'contributions of the paper', 'what are the contributions', 'what does this paper contribute',
@@ -19,18 +18,15 @@ def classify_intent_rules(query: str) -> Tuple[str, str, bool]:
     ]):
         return 'contribution', 'factual', False
 
-    # 2. Overview
     if any(k in q for k in [
         'what is this paper about', 'what is the paper about', 'about this paper',
         'overview', 'summarize', 'summary of this paper', 'what does this paper propose'
     ]):
         return 'overview', 'summarization', False
 
-    # 3. Comparison
     if any(k in q for k in ['compare', 'versus', ' vs ', 'difference between', 'tradeoff', 'differ from']):
         return 'comparison', 'comparative', True
 
-    # 4. Results / Empirical Results
     if any(k in q for k in [
         'what results did', 'results did', 'experimental results', 'benchmark',
         'performance', 'accuracy', 'scores', 'table 1', 'table 2', 'table 3',
@@ -38,46 +34,36 @@ def classify_intent_rules(query: str) -> Tuple[str, str, bool]:
     ]):
         return 'results', 'factual', False
 
-    # 5. Ablation
     if any(k in q for k in ['ablation', 'ablation studies', 'effect of model size', 'effect of pre-training', 'without nsp', 'without next sentence', 'removed', 'is removed', 'remove nsp', 'objective is removed']):
         return 'ablation', 'analytical', False
 
-    # 6. Mechanism
     if any(k in q for k in ['how does', 'how do', 'mechanism', 'pre-training task', 'training objective', 'how is', 'how are', 'how bert works']):
         return 'mechanism', 'analytical', False
 
-    # 7. Definition
     if any(k in q for k in [
         'what is masked language modeling', 'what is next sentence prediction', 'what is medusa',
         'what is speculative decoding', 'define ', 'definition of', 'what is ', 'what are ', 'role of'
     ]):
         return 'definition', 'factual', False
 
-    # 8. Methodology
     if any(k in q for k in ['methodology', 'algorithm', 'model architecture', 'transformer encoder']):
         return 'methodology', 'analytical', False
 
-    # 9. Limitations
     if any(k in q for k in ['limitation', 'drawback', 'weakness', 'failure mode', 'disadvantage']):
         return 'limitations', 'analytical', False
 
-    # 10. Dataset
     if any(k in q for k in ['dataset', 'corpus', 'corpora', 'training data', 'training set', 'books corpus', 'wikicorpus']):
         return 'dataset', 'factual', False
 
-    # 11. Implementation
     if any(k in q for k in ['hyperparameter', 'learning rate', 'batch size', 'optimizer', 'implementation details', 'epochs']):
         return 'implementation', 'technical', False
 
-    # 12. Conclusion
     if any(k in q for k in ['conclusion', 'future work', 'conclude']):
         return 'conclusion', 'factual', False
 
-    # 13. Citation Request
     if any(k in q for k in ['who wrote', 'authors', 'citation', 'cite', 'bibtex', 'published', 'year']):
         return 'citation_request', 'factual', False
 
-    # 14. Technical
     if any(k in q for k in ['hidden size', 'dimensions', 'loss function', 'number of layers', 'parameters']):
         return 'technical', 'factual', False
 
@@ -86,13 +72,11 @@ def classify_intent_rules(query: str) -> Tuple[str, str, bool]:
 def extract_target_entities(query: str) -> List[str]:
     entities: List[str] = []
 
-    # 1. Multi-word Title-Cased Phrases (e.g. "Masked Language Modeling", "Next Sentence Prediction", "Speculative Decoding")
     title_phrases = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b', query)
     for tp in title_phrases:
         if tp.lower() not in {'this paper', 'the paper', 'three main'} and tp not in entities:
             entities.append(tp)
 
-    # 2. Known domain-specific or acronym forms (case-insensitive checks mapped to canonical names)
     common_acronyms = {
         'bert': 'BERT', 'glue': 'GLUE', 'squad': 'SQuAD', 'medusa': 'Medusa',
         'mlm': 'MLM', 'nsp': 'NSP', 'swag': 'SWAG', 'mnli': 'MNLI',
@@ -106,18 +90,15 @@ def extract_target_entities(query: str) -> List[str]:
             if v not in entities and not any(v in e for e in entities):
                 entities.append(v)
 
-    # 3. Quoted substrings (e.g. "masked LM")
     quotes = re.findall(r'["\']([^"\']+)["\']', query)
     for q in quotes:
         if q.strip() and q.strip() not in entities:
             entities.append(q.strip())
 
-    # 4. Uppercase tokens of length 2-6 (acronyms like SQuAD, GLUE, BERT)
     for word in re.findall(r'\b[A-Z0-9]{2,6}\b', query):
         if word not in entities and word.lower() not in {'what', 'how', 'the', 'why', 'and', 'for', 'are', 'not', 'role', 'did'}:
             entities.append(word)
 
-    # 5. Concept phrases mentioned in lower case
     if 'masked language model' in q_lower or 'masked lm' in q_lower:
         if not any('masked' in e.lower() for e in entities):
             entities.append('Masked Language Modeling')
@@ -186,16 +167,15 @@ def infer_section_preferences(intent: str) -> List[str]:
     return mapping.get(intent, ['methodology', 'introduction', 'experiments'])
 
 def extract_required_concepts(query: str, intent: str, entities: List[str]) -> Tuple[List[str], List[str], bool]:
-    """
-    Extracts required concepts/entities and decomposes multi-concept queries into sub-questions.
-    Returns:
-        required_concepts: List of atomic concepts that MUST be covered in evidence.
-        sub_questions: List of decomposed sub-questions to retrieve independently.
-        is_complex: True if the question covers multiple concepts requiring independent retrieval.
-    """
+\
+\
+\
+\
+\
+\
+
     q_lower = query.lower().strip()
 
-    # 1. Comparison Questions: "difference between X and Y", "compare X and Y", "X vs Y"
     if intent == 'comparison' or any(k in q_lower for k in ['difference between', 'compare', 'versus', ' vs ', 'differ from']):
         comp_match = re.search(r'(?:difference between|compare|contrast)\s+(?:the\s+)?(.*?)\s+(?:and|versus|vs\.?)\s+(?:the\s+)?(.*?)(?:\?|\.|\Z)', q_lower)
         if comp_match:
@@ -215,7 +195,6 @@ def extract_required_concepts(query: str, intent: str, entities: List[str]) -> T
             ]
             return [c_a, c_b], sub_q, True
 
-    # 2. Multi-Part Tasks: "two pre-training tasks", "two tasks", "both tasks"
     if any(k in q_lower for k in ['two pre-training tasks', 'two pre training tasks', 'two tasks', 'both tasks', 'both pre-training tasks']):
         concepts = ["Masked Language Modeling", "Next Sentence Prediction"]
         sub_q = [
@@ -224,7 +203,6 @@ def extract_required_concepts(query: str, intent: str, entities: List[str]) -> T
         ]
         return concepts, sub_q, True
 
-    # 3. Multi-Benchmark Evaluation: GLUE and SQuAD
     benchmarks = [e for e in entities if e.upper() in ['GLUE', 'SQUAD', 'SWAG', 'MNLI', 'QQP', 'QNLI', 'MRPC', 'SST-2', 'COLA']]
     if not benchmarks:
         if 'glue' in q_lower and 'squad' in q_lower:
@@ -233,36 +211,29 @@ def extract_required_concepts(query: str, intent: str, entities: List[str]) -> T
         sub_q = [f"What results did BERT achieve on {b}?" for b in benchmarks]
         return benchmarks, sub_q, True
 
-    # 4. Multi-Entity Conjunctions ("both X and Y", "X and Y")
     if ' and ' in q_lower or ' both ' in q_lower:
         tech_entities = [e for e in entities if e.lower() not in {'bert', 'paper', 'model', 'approach', 'results', 'this paper'}]
         if len(tech_entities) >= 2:
             sub_q = [f"What is {e} in the context of this paper?" for e in tech_entities]
             return tech_entities, sub_q, True
 
-    # 5. Targeted Single-Concept: NSP
     if any(k in q_lower for k in ['next sentence prediction', 'nsp']) and not any(k in q_lower for k in ['masked language', 'mlm']):
         if any(k in q_lower for k in ['without', 'removed', 'is removed', 'remove']):
             return ["No NSP"], [query], False
         return ["Next Sentence Prediction"], [query], False
 
-    # 6. Targeted Single-Concept: MLM
     if any(k in q_lower for k in ['masked language modeling', 'masked lm', 'mlm', 'mask token', 'masking']):
         return ["Masked Language Modeling"], [query], False
 
-    # 7. Targeted Single-Concept: Fine-tuning
     if 'fine-tuning' in q_lower and 'feature-based' not in q_lower:
         return ["fine-tuning"], [query], False
 
-    # 8. Targeted Single-Concept: Feature-based
     if 'feature-based' in q_lower and 'fine-tuning' not in q_lower:
         return ["feature-based"], [query], False
 
-    # 9. Contributions
     if intent == 'contribution' or any(k in q_lower for k in ['contribution', 'contributions']):
         return ["contributions"], [query], False
 
-    # 10. Default single-concept from entities or intent
     if entities:
         main_ent = [e for e in entities if e.lower() not in {'this paper', 'the paper'}][0]
         return [main_ent], [query], False
@@ -279,7 +250,6 @@ def generate_retrieval_queries(
     queries: List[str] = [query]
     concepts = required_concepts or []
 
-    # For concept-specific queries
     for c in concepts:
         c_low = c.lower()
         if c_low in ['next sentence prediction', 'nsp']:
@@ -306,14 +276,12 @@ def generate_retrieval_queries(
             queries.append("we demonstrate the importance of bidirectional")
             queries.append("advances the state of the art for eleven")
 
-    # For definition/mechanism questions:
     if intent in ['definition', 'mechanism']:
         for ent in entities:
             queries.append(f"{ent} definition")
             queries.append(f"{ent} explanation mechanism")
             queries.append(f"{ent} methodology architecture pretraining")
 
-    # For comparison questions:
     elif intent == 'comparison':
         for ent in entities:
             queries.append(f"{ent} approach mechanism")
@@ -321,14 +289,12 @@ def generate_retrieval_queries(
             queries.append(f"comparison between {concepts[0]} and {concepts[1]}")
             queries.append(f"difference between {concepts[0]} and {concepts[1]}")
 
-    # For contribution questions:
     elif intent == 'contribution':
         queries.append("main contributions of the paper")
         queries.append("contributions of this paper")
         queries.append("the major contributions of our paper are as follows")
         queries.append("explicit contribution list")
 
-    # For results questions:
     elif intent in ['results', 'empirical_results', 'experiment']:
         if entities:
             for ent in entities:
@@ -339,28 +305,23 @@ def generate_retrieval_queries(
             queries.append(f"{query} benchmark results score Table")
             queries.append("headline results evaluation metrics")
 
-    # For ablation questions:
     elif intent == 'ablation':
         queries.append("ablation experiments Table 4 Table 5")
         queries.append("effect of pre-training tasks No NSP LTR")
 
-    # For methodology questions:
     elif intent in ['methodology', 'architecture', 'training']:
         ent_prefix = f"{' '.join(entities)} " if entities else ""
         queries.append(f"{ent_prefix}method methodology training procedure")
         queries.append(f"{ent_prefix}model architecture experimental setup")
 
-    # For overview questions:
     elif intent == 'overview':
         queries.append("abstract introduction overview proposed method summary")
         queries.append("paper overview architecture and main results")
 
-    # Generic cleanup query
     clean_q = re.sub(r'^(what is|what are|how does|how do|according to this paper|can you explain|describe)\s+', '', query, flags=re.IGNORECASE).strip()
     if clean_q and clean_q.lower() != query.lower():
         queries.append(clean_q)
 
-    # Deduplicate while preserving order
     seen = set()
     deduped = []
     for q in queries:
@@ -423,7 +384,6 @@ def query_analysis_node(state: ResearchState) -> Dict[str, Any]:
         query_intent, query_type, is_complex = classify_intent_rules(query)
         token_usage = state.get('token_usage', {})
 
-    # Rule-based safety overrides for precise intent targeting
     q_lower = query.lower()
     if any(k in q_lower for k in ['three main contributions', 'main contributions of this paper', 'what are the main contributions', 'what are the three main contributions']):
         query_intent = 'contribution'
@@ -447,7 +407,6 @@ def query_analysis_node(state: ResearchState) -> Dict[str, Any]:
         query_intent = 'mechanism'
         query_type = 'analytical'
 
-    # Fallback/refine entities and metadata if empty
     if not entities:
         entities = extract_target_entities(query)
     if not requested_facts:
@@ -457,7 +416,6 @@ def query_analysis_node(state: ResearchState) -> Dict[str, Any]:
     if not section_preferences:
         section_preferences = infer_section_preferences(query_intent)
 
-    # Concept extraction and decomposition analysis
     required_concepts, decomposed_subs, is_multi_concept = extract_required_concepts(query, query_intent, entities)
     if is_multi_concept:
         is_complex = True

@@ -24,18 +24,15 @@ export default function WorkspacePage() {
   const [uploadedFileUrls, setUploadedFileUrls] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // Mobile drawer states (< 1100px)
   const [isMobileSourcesOpen, setIsMobileSourcesOpen] = useState(false);
   const [isMobileEvidenceOpen, setIsMobileEvidenceOpen] = useState(false);
 
-  // Load documents on mount
   const loadDocuments = useCallback(async () => {
     try {
       setApiError(null);
       const res = await fetchDocuments();
       setDocuments(res.documents || []);
 
-      // If BERT document exists and no document is selected, auto-select it for demo experience
       if (res.documents && res.documents.length > 0) {
         const bert = res.documents.find(
           (d) => d.filename.includes("1810.04805") || d.title.toLowerCase().includes("bert")
@@ -59,7 +56,6 @@ export default function WorkspacePage() {
 
   const activeDoc = documents.find((d) => d.document_id === activeDocumentId) || null;
 
-  // Run research query through FastAPI backend
   const handleRunQuery = async (question: string) => {
     if (!question.trim()) return;
 
@@ -79,7 +75,6 @@ export default function WorkspacePage() {
 
       setQueryResponse(response);
 
-      // Default to citation 1 if citations exist and query is grounded
       if (response.citations && response.citations.length > 0) {
         setSelectedCitationIndex(1);
       }
@@ -92,7 +87,6 @@ export default function WorkspacePage() {
 
   const handleCitationClick = (idx: number) => {
     setSelectedCitationIndex(idx);
-    // Requirement 4A: Automatically open evidence drawer when a user taps a citation pill on mobile/tablet
     if (typeof window !== "undefined" && window.innerWidth < 1100) {
       setIsMobileEvidenceOpen(true);
     }
@@ -123,10 +117,8 @@ export default function WorkspacePage() {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-cri-bg text-cri-textPrimary font-sans">
-      {/* Top Header */}
       <Header activeDocument={activeDoc} />
 
-      {/* Backend Connection Error Banner */}
       {apiError && (
         <div className="px-4 py-2 bg-cri-surface border-b border-cri-orange/30 flex items-center justify-between text-xs text-cri-orange">
           <div className="flex items-center gap-2">
@@ -143,9 +135,7 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      {/* PRIMARY RESEARCH WORKSPACE */}
       <div className="flex-1 overflow-hidden p-2 sm:p-2.5 pt-2 bg-cri-bg flex flex-col">
-        {/* Mobile / Tablet Drawer Trigger Bar (< 1100px) */}
         <div className="min-[1100px]:hidden flex items-center justify-between gap-2 pb-2 shrink-0">
           <button
             type="button"
@@ -194,9 +184,7 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        {/* 3 LARGE NOTEBOOK-STYLE BOXES (Desktop: 22% / 54% / 24%, 12px gap) */}
         <div className="h-full w-full overflow-hidden flex flex-col min-[1100px]:grid min-[1100px]:grid-cols-[22%_minmax(0,1fr)_24%] gap-3">
-          {/* BOX 1: Sources (22% width on desktop >= 1100px) */}
           <div className="hidden min-[1100px]:block h-full min-w-0 overflow-hidden">
             <SourcesPanel
               documents={documents}
@@ -214,7 +202,6 @@ export default function WorkspacePage() {
             />
           </div>
 
-          {/* BOX 2: Research Workspace (Primary on mobile, 54% on desktop) */}
           <div className="h-full min-w-0 overflow-hidden">
             <ResearchPanel
               activeDocument={activeDoc}
@@ -228,7 +215,6 @@ export default function WorkspacePage() {
             />
           </div>
 
-          {/* BOX 3: Evidence & Verification (24% width on desktop >= 1100px) */}
           <div className="hidden min-[1100px]:block h-full min-w-0 overflow-hidden">
             <EvidencePanel
               queryResponse={queryResponse}
@@ -241,7 +227,6 @@ export default function WorkspacePage() {
         </div>
       </div>
 
-      {/* Mobile Slide-Over Drawer: Sources (Slides from Left) */}
       {isMobileSourcesOpen && (
         <div
           className="fixed inset-0 z-50 flex bg-black/65 backdrop-blur-[2px] animate-in fade-in duration-200 min-[1100px]:hidden"
@@ -292,7 +277,6 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      {/* Mobile Slide-Over Drawer: Evidence (Slides from Right) */}
       {isMobileEvidenceOpen && (
         <div
           className="fixed inset-0 z-50 flex justify-end bg-black/65 backdrop-blur-[2px] animate-in fade-in duration-200 min-[1100px]:hidden"
@@ -339,7 +323,6 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      {/* Add Source Document Modal */}
       <AddSourceModal
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
@@ -347,7 +330,6 @@ export default function WorkspacePage() {
         initialTab={uploadTab}
       />
 
-      {/* CRI Document Viewer Modal */}
       <DocumentViewer
         isOpen={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}

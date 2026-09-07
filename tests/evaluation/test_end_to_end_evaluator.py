@@ -21,7 +21,6 @@ from evaluation.end_to_end_evaluator import (
     evaluate_groundedness,
 )
 
-
 class TestConceptCoverageAndReferenceComparison:
     def test_concept_coverage_full_and_partial(self):
         req_concepts = [
@@ -54,7 +53,6 @@ class TestConceptCoverageAndReferenceComparison:
         disjoint = "The quick brown fox jumps over the lazy dog."
         f1_disjoint = compute_token_f1(disjoint, ref)
         assert f1_disjoint == 0.0
-
 
 class TestGroundednessAndCitations:
     def test_groundedness_pass_and_fail(self):
@@ -89,15 +87,13 @@ class TestGroundednessAndCitations:
         assert coverage > 0.0
         assert precision == 1.0
 
-        # Test invalid citation pointing to unretrieved chunk
         bad_citations = [{"chunk_id": "unretrieved_chunk"}]
         _, bad_validity, _, _ = evaluate_citations(answer, bad_citations, retrieved_ids, evidence)
         assert bad_validity == 0.0
 
-
 class TestAbstentionAndErrorTaxonomy:
     def test_abstention_detection(self):
-        # Unsupported query that correctly abstains
+
         cov, matched, missing = check_concept_coverage(
             required_concepts=[],
             text="I don't have sufficient evidence in the selected document to answer this question.",
@@ -107,7 +103,6 @@ class TestAbstentionAndErrorTaxonomy:
         assert cov == 1.0
         assert "correct_abstention" in matched
 
-        # Unsupported query that incorrectly attempts an answer
         cov_fail, matched_fail, missing_fail = check_concept_coverage(
             required_concepts=[],
             text="GPT-4 has 1.8 trillion parameters.",
@@ -117,7 +112,7 @@ class TestAbstentionAndErrorTaxonomy:
         assert cov_fail == 0.0
 
     def test_error_taxonomy_classification(self):
-        # 1. Abstention failure
+
         cat_abst = assign_error_taxonomy(
             must_abstain=True,
             is_abstention=False,
@@ -131,7 +126,6 @@ class TestAbstentionAndErrorTaxonomy:
         )
         assert cat_abst == "ABSTENTION_FAILURE"
 
-        # 2. Retrieval failure
         cat_ret = assign_error_taxonomy(
             must_abstain=False,
             is_abstention=False,
@@ -145,7 +139,6 @@ class TestAbstentionAndErrorTaxonomy:
         )
         assert cat_ret == "RETRIEVAL_FAILURE"
 
-        # 3. Evidence selection failure (in pool, lost in rerank)
         cat_sel = assign_error_taxonomy(
             must_abstain=False,
             is_abstention=False,
@@ -159,7 +152,6 @@ class TestAbstentionAndErrorTaxonomy:
         )
         assert cat_sel == "EVIDENCE_SELECTION_FAILURE"
 
-        # 4. Grounding failure
         cat_grd = assign_error_taxonomy(
             must_abstain=False,
             is_abstention=False,
@@ -173,7 +165,6 @@ class TestAbstentionAndErrorTaxonomy:
         )
         assert cat_grd == "GROUNDING_FAILURE"
 
-        # 5. Generation failure (retrieval succeeded, grounded, but failed concept coverage)
         cat_gen = assign_error_taxonomy(
             must_abstain=False,
             is_abstention=False,
@@ -187,7 +178,6 @@ class TestAbstentionAndErrorTaxonomy:
         )
         assert cat_gen == "GENERATION_FAILURE"
 
-        # 6. No failure
         cat_pass = assign_error_taxonomy(
             must_abstain=False,
             is_abstention=False,
@@ -201,7 +191,6 @@ class TestAbstentionAndErrorTaxonomy:
         )
         assert cat_pass == "NO_FAILURE"
 
-
 class TestGenerationSafetyAndIsolation:
     def test_document_isolation_prevents_unauthorized_citations(self):
         answer = "BERT is an architecture [1]."
@@ -212,7 +201,7 @@ class TestGenerationSafetyAndIsolation:
         retrieved_ids = ["chunk_doc_a"]
         evidence = [{"chunk_id": "chunk_doc_a", "text": "BERT architecture"}]
         _, validity, _, _ = evaluate_citations(answer, citations, retrieved_ids, evidence)
-        assert validity == 0.5  # Only 1 out of 2 is valid
+        assert validity == 0.5
 
     def test_gold_answer_never_leaked_to_generator(self):
         gold = GoldAnswerItem(
@@ -222,7 +211,7 @@ class TestGenerationSafetyAndIsolation:
             required_concepts=["bidirectional transformer"],
             gold_document_id="doc_1"
         )
-        # Verify gold fields are excluded from prompt serialization payload
+
         clean_prompt_inputs = {
             "query": gold.question,
             "evidence": ["Passage 1 text", "Passage 2 text"]

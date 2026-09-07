@@ -11,9 +11,8 @@ from evaluation.abstention_evaluator import (
     verify_no_document_precondition,
 )
 
-
 def test_three_tier_sufficiency_gate():
-    # Tier A: Strongly supported
+
     evidence = [
         {"text": "BERT is trained on BooksCorpus and English Wikipedia.", "rerank_score": 0.85, "metadata": {"document_id": "doc1", "chunk_id": "c1"}}
     ]
@@ -25,7 +24,6 @@ def test_three_tier_sufficiency_gate():
     )
     assert tier == "STRONGLY_SUPPORTED"
 
-    # Tier B: Weakly supported (moderate score)
     evidence_weak = [
         {"text": "BERT pre-training details are discussed in this section.", "rerank_score": 0.35, "metadata": {"document_id": "doc1", "chunk_id": "c1"}}
     ]
@@ -36,7 +34,6 @@ def test_three_tier_sufficiency_gate():
     )
     assert tier == "WEAKLY_SUPPORTED"
 
-    # Tier C: Unsupported (predicate absent)
     tier, reason = check_evidence_sufficiency_hardened(
         query="What was BERT's inference latency on an NVIDIA V100 GPU?",
         validated_evidence=evidence,
@@ -45,12 +42,11 @@ def test_three_tier_sufficiency_gate():
     assert tier == "UNSUPPORTED"
     assert "latency" in reason.lower() or "nvidia" in reason.lower()
 
-
 def test_versioned_entity_rejection():
     evidence = [
         {"text": "OpenAI GPT uses a left-to-right Transformer architecture.", "rerank_score": 0.70, "metadata": {"document_id": "doc1", "chunk_id": "c1"}}
     ]
-    # Versioned entity GPT-4 does not exist in document
+
     tier, reason = check_evidence_sufficiency_hardened(
         query="What is the parameter count of GPT-4?",
         validated_evidence=evidence
@@ -58,7 +54,6 @@ def test_versioned_entity_rejection():
     assert tier == "UNSUPPORTED"
     assert "gpt-4" in reason.lower()
 
-    # GPT-3 also does not exist
     tier, reason = check_evidence_sufficiency_hardened(
         query="What dataset was used to train GPT-3?",
         validated_evidence=evidence
@@ -66,12 +61,11 @@ def test_versioned_entity_rejection():
     assert tier == "UNSUPPORTED"
     assert "gpt-3" in reason.lower()
 
-
 def test_external_entity_rejection():
     evidence = [
         {"text": "BERT achieves high performance on GLUE benchmarks.", "rerank_score": 0.80, "metadata": {"document_id": "doc1", "chunk_id": "c1"}}
     ]
-    # External out-of-scope entities
+
     for q in [
         "What is the current price of NVIDIA stock?",
         "What is the weather in Bangalore today?",
@@ -80,7 +74,6 @@ def test_external_entity_rejection():
     ]:
         tier, reason = check_evidence_sufficiency_hardened(query=q, validated_evidence=evidence)
         assert tier == "UNSUPPORTED"
-
 
 def test_hard_negative_predicate_rejection():
     evidence = [
@@ -95,7 +88,6 @@ def test_hard_negative_predicate_rejection():
     for q, keyword in hard_negatives:
         tier, reason = check_evidence_sufficiency_hardened(query=q, validated_evidence=evidence)
         assert tier == "UNSUPPORTED"
-
 
 def test_in_scope_preservation():
     evidence = [
@@ -116,13 +108,11 @@ def test_in_scope_preservation():
     )
     assert tier == "STRONGLY_SUPPORTED"
 
-
 def test_no_document_guard():
     res = verify_no_document_precondition()
     assert res["passed"] is True
     assert "No document is currently selected" in res["returned_answer"]
     assert res["evidence_sufficient"] is False
-
 
 def test_confusion_matrix_calculation():
     cm = ConfusionMatrix(

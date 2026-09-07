@@ -65,7 +65,6 @@ export const ArchitectureView: React.FC = () => {
 
   return (
     <div className="h-full overflow-y-auto p-6 md:p-8 space-y-8 bg-cri-bg text-cri-textPrimary max-w-5xl mx-auto custom-scrollbar">
-      {/* Header */}
       <div className="border-b border-cri-border pb-5">
         <div className="text-[11px] font-mono uppercase tracking-wider text-cri-orange font-semibold mb-1 flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5" />
@@ -79,7 +78,6 @@ export const ArchitectureView: React.FC = () => {
         </p>
       </div>
 
-      {/* Pipeline Diagram */}
       <div className="space-y-4">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary flex items-center gap-2">
           <Layers className="w-4 h-4 text-cri-orange" />
@@ -107,7 +105,6 @@ export const ArchitectureView: React.FC = () => {
         </div>
       </div>
 
-      {/* Ingestion & Persistence Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-3">
           <div className="flex items-center gap-2">

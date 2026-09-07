@@ -13,13 +13,13 @@ def bert_document():
     return doc
 
 def test_bert_overview_regression(bert_document):
-    """
-    Quality regression test:
-    Validates that high-level research questions like 'What is this paper about?'
-    are properly classified as intent='overview', retrieve structurally diversified
-    evidence (Abstract, Intro, Conclusion), generate the 4 required sections, cite Page 1/9,
-    and include essential architectural and empirical concepts without broken fragments.
-    """
+\
+\
+\
+\
+\
+\
+
     graph = get_research_graph()
     initial_state = {
         'query': 'What is this paper about?',
@@ -32,13 +32,10 @@ def test_bert_overview_regression(bert_document):
     }
     final_state = graph.invoke(initial_state)
 
-    # 1. Verify Query Intent Classification
     assert final_state.get('query_intent') == 'overview', f"Expected intent 'overview', got {final_state.get('query_intent')}"
 
-    # 2. Verify Confidence Score
     assert final_state.get('confidence', 0.0) >= 0.80, f"Expected confidence >= 0.80, got {final_state.get('confidence')}"
 
-    # 3. Verify Citations point to Page 1 (Abstract/Intro) and/or Page 9 (Conclusion)
     citations = final_state.get('citations', [])
     assert len(citations) >= 2, f"Expected at least 2 citations, got {len(citations)}"
     citation_pages = {c.get('page_number') for c in citations}
@@ -46,7 +43,6 @@ def test_bert_overview_regression(bert_document):
     citation_sections = {str(c.get('section_name', '')).lower() for c in citations}
     assert any('abstract' in s or 'intro' in s for s in citation_sections), f"Expected Abstract or Intro in citations, got {citation_sections}"
 
-    # 4. Verify Answer Structure (Four Required Overview Sections)
     answer = final_state.get('answer', '')
     assert len(answer) > 0, "Answer should not be empty"
     assert "### 1. Problem Addressed" in answer, "Missing '### 1. Problem Addressed'"
@@ -54,11 +50,9 @@ def test_bert_overview_regression(bert_document):
     assert "### 3. High-Level Technical Mechanism" in answer, "Missing '### 3. High-Level Technical Mechanism'"
     assert "### 4. Key Contributions & Empirical Findings" in answer, "Missing '### 4. Key Contributions & Empirical Findings'"
 
-    # 5. Verify Fragment Bug is Fixed (never start with broken fragment)
     assert not answer.strip().startswith("word based only on its context"), "Regression: answer started with broken fragment"
     assert "word based only on its context" not in answer.lower()[:80], "Regression: broken fragment found near answer start"
 
-    # 6. Verify Semantic Concepts
     lower_ans = answer.lower()
     assert 'bert' in lower_ans, "Expected 'BERT' in answer"
     assert ('bidirectional encoder representations from transformers' in lower_ans or 'bidirectional' in lower_ans), "Expected bidirectional in answer"

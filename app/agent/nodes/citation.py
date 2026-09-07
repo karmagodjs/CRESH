@@ -14,7 +14,6 @@ def citation_node(state: ResearchState) -> Dict[str, Any]:
     evidence_sufficient = state.get('evidence_sufficient', True)
     current_doc_ids = set([d for d in state.get('current_document_ids', []) if d])
 
-    # If evidence was marked insufficient, no citations should ever be emitted
     if not evidence_sufficient or not evidence or 'insufficient evidence' in answer.lower():
         duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
         latency = dict(state.get('latency', {}))
@@ -29,7 +28,6 @@ def citation_node(state: ResearchState) -> Dict[str, Any]:
             if num_str.isdigit():
                 found_indices.add(int(num_str))
 
-    # If model formulated answer but omitted explicit [1] tags, resolve to top evidence
     if not found_indices and evidence and len(answer) > 40:
         found_indices = {1, 2} if len(evidence) >= 2 else {1}
 
@@ -40,7 +38,6 @@ def citation_node(state: ResearchState) -> Dict[str, Any]:
             meta = ev_item.get('metadata', {})
             doc_id = meta.get('document_id', '')
 
-            # Enforce document scope isolation on citations
             if current_doc_ids and doc_id not in current_doc_ids:
                 logger.error(f"Filtered out unauthorized citation to document {doc_id} not in {current_doc_ids}")
                 continue

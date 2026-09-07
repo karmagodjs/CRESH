@@ -24,10 +24,6 @@ from app.observability.logging import get_logger
 
 logger = get_logger("retrieval_evaluator")
 
-# =====================================================================
-# 1. SCHEMAS
-# =====================================================================
-
 class GoldQuery(BaseModel):
     id: str
     question: str
@@ -80,34 +76,30 @@ class FailureRecord(BaseModel):
     retrieval_stage_where_failure_occurred: str
     reason: str
 
-# =====================================================================
-# 2. METRIC CALCULATIONS
-# =====================================================================
-
 def compute_recall_at_k(relevance_binary_list: List[int], k: int) -> float:
-    """
-    Standard passage retrieval Recall@K (Hit@K):
-    Returns 1.0 if at least one relevant passage is retrieved within the top K results, else 0.0.
-    """
+\
+\
+\
+
     if not relevance_binary_list or k <= 0:
         return 0.0
     return 1.0 if any(relevance_binary_list[:k]) else 0.0
 
 def compute_precision_at_k(relevance_binary_list: List[int], k: int) -> float:
-    """
-    Precision@K: Fraction of retrieved passages in top K that are relevant.
-    """
+\
+\
+
     if not relevance_binary_list or k <= 0:
         return 0.0
     sub = relevance_binary_list[:k]
     return float(sum(sub)) / float(k)
 
 def compute_mrr_at_k(relevance_binary_list: List[int], k: int = 10) -> float:
-    """
-    Mean Reciprocal Rank (MRR@K):
-    Reciprocal of the rank of the FIRST relevant passage within top K (1-indexed).
-    If no relevant passage is in top K, returns 0.0.
-    """
+\
+\
+\
+\
+
     if not relevance_binary_list or k <= 0:
         return 0.0
     for rank, rel in enumerate(relevance_binary_list[:k], 1):
@@ -116,10 +108,10 @@ def compute_mrr_at_k(relevance_binary_list: List[int], k: int = 10) -> float:
     return 0.0
 
 def compute_ndcg_at_k(relevance_binary_list: List[int], k: int = 10) -> float:
-    """
-    Normalized Discounted Cumulative Gain (nDCG@K):
-    Uses standard DCG = sum(rel_i / log2(i + 2)) and ideal DCG (IDCG).
-    """
+\
+\
+\
+
     if not relevance_binary_list or k <= 0:
         return 0.0
     sub = relevance_binary_list[:k]
@@ -129,10 +121,6 @@ def compute_ndcg_at_k(relevance_binary_list: List[int], k: int = 10) -> float:
     ideal = sorted(sub, reverse=True)
     idcg = sum(float(rel) / math.log2(i + 2) for i, rel in enumerate(ideal))
     return dcg / idcg if idcg > 0.0 else 0.0
-
-# =====================================================================
-# 3. SEMANTIC GOLD EVIDENCE MATCHING
-# =====================================================================
 
 def extract_chunk_details(chunk: Any) -> Dict[str, Any]:
     if isinstance(chunk, dict):
@@ -161,15 +149,14 @@ def extract_chunk_details(chunk: Any) -> Dict[str, Any]:
     }
 
 def is_chunk_gold_relevant(chunk: Any, gold: GoldQuery, target_document_id: str) -> RelevanceMatch:
-    """
-    Transparent, deterministic semantic relevance matching:
-    1. Document Scope: Chunk MUST match target_document_id.
-    2. Section Match: Chunk section or header matches gold section keywords.
-    3. Concept Match: Chunk text contains expected concepts or key technical terms.
-    """
+\
+\
+\
+\
+\
+
     info = extract_chunk_details(chunk)
 
-    # 1. Strict Document Isolation Check
     if info["document_id"] != target_document_id:
         return RelevanceMatch(
             is_relevant=False,
@@ -179,8 +166,7 @@ def is_chunk_gold_relevant(chunk: Any, gold: GoldQuery, target_document_id: str)
         )
 
     text_lower = info["text"].lower()
-    
-    # 2. Section Keyword Match: Check section_name and explicit header lines
+
     sec_lower = info["section_name"].lower()
     first_lines = "\n".join(info["text"].split("\n")[:2]).lower()
     for line in first_lines.split("\n"):
@@ -200,14 +186,13 @@ def is_chunk_gold_relevant(chunk: Any, gold: GoldQuery, target_document_id: str)
 
     section_match = len(matched_sections) > 0
 
-    # 3. Concept / Keyword Match
     concept_matches: List[str] = []
     for concept in gold.expected_concepts:
         c_low = concept.lower()
         if c_low in text_lower:
             concept_matches.append(concept)
             continue
-        # Multi-word phrase matching with content word overlap
+
         tokens = [w for w in re.findall(r"[a-z0-9]+", c_low) if len(w) >= 3 and w not in {"the", "and", "for", "with", "from", "that", "this"}]
         if not tokens:
             continue
@@ -216,7 +201,6 @@ def is_chunk_gold_relevant(chunk: Any, gold: GoldQuery, target_document_id: str)
         elif len(tokens) >= 3 and sum(1 for t in tokens if t in text_lower) >= (len(tokens) * 0.75):
             concept_matches.append(concept)
 
-    # 4. Deterministic Relevance Assessment
     is_relevant = False
     relevance_score = 0.0
 
@@ -233,7 +217,7 @@ def is_chunk_gold_relevant(chunk: Any, gold: GoldQuery, target_document_id: str)
         relevance_score = 0.95
         reason = f"Single-concept full match ({concept_matches}) with section match"
     elif section_match:
-        # Check for specific numbers / identifiers mentioned in expected concepts
+
         numbers_in_concepts = re.findall(r"\b\d+(?:\.\d+)?%?\b", " ".join(gold.expected_concepts))
         if numbers_in_concepts and any(num in text_lower for num in numbers_in_concepts):
             is_relevant = True
@@ -258,10 +242,6 @@ def is_chunk_gold_relevant(chunk: Any, gold: GoldQuery, target_document_id: str)
         reason=reason
     )
 
-# =====================================================================
-# 4. RETRIEVAL EVALUATION RUNNER
-# =====================================================================
-
 def evaluate_retrieval_pipeline(
     dataset_path: Path,
     bert_pdf_path: Path,
@@ -276,7 +256,6 @@ def evaluate_retrieval_pipeline(
 
     gold_queries = [GoldQuery(**item) for item in raw_gold]
 
-    # Ingest / get document ID
     with open(bert_pdf_path, "rb") as fp:
         bert_bytes = fp.read()
     doc_resp = ingest_document_safely(file_bytes=bert_bytes, filename=bert_pdf_path.name)
@@ -296,7 +275,6 @@ def evaluate_retrieval_pipeline(
         if q_type not in type_binary_lists:
             type_binary_lists[q_type] = {s: [] for s in stage_names}
 
-        # 1. Run intermediate retrieval stages
         stages_res = retriever.retrieve_with_stages(
             query=gold.question,
             document_id=target_doc_id,
@@ -308,7 +286,6 @@ def evaluate_retrieval_pipeline(
         hybrid_cands = stages_res.get("fused_candidates", [])
         rerank_cands = stages_res.get("reranked_candidates", [])
 
-        # 2. Run LangGraph retrieval + reranking nodes for Final Evidence selection
         initial_state = {
             "query": gold.question,
             "original_query": gold.question,
@@ -321,7 +298,6 @@ def evaluate_retrieval_pipeline(
         state_rerank = reranking_node({**initial_state, **state_decomp, **state_ret})
         final_evidence = state_rerank.get("evidence", [])
 
-        # 3. Evaluate binary relevance at each stage
         dense_bin = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in dense_cands]
         bm25_bin = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in bm25_cands]
         hybrid_bin = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in hybrid_cands]
@@ -337,7 +313,6 @@ def evaluate_retrieval_pipeline(
         for s, b_list in zip(stage_names, [dense_bin, bm25_bin, hybrid_bin, rerank_bin, evidence_bin]):
             type_binary_lists[q_type][s].append(b_list)
 
-        # Question Metrics
         d_r5 = bool(any(dense_bin[:5]))
         d_r10 = bool(any(dense_bin[:10]))
         b_r5 = bool(any(bm25_bin[:5]))
@@ -352,7 +327,6 @@ def evaluate_retrieval_pipeline(
         ndcg_val = compute_ndcg_at_k(rerank_bin if rerank_bin else evidence_bin, k=10)
         p5_val = compute_precision_at_k(rerank_bin if rerank_bin else evidence_bin, k=5)
 
-        # Failure detection
         first_fail = None
         fail_reason = None
         if not d_r10:
@@ -417,7 +391,6 @@ def evaluate_retrieval_pipeline(
 
     n_queries = len(gold_queries)
 
-    # Compute aggregate metrics for each stage
     def compute_stage_metrics(b_lists: List[List[int]]) -> Dict[str, float]:
         n = max(1, len(b_lists))
         r5 = sum(compute_recall_at_k(b, 5) for b in b_lists) / n
@@ -437,7 +410,6 @@ def evaluate_retrieval_pipeline(
         s: compute_stage_metrics(stage_binary_lists[s]) for s in stage_names
     }
 
-    # Breakdown by question type (using Cohere Rerank metrics as representative retrieval quality)
     metrics_by_type = {}
     for q_type, s_dict in type_binary_lists.items():
         metrics_by_type[q_type] = {
@@ -445,7 +417,6 @@ def evaluate_retrieval_pipeline(
             **compute_stage_metrics(s_dict["rerank"])
         }
 
-    # Overall Metrics (representing end-to-end Cohere Rerank + Evidence Selection performance)
     overall_metrics = compute_stage_metrics(stage_binary_lists["rerank"])
 
     report = {
@@ -467,22 +438,16 @@ def evaluate_retrieval_pipeline(
         "failure_cases": [f.model_dump() for f in failure_records]
     }
 
-    # Save per-question results
     output_results_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_results_path, "w", encoding="utf-8") as f:
         json.dump([q.model_dump() for q in question_results], f, indent=2)
 
-    # Save aggregate report
     output_report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
 
     logger.info(f"Saved results to {output_results_path} and report to {output_report_path}")
     return report, question_results
-
-# =====================================================================
-# 5. CLI INTERFACE
-# =====================================================================
 
 def main():
     parser = argparse.ArgumentParser(description="CRI Retrieval Evaluation & Benchmarking")

@@ -33,7 +33,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Web tab states
   const [webUrl, setWebUrl] = useState("");
   const [webUrlError, setWebUrlError] = useState<string | null>(null);
   const [isAddingWeb, setIsAddingWeb] = useState(false);
@@ -126,8 +125,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
     setIsAddingWeb(true);
 
-    // As audited: FastAPI backend does not have a web scraper/URL ingestion route.
-    // Per Section 7: show clear, honest message:
     setTimeout(() => {
       setIsAddingWeb(false);
       setWebBackendMessage(
@@ -145,7 +142,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         className="w-full max-w-lg bg-cri-surface border border-cri-border rounded-[14px] shadow-2xl p-4 sm:p-5 space-y-4 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-cri-border pb-3.5">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-cri-orange">
@@ -170,7 +166,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Switcher: [ Upload file | Add web URL ] */}
         <div className="grid grid-cols-2 gap-1 p-0.5 bg-cri-surfaceElevated rounded-[8px] border border-cri-border text-xs">
           <button
             type="button"
@@ -198,7 +193,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           </button>
         </div>
 
-        {/* Tab 1: File Upload */}
         {activeTab === "file" ? (
           <>
             <div
@@ -278,7 +272,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             </div>
           </>
         ) : (
-          /* Tab 2: Web URL */
           <form onSubmit={handleAddWebUrl} className="space-y-4">
             <div className="p-4 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-3">
               <div className="space-y-1">

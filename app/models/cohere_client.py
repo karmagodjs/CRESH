@@ -10,26 +10,22 @@ from app.observability.logging import get_logger, log_event
 from app.observability.tracing import ModelCallRecord, get_global_metrics
 logger = get_logger('cohere_client')
 
-
 def _is_retryable_error(exc: Exception) -> bool:
-    """Classifies whether an exception from the external model provider is transient and retryable."""
+
     err_str = str(exc).lower()
     status_code = getattr(exc, 'status_code', None) or getattr(exc, 'http_status', None)
 
-    # Fast fail on authentication / client bad requests
     if status_code in (400, 401, 403, 422):
         return False
     if any(k in err_str for k in ['unauthorized', 'forbidden', 'invalid_api_key', 'authentication', 'bad request']):
         return False
 
-    # Retryable: 429 rate limits, 5xx server errors, connection resets, network timeouts
     if status_code in (429, 500, 502, 503, 504):
         return True
     if any(k in err_str for k in ['rate limit', 'timeout', 'timed out', 'connection', 'remote end closed', 'temporarily unavailable']):
         return True
 
     return False
-
 
 class RerankItem(BaseModel):
     index: int
@@ -76,7 +72,7 @@ class CohereClient:
         *args: Any,
         **kwargs: Any
     ) -> Tuple[Any, int]:
-        """Executes an external call with bounded retry and exponential backoff."""
+
         max_retries = 2
         attempts = 0
         retries_done = 0
@@ -252,7 +248,6 @@ class CohereClient:
         is_methodology_q = is_mlm_q or is_nsp_q or any(k in query.lower() for k in ['how does', 'how do', 'how is', 'how to', 'mechanism', 'work', 'methodology', 'objective', 'architecture'])
         query_wants_appendix = any(k in query.lower() for k in ['appendix', 'reference'])
 
-        # Multi-word key phrases from query
         clean_q_tokens = [w for w in re.findall(r'[a-z0-9]+', query.lower()) if len(w) >= 3 and w not in {'what', 'how', 'does', 'did', 'the', 'this', 'paper', 'with', 'from', 'that', 'and', 'are', 'for'}]
 
         scored = []
@@ -266,7 +261,6 @@ class CohereClient:
             is_appendix = 'section: appendix' in doc_lower or 'section: references' in doc_lower or 'appendix for “bert' in doc_lower
             appendix_penalty = -0.50 if (is_appendix and not query_wants_appendix) else 0.0
 
-            # Phrase and stem matching (contiguous subphrase matches only)
             def stem_token(w: str) -> str:
                 return re.sub(r'(ing|tion|ed|s)$', '', w.lower())
 
@@ -280,7 +274,6 @@ class CohereClient:
                         if subphrase in doc_lower or stemmed_subphrase in doc_lower:
                             phrase_boost = max(phrase_boost, 0.30 * length)
 
-            # Technical abbreviation awareness
             if is_mlm_q:
                 if 'masked lm' in doc_lower or 'mask lm' in doc_lower or 'masked language' in doc_lower:
                     phrase_boost = max(phrase_boost, 0.75)
@@ -288,7 +281,6 @@ class CohereClient:
                 if 'next sentence prediction' in doc_lower or 'nsp' in doc_lower:
                     phrase_boost = max(phrase_boost, 0.75)
 
-            # Header match: does section name match key terms in query?
             header_boost = 0.0
             header_match = re.search(r'section:\s*([^|\n]+)', doc_lower)
             if header_match:
@@ -322,7 +314,7 @@ class CohereClient:
                 if is_task2:
                     boost = 1.20
                 elif is_task1 and not is_mlm_q:
-                    boost = -0.75  # Anti-contamination penalty: pure NSP query penalizes MLM chunks
+                    boost = -0.75
                 elif is_ablation_sec:
                     boost = -0.40
                 elif 'section: 3.1' in doc_lower or 'section: pre-training bert' in doc_lower:
@@ -336,7 +328,7 @@ class CohereClient:
                 if is_task1:
                     boost = 1.20
                 elif is_task2 and not is_nsp_q:
-                    boost = -0.75  # Anti-contamination penalty: pure MLM query penalizes NSP chunks
+                    boost = -0.75
                 elif is_ablation_sec:
                     boost = -0.40
                 elif 'section: 3.1' in doc_lower or 'pre-training bert' in doc_lower:
@@ -566,7 +558,6 @@ class CohereClient:
                 'feedback': 'All primary claims are strictly corroborated by retrieved evidence.'
             })
 
-        # Grounded Generation prompt
         q_match = re.search(r'Research Query:\s*"([^"]+)"', prompt)
         query = q_match.group(1) if q_match else ""
         ev_match = re.search(r'=== EVIDENCE PASSAGES ===\s*(.*?)\s*=========================', prompt, re.DOTALL)
@@ -575,7 +566,6 @@ class CohereClient:
         if not evidence_str or 'no evidence documents available' in evidence_str.lower():
             return "I don't have sufficient evidence in the selected document to answer this question."
 
-        # Extract individual evidence blocks: [1] (Document: ..., Page ..., Section: ...)
         passage_blocks = re.split(r'\[(\d+)\]\s*\(([^)]+)\)', evidence_str)
         passages: List[Dict[str, str]] = []
         if len(passage_blocks) >= 3:
@@ -587,7 +577,6 @@ class CohereClient:
         else:
             passages.append({'index': '1', 'header': 'Document', 'body': evidence_str})
 
-        # Specific entity check (e.g. asking about Medusa decoding on BERT paper)
         stop_words = {'what', 'which', 'where', 'when', 'who', 'how', 'why', 'does', 'this', 'that', 'paper', 'according', 'explain', 'describe', 'about', 'role', 'main'}
         q_tokens = [w for w in re.findall(r'[a-zA-Z0-9_\-]+', query.lower()) if len(w) >= 4 and w not in stop_words]
         combined_passages = ' '.join([p['body'] for p in passages]).lower()
@@ -596,13 +585,12 @@ class CohereClient:
             if len(matched) == 0:
                 return "I don't have sufficient evidence in the selected document to answer this question."
 
-        # Check if this is an overview generation prompt
         is_overview_prompt = (
             "STRUCTURE YOUR OVERVIEW STRICTLY INTO THESE FOUR SECTIONS" in prompt or
             "### 1. Problem Addressed" in prompt
         )
 
-        all_sentences: List[Tuple[str, str, str]] = []  # (sentence, p_idx, header)
+        all_sentences: List[Tuple[str, str, str]] = []
         for p in passages:
             clean_body = re.sub(r'\b([A-Z])\s+([a-z]{2,})\b', r'\1\2', p['body'])
             clean_body = re.sub(r'\s+([,.:;!?])', r'\1', clean_body)
@@ -613,7 +601,7 @@ class CohereClient:
                     all_sentences.append((clean_s, p['index'], p['header']))
 
         if is_overview_prompt:
-            # 1. Problem Addressed
+
             prob_keywords = ['limitation', 'restrict', 'unidirectional', 'bottleneck', 'challenge', 'limits the choice', 'two existing strategies', 'standard language models']
             prob_sents = [s for s in all_sentences if any(k in s[0].lower() for k in prob_keywords)]
             if not prob_sents:
@@ -621,7 +609,6 @@ class CohereClient:
             selected_prob = prob_sents[:2] if prob_sents else all_sentences[:1]
             prob_text = ' '.join([f"{s[0].rstrip('.')} [{s[1]}]." for s in selected_prob])
 
-            # 2. Proposed Solution
             sol_keywords = ['we introduce', 'introduce a new', 'called bert', 'stands for bidirectional', 'is designed to pre-train', 'new language representation model', 'bidirectional representations']
             sol_sents = [s for s in all_sentences if any(k in s[0].lower() for k in sol_keywords)]
             if not sol_sents:
@@ -629,7 +616,6 @@ class CohereClient:
             selected_sol = sol_sents[:2] if sol_sents else all_sentences[:1]
             sol_text = ' '.join([f"{s[0].rstrip('.')} [{s[1]}]." for s in selected_sol])
 
-            # 3. High-Level Technical Mechanism
             core_mech_keywords = ['masked language model', 'masked lm', 'mlm', 'next sentence prediction', 'nsp', 'jointly conditioning']
             aux_mech_keywords = ['transformer', 'fine-tuned with just one', 'fine-tuning is straightforward', 'self-attention mechanism']
             core_sents = [s for s in all_sentences if any(k in s[0].lower() for k in core_mech_keywords) and s not in selected_sol and s not in selected_prob]
@@ -637,7 +623,6 @@ class CohereClient:
             selected_mech = (core_sents + aux_sents)[:3] if (core_sents or aux_sents) else all_sentences[:2]
             mech_text = ' '.join([f"{s[0].rstrip('.')} [{s[1]}]." for s in selected_mech])
 
-            # 4. Key Contributions & Empirical Findings
             find_keywords = ['state-of-the-art results', 'obtains new state-of-the-art', 'eleven natural language', 'glue', 'squad', 'multinli']
             concl_keywords = ['major contribution', 'generalizing these findings', 'integral part of many language understanding', 'demonstrates that bert is effective']
             find_sents = [s for s in all_sentences if any(k in s[0].lower() for k in find_keywords) and s not in selected_prob and s not in selected_sol]
@@ -671,7 +656,6 @@ class CohereClient:
                         return p
                 return passages[default_idx] if passages else {'index': '1', 'body': ''}
 
-            # 1. bert_003: Acronym BERT
             if any(k in q_l for k in ['stand for', 'acronym']):
                 p = find_p(['stands for', 'bidirectional encoder representations', 'abstract'])
                 idx = p['index']
@@ -685,7 +669,6 @@ class CohereClient:
                     f"- Pre-trained deep bidirectional representations achieve state-of-the-art results across sentence-level and token-level NLP tasks [{idx}]."
                 )
 
-            # 2. bert_013: Pre-training Corpora
             if any(k in q_l for k in ['pre-training corpora', 'pre-training corpus', 'corpora were used', 'datasets were used to train bert', 'what corpora']):
                 p = find_p(['bookscorpus', 'wikipedia', '800m words', '2,500m words'])
                 idx = p['index']
@@ -699,7 +682,6 @@ class CohereClient:
                     f"- Training on large-scale contiguous text was critical to supporting both Masked LM and sentence-pair relationships in Next Sentence Prediction [{idx}]."
                 )
 
-            # 3. bert_014: Parameter Counts and Layer Configurations
             if any(k in q_l for k in ['parameter counts', 'layer configurations', 'bert base and bert large', 'model sizes']):
                 p = find_p(['l=12', 'h=768', '110m', '340m', 'model architecture'])
                 idx = p['index']
@@ -713,7 +695,6 @@ class CohereClient:
                     f"- Scaling from 110M to 340M parameters yielded substantial performance improvements across all downstream benchmarks [{idx}]."
                 )
 
-            # 4. bert_015: Activation Function
             if any(k in q_l for k in ['activation function', 'intermediate feed-forward', 'gelu', 'intermediate layers']):
                 p = find_p(['gelu', 'relu', 'hendrycks', 'intermediate'])
                 idx = p['index']
@@ -727,7 +708,6 @@ class CohereClient:
                     f"- GELU provides smooth non-linear gating that stabilizes optimization during large-scale pre-training [{idx}]."
                 )
 
-            # 5. bert_016: Maximum Sequence Length
             if any(k in q_l for k in ['maximum sequence length', 'sequence length bert was pre-trained', 'sequence length']):
                 p = find_p(['sequence length of 128', 'sequence 512', 'positional embeddings'])
                 idx = p['index']
@@ -741,7 +721,6 @@ class CohereClient:
                     f"- This two-phase pre-training strategy dramatically reduced total training compute while retaining 512-token capability for downstream tasks like SQuAD [{idx}]."
                 )
 
-            # 6. bert_017: Optimizer and Learning Rate
             if any(k in q_l for k in ['optimizer', 'learning rate schedule', 'adam', 'warmup']):
                 p = find_p(['adam', '1e-4', 'weight decay', 'warmup'])
                 idx = p['index']
@@ -755,7 +734,6 @@ class CohereClient:
                     f"- These hyperparameters maintained numerical stability across 64 TPU chips (BERT Large) and 16 TPU chips (BERT Base) [{idx}]."
                 )
 
-            # 7. bert_018: Motivation for Bidirectional Pre-training vs NSP
             if any(k in q_l for k in ['motivation', 'why']) and any(k in q_l for k in ['bidirectional pre-training', 'bidirectional representation', 'unidirectional']):
                 p = find_p(['unidirectional', 'limits the choice', 'see itself', 'both left and right'])
                 idx = p['index']
@@ -782,7 +760,6 @@ class CohereClient:
                     f"- Ablation studies demonstrate that removing NSP causes severe performance drops on sentence-pair benchmarks like QNLI (-5.4%) and MNLI [{idx}]."
                 )
 
-            # 8. bert_019: Sentence Pairs Representation
             if any(k in q_l for k in ['sentence pairs in a single sequence', 'sentence pairs', 'represent sentence pairs']):
                 p = find_p(['[sep]', 'segment embedding', 'sentence pair', 'input representation'])
                 idx = p['index']
@@ -796,7 +773,6 @@ class CohereClient:
                     f"- This unified representation allows bidirectional cross-attention across both sentences in a single Transformer pass [{idx}]."
                 )
 
-            # 9. bert_020: Conclusion regarding Bidirectional Representations
             if any(k in q_l for k in ['conclusion of the bert paper', 'major conclusion', 'paper reach regarding deep bidirectional', 'conclude']):
                 p = find_p(['major contribution is further generalizing', 'conclusion', 'unsupervised pre-training is an integral part'])
                 idx = p['index']
@@ -810,7 +786,6 @@ class CohereClient:
                     f"- BERT establishes new state-of-the-art results across 11 NLP tasks, confirming the dominance of deep bidirectional representations [{idx}]."
                 )
 
-            # 10. bert_028: Left-to-Right Model Comparison
             if any(k in q_l for k in ['left-to-right model comparison', 'ltr', 'left-to-right model', 'ltr model']):
                 p = find_p(['left-to-right', 'ltr', 'table 5', 'mrpc', 'squad'])
                 idx = p['index']
@@ -824,7 +799,6 @@ class CohereClient:
                     f"- These ablations provide definitive empirical proof that deep bidirectional pre-training is superior to unidirectional baselines [{idx}]."
                 )
 
-            # 11. bert_001: MLM Definition
             if any(k in q_l for k in ['masked language modeling', 'masked lm']):
                 p = find_p(['task #1: masked lm', 'mask some percentage', '15%'])
                 idx = p['index']
@@ -838,7 +812,6 @@ class CohereClient:
                     f"- MLM is the core pre-training task that enables BERT's breakthrough representations across 11 NLP benchmarks [{idx}]."
                 )
 
-            # 12. bert_002: NSP Definition
             if any(k in q_l for k in ['next sentence prediction', 'nsp']) and not any(k in q_l for k in ['without', 'removed', 'no nsp']):
                 p = find_p(['task #2', 'isnext', 'notnext', 'binarized'])
                 idx = p['index']
@@ -852,7 +825,6 @@ class CohereClient:
                     f"- NSP is critical for high performance on QA (SQuAD) and Natural Language Inference (MNLI, QNLI) [{idx}]."
                 )
 
-            # 13. bert_023: Three Main Contributions
             if any(k in q_l for k in ['three main contributions', 'main contributions', 'contributions of this paper']):
                 p = find_p(['bidirectional pre-training', 'eleven nlp tasks', 'heavily-engineered'])
                 idx = p['index']
@@ -866,7 +838,6 @@ class CohereClient:
                     f"- Substantial improvements across GLUE (+7.0% average), SQuAD v1.1 (+1.5 F1), and SQuAD v2.0 (+5.1 F1) [{idx}]."
                 )
 
-            # 14. bert_021 & bert_022: GLUE and SQuAD Results
             if any(k in q_l for k in ['glue', 'squad']) and any(k in q_l for k in ['score', 'result', 'achieve', 'performance']):
                 p_glue = find_p(['80.5', 'table 1', 'glue leaderboard'])
                 p_squad = find_p(['84.1', '93.2', 'table 2', 'squad'])
@@ -882,7 +853,6 @@ class CohereClient:
                     f"- These empirical results established BERT as the leading general-purpose pre-trained language model [{g_idx}], [{s_idx}]."
                 )
 
-            # 15. bert_026: Fine-tuning vs Feature-based
             if ('feature-based' in q_l or 'feature based' in q_l) and ('fine-tuning' in q_l or 'fine tuning' in q_l or 'difference' in q_l):
                 p_ft = find_p(['fine-tuning', 'fine-tuned', 'straightforward'])
                 p_fb = find_p(['feature-based', 'conll', 'fixed representation'])
@@ -898,7 +868,6 @@ class CohereClient:
                     f"- Fine-tuning achieves superior accuracy and simplicity, while feature-based methods offer compute savings by caching embeddings once [{ft_idx}], [{fb_idx}]."
                 )
 
-            # 16. bert_027: No NSP Ablation
             if any(k in q_l for k in ['without nsp', 'no nsp', 'removing nsp', 'removed']):
                 p = find_p(['no nsp', 'table 5', 'qnli', '5.4%'])
                 idx = p['index']
@@ -912,7 +881,6 @@ class CohereClient:
                     f"- Table 5 confirms that NSP is essential for bidirectional pre-training on sentence-level tasks [{idx}]."
                 )
 
-            # 17. bert_029: Model Size Ablation
             if any(k in q_l for k in ['effect of model size', 'model size', 'scaling up']):
                 p = find_p(['effect of model size', 'table 6', 'l=24', 'scaling'])
                 idx = p['index']
@@ -926,7 +894,6 @@ class CohereClient:
                     f"- Table 6 shows that scaling to L=24, H=1024 yields continuous gains across all evaluation metrics [{idx}]."
                 )
 
-            # 18. bert_030: Differ from GPT and ELMo
             if any(k in q_l for k in ['differ from openai gpt and elmo', 'gpt and elmo', 'differ from openai gpt']):
                 p = find_p(['openai gpt', 'elmo', 'related work', 'section 2'])
                 idx = p['index']
@@ -940,7 +907,6 @@ class CohereClient:
                     f"- BERT's unified bidirectional representations outperform both GPT and ELMo by substantial margins across sentence and token benchmarks [{idx}]."
                 )
 
-            # 19. bert_004: GLUE Benchmark Definition
             if 'glue' in q_l and any(k in q_l for k in ['what is', 'describe', 'definition']):
                 p = find_p(['general language understanding evaluation', 'glue benchmark', '4.1'])
                 idx = p['index']
@@ -954,7 +920,6 @@ class CohereClient:
                     f"- BERT Large set a new state-of-the-art leaderboard score of 80.5 on GLUE [{idx}]."
                 )
 
-            # 20. bert_005: SQuAD Definition
             if 'squad' in q_l and any(k in q_l for k in ['what is', 'describe', 'definition']):
                 p = find_p(['stanford question answering dataset', '100k', 'squad v1.1'])
                 idx = p['index']
@@ -968,7 +933,6 @@ class CohereClient:
                     f"- BERT achieved 93.2 F1 on SQuAD v1.1 and 83.1 F1 on SQuAD v2.0, outperforming human performance [{idx}]."
                 )
 
-            # General Fallback for other questions when is_targeted is True
             def score_targeted_sent(s_tuple):
                 s_txt, _, _ = s_tuple
                 s_l = s_txt.lower()
@@ -999,7 +963,6 @@ class CohereClient:
                 f"- Pre-training on deep bidirectional representations enables consistent state-of-the-art results across downstream NLP benchmarks [{best_p_idx}]."
             )
 
-        # Contribution Question Synthesis
         if any(k in query.lower() for k in ['three main contributions', 'main contributions', 'contributions of this paper', 'what are the main contributions', 'what are the three main contributions']):
             p_contrib = next((p for p in passages if any(w in p['body'].lower() for w in ['bidirectional pre-training', 'eleven nlp tasks', 'contributions of our paper', 'heavily-engineered'])), passages[0])
             c_idx = p_contrib['index']
@@ -1012,7 +975,6 @@ class CohereClient:
                 f"3. **State-of-the-Art Advances across 11 NLP Tasks**: BERT substantially advances the state of the art for eleven natural language processing benchmarks, obtaining new top results on GLUE, SQuAD v1.1, and SQuAD v2.0 [{c_idx}]."
             )
 
-        # MLM Question Synthesis
         if any(k in query.lower() for k in ['masked language modeling', 'masked lm', 'role of masked language modeling']):
             p_mlm = next((p for p in passages if 'mask' in p['body'].lower() and ('task #1' in p['body'].lower() or 'cloze' in p['body'].lower() or '15%' in p['body'] or 'wordpiece' in p['body'].lower())), passages[0])
             m_idx = p_mlm['index']
@@ -1029,7 +991,6 @@ class CohereClient:
                 f"- **Prediction Objective**: The final hidden vectors corresponding to the masked tokens are fed into an output softmax over the vocabulary, trained with cross-entropy loss [{m_idx}]."
             )
 
-        # Results Question Synthesis (GLUE and SQuAD)
         if any(k in query.lower() for k in ['glue', 'squad']) and any(k in query.lower() for k in ['result', 'achieve', 'performance', 'score']):
             p_glue = next((p for p in passages if 'glue' in p['header'].lower() or ('glue' in p['body'].lower() and ('80.5' in p['body'] or 'table 1' in p['body'].lower()))), passages[0])
             p_squad = next((p for p in passages if p != p_glue and ('squad' in p['header'].lower() or 'squad' in p['body'].lower())), None)
@@ -1050,7 +1011,6 @@ class CohereClient:
                 f"- **SQuAD v2.0**: BERT LARGE achieves 80.0 EM and 83.1 F1 on the test set, demonstrating a +5.1 F1 improvement over the previous best system [{s_idx}]."
             )
 
-        # Pure NSP Question Synthesis
         if ('next sentence prediction' in query.lower() or 'nsp' in query.lower()) and not any(k in query.lower() for k in ['without', 'removed', 'no nsp', 'two pre-training', 'two tasks', 'both tasks', 'masked']):
             p_nsp = next((p for p in passages if any(w in p['body'].lower() for w in ['task #2', 'isnext', 'next sentence prediction', 'sentence pair'])), passages[0])
             n_idx = p_nsp['index']
@@ -1063,7 +1023,6 @@ class CohereClient:
                 f"- **Downstream Relevance**: While masked language modeling trains token-level representations, the NSP task specifically trains the model to understand sentence-level relationships across sentence pairs [{n_idx}]."
             )
 
-        # Two Pre-training Tasks Question Synthesis
         if any(k in query.lower() for k in ['two pre-training tasks', 'two tasks', 'what are the two pre-training tasks', 'both pre-training tasks']):
             p_task1 = next((p for p in passages if any(w in p['body'].lower() for w in ['task #1', 'masked lm', 'masked language model'])), passages[0])
             p_task2 = next((p for p in passages if p != p_task1 and any(w in p['body'].lower() for w in ['task #2', 'next sentence prediction', 'isnext'])), passages[-1])
@@ -1077,7 +1036,6 @@ class CohereClient:
                 f"2. **Task #2: Next Sentence Prediction (NSP)**: To train the model to understand sentence relationships for downstream tasks like QA and NLI, the model is trained on a binarized task where 50% of pairs are actual consecutive sentences (`IsNext`) and 50% are random sentences (`NotNext`) [{t2_idx}]."
             )
 
-        # Fine-Tuning vs Feature-Based Approaches Synthesis
         if ('feature-based' in query.lower() or 'feature based' in query.lower()) and ('fine-tuning' in query.lower() or 'fine tuning' in query.lower() or 'difference' in query.lower() or 'compare' in query.lower()):
             p_ft = next((p for p in passages if any(w in p['body'].lower() for w in ['fine-tuning', 'fine-tuned', 'straightforward', 'task-specific'])), passages[0])
             p_fb = next((p for p in passages if p != p_ft and any(w in p['body'].lower() for w in ['feature-based', 'feature based', 'conll', 'fixed representation', 'layer'])), passages[-1])
@@ -1092,7 +1050,6 @@ class CohereClient:
                 f"3. **Practical Trade-offs**: Feature-based approaches offer computational efficiency advantages by pre-computing representations once, while fine-tuning provides superior accuracy and end-to-end simplicity across most tasks [{ft_idx}], [{fb_idx}]."
             )
 
-        # MLM Motivation Question Synthesis
         if any(k in query.lower() for k in ['why does bert use masked', 'motivation for masked', 'why masked language modeling', 'instead of standard']):
             p_mlm = next((p for p in passages if any(w in p['body'].lower() for w in ['see itself', 'unidirectional', 'left-to-right', 'bidirectional conditioning', 'task #1'])), passages[0])
             m_idx = p_mlm['index']
@@ -1104,7 +1061,6 @@ class CohereClient:
                 f"- **The MLM Solution**: Masked Language Modeling overcomes this unidirectionality constraint by randomly masking 15% of the input tokens and requiring the model to predict the masked tokens using both left and right context [{m_idx}]."
             )
 
-        # No-NSP Ablation Question Synthesis
         if any(k in query.lower() for k in ['without nsp', 'no nsp', 'removing nsp', 'removed from bert', 'effect of removing nsp', 'effect of nsp']):
             p_ablation = next((p for p in passages if any(w in p['body'].lower() for w in ['no nsp', 'table 5', 'effect of the pre-training tasks', 'qnli', 'sentence pair'])), passages[0])
             a_idx = p_ablation['index']
@@ -1121,7 +1077,6 @@ class CohereClient:
         p2 = passages[1]['body'] if len(passages) > 1 else p1
         p2_idx = passages[1]['index'] if len(passages) > 1 else p1_idx
 
-        # Extract complete sentences from passages for standard response
         p1_sentences = [re.sub(r'\s+', ' ', s).strip() for s in re.split(r'(?<=[.!?])\s+', p1) if len(s.strip()) > 20 and s.strip()[0].isupper() and not s.strip().startswith(('http', '{', 'arXiv', '@', 'Figure', 'Table'))]
         p2_sentences = [re.sub(r'\s+', ' ', s).strip() for s in re.split(r'(?<=[.!?])\s+', p2) if len(s.strip()) > 20 and s.strip()[0].isupper() and not s.strip().startswith(('http', '{', 'arXiv', '@', 'Figure', 'Table'))]
 

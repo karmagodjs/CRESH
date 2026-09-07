@@ -2,7 +2,6 @@ import pytest
 from app.agent.graph import get_research_graph
 from app.retrieval.hybrid import HybridRetriever
 
-
 def test_no_document_selected_safety():
     graph = get_research_graph()
     state = {
@@ -27,7 +26,6 @@ def test_no_document_selected_safety():
     assert len(result["reranked_documents"]) == 0
     assert len(result["citations"]) == 0
 
-
 def test_strict_document_scoped_hybrid_retrieval():
     retriever = HybridRetriever()
     allowed_doc_id = "fe0ee73b-2daf-5064-be62-873a3d615a5a"
@@ -38,7 +36,6 @@ def test_strict_document_scoped_hybrid_retrieval():
     )
     for c in candidates:
         assert c.metadata.document_id == allowed_doc_id
-
 
 def test_citation_document_scope_enforcement():
     graph = get_research_graph()

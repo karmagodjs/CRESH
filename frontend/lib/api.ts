@@ -48,7 +48,6 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
         errorDetail = typeof errorData.detail === "string" ? errorData.detail : JSON.stringify(errorData.detail);
       }
     } catch {
-      // ignore json parse error
     }
     throw new ApiError(res.status, errorDetail, errorData);
   }

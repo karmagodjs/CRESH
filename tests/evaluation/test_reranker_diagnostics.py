@@ -18,7 +18,6 @@ from evaluation.reranker_diagnostic_runner import (
     verify_leakage_audit,
 )
 
-
 class TestQueryFormulationAndAntiLeakage:
     @pytest.fixture
     def sample_gold_mlm(self):
@@ -45,11 +44,10 @@ class TestQueryFormulationAndAntiLeakage:
     def test_expand_query_clean_preserves_intent_no_leakage(self, sample_gold_activation):
         expanded = expand_query_clean(sample_gold_activation.question)
         assert sample_gold_activation.question in expanded
-        # Must NOT contain the gold answer "GELU" or "Gaussian"
+
         assert "gelu" not in expanded.lower()
         assert "gaussian" not in expanded.lower()
 
-        # Audit must pass
         has_leak, leaks = verify_leakage_audit(sample_gold_activation.question, expanded, sample_gold_activation)
         assert not has_leak
         assert leaks == []
@@ -82,7 +80,6 @@ class TestQueryFormulationAndAntiLeakage:
         assert "Methodology" in queries[1] or "mechanism" in queries[1].lower()
         assert "Experimental" in queries[2] or "evaluation" in queries[2].lower()
 
-
 class TestMultiQueryRRFMerge:
     def _make_chunk(self, chunk_id: str, score: float = 1.0) -> SearchResult:
         meta = ChunkMetadata(
@@ -105,19 +102,15 @@ class TestMultiQueryRRFMerge:
         c2 = self._make_chunk("c2")
         c3 = self._make_chunk("c3")
 
-        # List 1: c1 at rank 1, c2 at rank 2
-        # List 2: c1 at rank 1, c3 at rank 2
-        # List 3: c2 at rank 1, c1 at rank 2
         list1 = [c1, c2]
         list2 = [c1, c3]
         list3 = [c2, c1]
 
         merged = multi_query_rrf_merge([list1, list2, list3], top_k=3, rrf_k=60)
         assert len(merged) == 3
-        # c1 appeared at rank 1, 1, 2 -> highest cumulative RRF score
+
         assert merged[0].chunk_id == "c1"
         assert set(c.chunk_id for c in merged) == {"c1", "c2", "c3"}
-
 
 class TestFormulationDeltaComputation:
     def test_compute_delta(self):

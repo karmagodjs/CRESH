@@ -18,11 +18,9 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  // Actual runtime latencies
   const timings = queryResponse?.timings_ms || queryResponse?.latency_breakdown || {};
   const totalLatency = queryResponse?.total_latency_ms || 0;
 
-  // Stage sequence
   const stages: { label: string; key: string }[] = [
     { label: "Query expansion", key: "query_expansion" },
     { label: "Dense retrieval", key: "dense_retrieval" },
@@ -44,7 +42,6 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
         className="w-full max-w-md bg-cri-surface border-l border-cri-border h-full flex flex-col shadow-2xl transition-transform"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-cri-orange" />
@@ -61,7 +58,6 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-5">
           {!queryResponse ? (
             <div className="py-16 text-center text-xs text-cri-textMuted">
@@ -69,7 +65,6 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
             </div>
           ) : (
             <>
-              {/* Correlation Identifiers */}
               <div className="p-3.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2 text-xs">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   Trace Identifiers
@@ -96,7 +91,6 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Stage Latencies */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   <span>Stage Latencies</span>
@@ -128,7 +122,6 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                     );
                   })}
 
-                  {/* Total row */}
                   <div className="p-3 bg-cri-surfaceElevated flex items-center justify-between font-semibold">
                     <span className="text-cri-textPrimary text-xs">Total Latency</span>
                     <span className="font-mono text-cri-orange text-xs">{formatMs(totalLatency)}</span>
@@ -136,7 +129,6 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Resource & Cost Accounting */}
               <div className="p-3.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2.5 text-xs">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   Token Accounting & Cost
@@ -169,7 +161,6 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Execution Trace Steps */}
               {queryResponse.execution_trace && queryResponse.execution_trace.length > 0 && (
                 <div className="space-y-2">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">

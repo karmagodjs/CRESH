@@ -38,7 +38,6 @@ export const ObservabilityView: React.FC = () => {
 
   return (
     <div className="h-full overflow-y-auto p-6 md:p-8 space-y-8 bg-cri-bg text-cri-textPrimary max-w-5xl mx-auto custom-scrollbar">
-      {/* Header */}
       <div className="border-b border-cri-border pb-5 flex items-center justify-between">
         <div>
           <div className="text-[11px] font-mono uppercase tracking-wider text-cri-orange font-semibold mb-1 flex items-center gap-1.5">
@@ -70,9 +69,7 @@ export const ObservabilityView: React.FC = () => {
         </div>
       )}
 
-      {/* System Status Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
-        {/* Status */}
         <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>API Health</span>
@@ -88,7 +85,6 @@ export const ObservabilityView: React.FC = () => {
           <div className="text-[10px] font-mono text-cri-textMuted">Version: {health?.version || "1.0.0"}</div>
         </div>
 
-        {/* Cohere Status */}
         <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Cohere Provider</span>
@@ -100,7 +96,6 @@ export const ObservabilityView: React.FC = () => {
           <div className="text-[10px] font-mono text-cri-textMuted">Rerank v3.5 & Embed v3</div>
         </div>
 
-        {/* Vector Store */}
         <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Vector Store</span>
@@ -112,7 +107,6 @@ export const ObservabilityView: React.FC = () => {
           <div className="text-[10px] font-mono text-cri-textMuted">Qdrant In-Memory Payload</div>
         </div>
 
-        {/* Total Queries */}
         <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Total Queries</span>
@@ -127,7 +121,6 @@ export const ObservabilityView: React.FC = () => {
         </div>
       </div>
 
-      {/* Latency Percentiles */}
       <div className="space-y-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary flex items-center gap-2">
           <Clock className="w-4 h-4 text-cri-orange" />
@@ -162,7 +155,6 @@ export const ObservabilityView: React.FC = () => {
         </div>
       </div>
 
-      {/* Resource & Accounting */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-2">
           <div className="text-xs font-semibold uppercase text-cri-textPrimary flex items-center gap-2">

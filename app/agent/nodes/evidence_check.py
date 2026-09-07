@@ -35,18 +35,17 @@ def evidence_check_node(state: ResearchState) -> Dict[str, Any]:
     missing_concepts: List[str] = []
     missing_entities: List[str] = []
 
-    # HARD ISOLATION: If no document is selected, evidence check immediately fails
     if not current_doc_ids:
         evidence_sufficient = False
         evidence_tier = 'UNSUPPORTED'
         missing_summary = "No document is currently selected. Please upload a document before asking questions."
     elif not raw_evidence:
-        # 1. At least one chunk must exist
+
         evidence_sufficient = False
         evidence_tier = 'UNSUPPORTED'
         missing_summary = 'No relevant passages were found in the index.'
     else:
-        # 2. Every chunk must belong to an allowed document
+
         allowed_set = set(current_doc_ids)
         filtered = [e for e in raw_evidence if e.get('metadata', {}).get('document_id') in allowed_set]
         if len(filtered) != len(raw_evidence):
@@ -58,7 +57,7 @@ def evidence_check_node(state: ResearchState) -> Dict[str, Any]:
             missing_summary = 'No evidence passages belong to the selected document(s).'
 
         else:
-            # 3. Evidence must have valid metadata
+
             for e in raw_evidence:
                 meta = e.get('metadata', {})
                 if meta.get('document_id') and meta.get('chunk_id') and e.get('text'):
@@ -68,11 +67,10 @@ def evidence_check_node(state: ResearchState) -> Dict[str, Any]:
                 evidence_sufficient = False
                 missing_summary = 'Evidence chunks lack valid required metadata.'
             else:
-                # 4. Relevance check: Evidence must be sufficiently relevant to query
+
                 top_score = validated_evidence[0].get('rerank_score', 0.0)
                 combined_text = ' '.join([e.get('text', '') for e in validated_evidence]).lower()
 
-                # Extract key query subject terms (excluding common question/stop words)
                 stop_words = {
                     'what', 'which', 'where', 'when', 'who', 'whom', 'whose', 'why', 'how',
                     'does', 'doing', 'done', 'paper', 'this', 'that', 'these', 'those',
@@ -82,7 +80,6 @@ def evidence_check_node(state: ResearchState) -> Dict[str, Any]:
                 }
                 query_tokens = [w for w in re.findall(r'[a-zA-Z0-9_\-]+', query.lower()) if len(w) >= 3 and w not in stop_words]
 
-                # Check if query is an open document overview question
                 is_overview_query = any(k in query.lower() for k in ['about', 'contributions', 'main ideas', 'summary', 'overview', 'introduce', 'purpose'])
                 target_entities = state.get('target_entities', [])
 
@@ -92,7 +89,6 @@ def evidence_check_node(state: ResearchState) -> Dict[str, Any]:
                         if ent_l not in combined_text and not any(w in combined_text for w in ent_l.split() if len(w) >= 3):
                             missing_entities.append(ent)
 
-                # 5. Concept coverage check: If required concepts exist, coverage_score must be 1.0
                 required_concepts = state.get('required_concepts', [])
                 concept_coverage = state.get('concept_coverage', {})
                 coverage_score = state.get('coverage_score', 1.0)
@@ -121,7 +117,6 @@ def evidence_check_node(state: ResearchState) -> Dict[str, Any]:
                     evidence_sufficient = False
                     missing_summary = f'Top rerank score ({top_score:.2f}) is too low to ground an answer.'
 
-                # Hardened Abstention Gate (Phase 6 Feature Flag or State Override)
                 hardened_enabled = getattr(settings, 'ENABLE_HARDENED_ABSTENTION', False) or state.get('enable_hardened_abstention', False)
                 evidence_tier = 'STRONGLY_SUPPORTED'
                 if hardened_enabled and evidence_sufficient:
@@ -189,19 +184,18 @@ def evidence_check_node(state: ResearchState) -> Dict[str, Any]:
         'timings_ms': timings
     }
 
-
 def check_evidence_sufficiency_hardened(
     query: str,
     validated_evidence: List[Dict[str, Any]],
     target_entities: Optional[List[str]] = None,
     is_overview_query: bool = False
 ) -> Tuple[str, str]:
-    """
-    Three-Tier Hardened Evidence Sufficiency Gate:
-      - STRONGLY_SUPPORTED (Tier A): Proceed directly to targeted generation.
-      - WEAKLY_SUPPORTED (Tier B): Proceed with conservative strategy.
-      - UNSUPPORTED (Tier C): Immediate safe abstention.
-    """
+\
+\
+\
+\
+\
+
     if not validated_evidence:
         return 'UNSUPPORTED', 'No evidence passages found.'
 
@@ -209,7 +203,6 @@ def check_evidence_sufficiency_hardened(
     combined_ev = ' '.join([e.get('text', '') for e in validated_evidence]).lower()
     top_score = float(validated_evidence[0].get('rerank_score', validated_evidence[0].get('score', 0.0)))
 
-    # 1. Versioned / Specific Model Entities Check (e.g. GPT-4, GPT-3, LLaMA-2)
     versioned_entities = re.findall(r'\b(?:gpt|chatgpt|llama|t5|claude|gemini)[\s\-_]?(?:\d+(?:\.\d+)?|neo|turbo|plus)\b', q_low)
     for ve in versioned_entities:
         ve_clean = re.sub(r'[\s\-_]', '', ve)
@@ -217,7 +210,6 @@ def check_evidence_sufficiency_hardened(
         if ve_clean not in ev_clean:
             return 'UNSUPPORTED', f"Target versioned entity '{ve}' is absent from the selected document."
 
-    # External entities/concepts known to not exist in document
     external_entities = [
         'chatgpt', 'nvidia', 'bangalore', 'stock price', 'market cap',
         'openai founder', 'who founded', 'who created', 'led the development',
@@ -227,7 +219,6 @@ def check_evidence_sufficiency_hardened(
         if ee in q_low and ee not in combined_ev:
             return 'UNSUPPORTED', f"External entity or concept '{ee}' is absent from the selected document."
 
-    # 2. Predicate / Fact-bearing Term Check (Hard Negatives)
     predicates = {
         'founder': ['founder', 'founded', 'creator', 'created by', 'ceo'],
         'latency': ['latency', 'inference time', 'ms per', 'throughput', 'speedup', 'runtime'],
@@ -245,7 +236,6 @@ def check_evidence_sufficiency_hardened(
             if not has_match:
                 return 'UNSUPPORTED', f"Requested fact or attribute '{pred_key}' is not contained in the evidence."
 
-    # 3. Content overlap check (excluding common stop words)
     stop_words = {
         'what', 'which', 'where', 'when', 'who', 'whom', 'whose', 'why', 'how',
         'does', 'doing', 'done', 'paper', 'this', 'that', 'these', 'those', 'the',
@@ -267,7 +257,6 @@ def check_evidence_sufficiency_hardened(
         return 'WEAKLY_SUPPORTED', 'Partial topical evidence present in document.'
     else:
         return 'UNSUPPORTED', f'Rerank score ({top_score:.2f}) is below confidence threshold.'
-
 
 def insufficient_evidence_node(state: ResearchState) -> Dict[str, Any]:
     trace = list(state.get('execution_trace', []))
@@ -336,7 +325,6 @@ def insufficient_evidence_node(state: ResearchState) -> Dict[str, Any]:
     except Exception as e:
         logger.warning(f"Evaluation logging failed: {e}")
     return out
-
 
 def query_refinement_node(state: ResearchState) -> Dict[str, Any]:
     start_time = time.perf_counter()

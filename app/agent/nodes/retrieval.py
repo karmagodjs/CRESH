@@ -13,7 +13,6 @@ def retrieval_node(state: ResearchState) -> Dict[str, Any]:
     query = state.get('query', '')
     sub_questions = state.get('sub_questions', [])
 
-    # Extract allowed document IDs strictly
     current_doc_ids: List[str] = [str(d).strip() for d in state.get('current_document_ids', []) if d and str(d).strip()]
     if not current_doc_ids:
         meta = state.get('metadata', {})
@@ -25,7 +24,6 @@ def retrieval_node(state: ResearchState) -> Dict[str, Any]:
     duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
     latency = dict(state.get('latency', {}))
 
-    # HARD ISOLATION PRECONDITION: If no document is selected, do NOT query retriever
     if not current_doc_ids:
         latency['retrieval'] = duration_ms
         logger.warning("retrieval_node: No document selected. Aborting retrieval.")
@@ -59,7 +57,6 @@ def retrieval_node(state: ResearchState) -> Dict[str, Any]:
     required_concepts = state.get('required_concepts', [])
     concept_candidate_counts: Dict[str, int] = {}
 
-    # Concept-specific targeted retrieval (Guarantees multi-concept coverage)
     if required_concepts and len(required_concepts) >= 2:
         for c in required_concepts:
             concept_candidate_counts[c] = 0
@@ -126,7 +123,6 @@ def retrieval_node(state: ResearchState) -> Dict[str, Any]:
 
     sorted_candidates = sorted(all_candidates.values(), key=lambda x: x.score, reverse=True)
 
-    # Diagnostic output
     diag_lines = [
         f"\n==================== RETRIEVAL DIAGNOSTIC ====================",
         f"QUERY: \"{query}\"",
@@ -147,7 +143,6 @@ def retrieval_node(state: ResearchState) -> Dict[str, Any]:
     diag_lines.append("==============================================================\n")
     logger.info("\n".join(diag_lines))
 
-    # Cross-document contamination guard: every candidate must belong to allowed documents
     if current_doc_ids:
         allowed_set = set(current_doc_ids)
         for c in sorted_candidates:

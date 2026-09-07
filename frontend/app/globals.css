@@ -5,13 +5,11 @@
 @tailwind utilities;
 
 
-/* CSS Variables for Dark (default) and Light themes */
 :root,
 [data-theme="dark"] {
   --font-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Theme Tokens - Dark */
   --bg: #101214;
   --surface: #171A1D;
   --surface-header: #15181C;
@@ -32,7 +30,6 @@
 }
 
 [data-theme="light"] {
-  /* Theme Tokens - Light */
   --bg: #F6F7F8;
   --surface: #FFFFFF;
   --surface-header: #FFFFFF;
@@ -52,7 +49,6 @@
   --info: #0969DA;
 }
 
-/* Global Reset & Theme Transitions */
 html, body {
   background-color: var(--bg);
   color: var(--text-primary);
@@ -65,13 +61,11 @@ html, body {
   transition: background-color 180ms ease, color 180ms ease;
 }
 
-/* Accessible Visible Focus */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* Reduced Motion Respect */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -81,7 +75,6 @@ html, body {
   }
 }
 
-/* Clean Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -100,7 +93,6 @@ html, body {
   background: var(--text-muted);
 }
 
-/* Citation highlight animation */
 @keyframes citationPulse {
   0% {
     background-color: rgba(255, 107, 44, 0.20);
@@ -121,7 +113,6 @@ html, body {
   animation: citationPulse 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Light Mode Overrides for hardcoded hex classes */
 [data-theme="light"] .bg-\[\#101214\] {
   background-color: var(--bg) !important;
 }
@@ -155,7 +146,6 @@ html, body {
   background-color: var(--surface-hover) !important;
 }
 
-/* Research Synthesis Answer Typography & Markdown Styling */
 .cri-answer-body {
   font-weight: 400 !important;
 }

@@ -7,7 +7,6 @@ import { Award, TrendingUp, ShieldCheck, CheckCircle2 } from "lucide-react";
 export const EvaluationView: React.FC = () => {
   return (
     <div className="h-full overflow-y-auto p-6 sm:p-8 space-y-8 bg-cri-bg text-cri-textPrimary max-w-6xl mx-auto">
-      {/* View Header */}
       <div className="border-b border-cri-border pb-4">
         <div className="text-[10px] font-bold uppercase tracking-wider text-cri-orange font-mono mb-1">
           Empirical Methodology & Gold Benchmark
@@ -20,7 +19,6 @@ export const EvaluationView: React.FC = () => {
         </p>
       </div>
 
-      {/* Primary Benchmark Scorecard */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary flex items-center gap-2 font-mono">
@@ -58,7 +56,6 @@ export const EvaluationView: React.FC = () => {
         </div>
       </div>
 
-      {/* Controlled Retrieval Ablation Study */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary flex items-center gap-2 font-mono">
@@ -104,7 +101,6 @@ export const EvaluationView: React.FC = () => {
         </div>
       </div>
 
-      {/* Key Evaluation Conclusions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-2">
           <h3 className="text-xs font-bold uppercase tracking-wider text-cri-orange font-mono">

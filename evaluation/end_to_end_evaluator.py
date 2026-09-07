@@ -38,11 +38,6 @@ from app.retrieval.hybrid import HybridRetriever
 from evaluation.reranker_diagnostic_runner import expand_query_clean
 from evaluation.retrieval_evaluator import GoldQuery, is_chunk_gold_relevant
 
-
-# =====================================================================
-# 1. DATA SCHEMAS
-# =====================================================================
-
 class GoldAnswerItem(BaseModel):
     question_id: str
     question: str
@@ -53,7 +48,6 @@ class GoldAnswerItem(BaseModel):
     gold_document_id: str = ""
     gold_section_keywords: List[str] = Field(default_factory=list)
     must_abstain: bool = False
-
 
 class QuestionEvalTrace(BaseModel):
     question_id: str
@@ -79,7 +73,7 @@ class QuestionEvalTrace(BaseModel):
     evidence_supported_claim_ratio: float
     unsupported_claims: List[str]
     supported_claims: List[str]
-    grounding_verdict: str  # "PASS" | "FAIL"
+    grounding_verdict: str
     citation_presence: bool
     citation_validity: float
     citation_coverage: float
@@ -90,7 +84,6 @@ class QuestionEvalTrace(BaseModel):
     total_latency_ms: float
     failure_category: str
 
-
 class CategorySummary(BaseModel):
     category: str
     count: int
@@ -99,35 +92,30 @@ class CategorySummary(BaseModel):
     grounding_pass_rate: float
     citation_coverage: float
 
-
-# =====================================================================
-# 2. DETERMINISTIC METRIC CALCULATIONS
-# =====================================================================
-
 def compute_token_f1(generated: str, reference: str) -> float:
-    """
-    Lightweight, deterministic reference similarity metric.
-    Calculates harmonic mean of precision and recall over content words.
-    """
+\
+\
+\
+
     stop_words = {
         'the', 'a', 'an', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'to', 'for',
         'of', 'and', 'or', 'that', 'this', 'with', 'by', 'from', 'it', 'its', 'as'
     }
-    
+
     def tokenize(text: str) -> List[str]:
         words = re.findall(r'\b[a-zA-Z0-9_\-]+\b', text.lower())
         return [w for w in words if len(w) > 1 and w not in stop_words]
 
     gen_tokens = tokenize(generated)
     ref_tokens = tokenize(reference)
-    
+
     if not gen_tokens or not ref_tokens:
         return 0.0
 
     gen_set = set(gen_tokens)
     ref_set = set(ref_tokens)
     overlap = gen_set.intersection(ref_set)
-    
+
     if not overlap:
         return 0.0
 
@@ -136,19 +124,18 @@ def compute_token_f1(generated: str, reference: str) -> float:
     f1 = 2.0 * precision * recall / (precision + recall)
     return round(f1, 4)
 
-
 def check_concept_coverage(
     required_concepts: List[str],
     text: str,
     is_abstention: bool,
     must_abstain: bool
 ) -> Tuple[float, List[str], List[str]]:
-    """
-    Evaluates what fraction of required concepts are expressed in the answer.
-    For unsupported questions (must_abstain=True):
-      - If system correctly abstains, coverage is 1.0 (no missing required concepts).
-      - If system fails to abstain and invents an answer, coverage is 0.0.
-    """
+\
+\
+\
+\
+\
+
     if must_abstain:
         if is_abstention:
             return 1.0, ["correct_abstention"], []
@@ -165,12 +152,10 @@ def check_concept_coverage(
     for concept in required_concepts:
         c_low = concept.lower().strip()
 
-        # 1. Exact substring match
         if c_low in t_low:
             matched.append(concept)
             continue
 
-        # 2. Number / percentage checks (e.g., "15%", "80.5", "11", "50%")
         numbers = re.findall(r'\b\d+(?:\.\d+)?%?\b', c_low)
         if numbers and all(num in t_low for num in numbers):
             content_words = [
@@ -181,7 +166,6 @@ def check_concept_coverage(
                 matched.append(concept)
                 continue
 
-        # 3. Multi-word phrase token overlap (e.g., "BERT BASE: 12 layers, 768 hidden, 12 heads, 110M parameters")
         c_words = [
             w for w in re.findall(r'\b[a-z0-9]+\b', c_low)
             if len(w) >= 2 and w not in {'the', 'and', 'for', 'with', 'from', 'that', 'this', 'are', 'was'}
@@ -197,25 +181,24 @@ def check_concept_coverage(
     score = round(len(matched) / len(required_concepts), 4)
     return score, matched, missing
 
-
 def extract_factual_claims(answer: str) -> List[str]:
-    """
-    Extracts individual factual statement claims from markdown headers, bullets, or paragraphs.
-    """
+\
+\
+
     claims: List[str] = []
     lines = answer.split('\n')
     for line in lines:
         line_s = line.strip()
         if not line_s or line_s.startswith('#'):
             continue
-        # Remove bullet prefix
+
         clean = re.sub(r'^[-*•\d.]+\s*', '', line_s).strip()
-        # Remove bold subheaders like **Mechanism**:
+
         clean = re.sub(r'^\*\*[^*]+\*\*:\s*', '', clean).strip()
-        # Remove citation references like [1], [1, 2]
+
         clean = re.sub(r'\[[\d,\s]+\]', '', clean).strip()
         if len(clean) > 20:
-            # Split sentences
+
             sents = re.split(r'(?<=[.!?])\s+', clean)
             for s in sents:
                 s_clean = s.strip()
@@ -223,16 +206,15 @@ def extract_factual_claims(answer: str) -> List[str]:
                     claims.append(s_clean)
     return claims
 
-
 def evaluate_groundedness(
     answer: str,
     evidence_passages: List[Dict[str, Any]],
     is_abstention: bool
 ) -> Tuple[float, List[str], List[str], str]:
-    """
-    Evaluates whether each claim in the answer is corroborated by the retrieved evidence text.
-    Returns: (supported_ratio, supported_claims, unsupported_claims, verdict)
-    """
+\
+\
+\
+
     if is_abstention:
         return 1.0, ["abstention_statement"], [], "PASS"
 
@@ -240,7 +222,7 @@ def evaluate_groundedness(
     claims = extract_factual_claims(answer)
 
     if not claims:
-        # Fallback if no specific sentences parsed
+
         claims = [answer[:150]]
 
     supported: List[str] = []
@@ -248,12 +230,10 @@ def evaluate_groundedness(
 
     for claim in claims:
         claim_low = claim.lower()
-        
-        # Check specific numbers in claim
+
         claim_numbers = re.findall(r'\b\d+(?:\.\d+)?%?\b', claim)
         numbers_ok = all(num.lower() in combined_evidence for num in claim_numbers)
 
-        # Check capitalized entities (acronyms / proper names)
         entities = [
             w for w in re.findall(r'\b[A-Z][a-zA-Z0-9_\-]+\b', claim)
             if w.lower() not in {
@@ -262,7 +242,6 @@ def evaluate_groundedness(
         ]
         entities_ok = all(ent.lower() in combined_evidence for ent in entities)
 
-        # Content word overlap
         words = [
             w for w in re.findall(r'\b[a-z0-9]+\b', claim_low)
             if len(w) >= 3 and w not in {
@@ -287,20 +266,19 @@ def evaluate_groundedness(
     verdict = "PASS" if (ratio >= 0.75 and len(unsupported) == 0) else "FAIL"
     return ratio, supported, unsupported, verdict
 
-
 def evaluate_citations(
     answer: str,
     citations: List[Dict[str, Any]],
     retrieved_chunk_ids: List[str],
     evidence_passages: List[Dict[str, Any]]
 ) -> Tuple[bool, float, float, float]:
-    """
-    Evaluates:
-      - presence: Does the answer contain citations?
-      - validity: Fraction of citations pointing to valid retrieved chunks.
-      - coverage: Fraction of paragraphs/bullets with citations.
-      - precision: Fraction of cited chunks that contain text relevant to the answer.
-    """
+\
+\
+\
+\
+\
+\
+
     raw_citations = re.findall(r'\[([0-9,\s]+)\]', answer)
     has_citations = bool(citations) or bool(raw_citations)
 
@@ -311,12 +289,10 @@ def evaluate_citations(
     valid_count = sum(1 for c in citations if c.get("chunk_id") in retrieved_set)
     validity = round(valid_count / len(citations), 4) if citations else 1.0
 
-    # Coverage: ratio of non-empty lines with citations
     lines = [l.strip() for l in answer.split('\n') if len(l.strip()) > 20 and not l.strip().startswith('#')]
     cited_lines = sum(1 for l in lines if re.search(r'\[\d+\]', l))
     coverage = round(cited_lines / len(lines), 4) if lines else 0.0
 
-    # Precision: check if cited passages share keywords with the answer
     ans_tokens = set(re.findall(r'\b[a-zA-Z0-9]{3,}\b', answer.lower()))
     prec_count = 0
     for c in citations:
@@ -333,7 +309,6 @@ def evaluate_citations(
     precision = round(prec_count / len(citations), 4) if citations else 0.0
     return True, validity, coverage, precision
 
-
 def assign_error_taxonomy(
     must_abstain: bool,
     is_abstention: bool,
@@ -345,23 +320,22 @@ def assign_error_taxonomy(
     citation_presence: bool,
     citation_validity: float
 ) -> str:
-    """
-    Mutually exclusive error taxonomy assignment:
-      - RETRIEVAL_FAILURE: Correct evidence was not retrieved in top 10.
-      - EVIDENCE_SELECTION_FAILURE: Evidence was in initial candidate pool but omitted from top 10.
-      - GENERATION_FAILURE: Evidence was present in top 10, but generated answer was incorrect.
-      - GROUNDING_FAILURE: Answer contains unsupported claims.
-      - CITATION_FAILURE: Answer is correct but citation is missing or invalid.
-      - ABSTENTION_FAILURE: System answered when it should have abstained.
-      - NO_FAILURE: Correct, grounded, and properly cited.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+
     if must_abstain:
         if is_abstention:
             return "NO_FAILURE"
         else:
             return "ABSTENTION_FAILURE"
 
-    # Non-abstention query checks:
     if not retrieval_relevant_in_top10:
         if retrieval_relevant_in_pool:
             return "EVIDENCE_SELECTION_FAILURE"
@@ -378,20 +352,15 @@ def assign_error_taxonomy(
 
     return "NO_FAILURE"
 
-
-# =====================================================================
-# 3. END-TO-END EVALUATION RUNNER
-# =====================================================================
-
 def run_end_to_end_benchmark(
     dataset_path: Path,
     bert_pdf_path: Path,
     output_report_path: Path,
     output_summary_path: Path
 ) -> Dict[str, Any]:
-    """
-    Executes the full Phase 5 End-to-End Evaluation on all 35 benchmark records.
-    """
+\
+\
+
     assert dataset_path.exists(), f"Dataset not found at {dataset_path}"
     assert bert_pdf_path.exists(), f"BERT PDF not found at {bert_pdf_path}"
 
@@ -400,7 +369,6 @@ def run_end_to_end_benchmark(
 
     gold_items = [GoldAnswerItem(**item) for item in raw_dataset]
 
-    # Ingest target document strictly
     with open(bert_pdf_path, "rb") as fp:
         bert_bytes = fp.read()
     doc_resp = ingest_document_safely(file_bytes=bert_bytes, filename=bert_pdf_path.name)
@@ -425,7 +393,6 @@ def run_end_to_end_benchmark(
 
         t_total_start = time.perf_counter()
 
-        # Step 1: Retrieval via next-gen candidate (Query Expansion -> Dense + BM25 -> RRF -> Rerank)
         q_vec = retriever.cohere_client.embed([q_exp], input_type="search_query")[0]
         dense_cands = retriever.vector_store.similarity_search(
             query_vector=q_vec, top_k=25, allowed_document_ids=[target_doc_id]
@@ -458,7 +425,6 @@ def run_end_to_end_benchmark(
             for r in reranked_cands
         ]
 
-        # Step 2: Build State for Production Nodes
         state = {
             "query": q,
             "original_query": q,
@@ -472,11 +438,9 @@ def run_end_to_end_benchmark(
             "token_usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
         }
 
-        # Step 3: Grounding Gate
         ev_gate_res = evidence_check_node(state)
         state.update(ev_gate_res)
 
-        # Step 4: Generation / Insufficient Evidence Routing
         t_gen_start = time.perf_counter()
         if state.get("evidence_sufficient"):
             gen_res = generation_node(state)
@@ -506,31 +470,26 @@ def run_end_to_end_benchmark(
         )
         abstention_correct = (is_abstention == must_abstain)
 
-        # Step 5: Answer Quality Metrics Evaluation
         cov_score, matched_c, missing_c = check_concept_coverage(
             item.required_concepts, ans_text, is_abstention, must_abstain
         )
         f1_similarity = compute_token_f1(ans_text, item.reference_answer)
-        
-        # Relevance: simple content overlap with question
+
         q_tokens = set(re.findall(r'\b[a-zA-Z0-9]{3,}\b', q.lower()))
         ans_tokens = set(re.findall(r'\b[a-zA-Z0-9]{3,}\b', ans_text.lower()))
         ans_relevance = 1.0 if is_abstention and must_abstain else (
             round(len(q_tokens.intersection(ans_tokens)) / len(q_tokens), 4) if q_tokens else 1.0
         )
 
-        # Groundedness evaluation
         supp_ratio, supp_claims, unsupp_claims, g_verdict = evaluate_groundedness(
             ans_text, evidence_payload, is_abstention
         )
 
-        # Citation evaluation
         citations_list = state.get("citations", [])
         c_pres, c_val, c_cov, c_prec = evaluate_citations(
             ans_text, citations_list, reranked_ids, evidence_payload
         )
 
-        # Retrieval relevance check for Error Taxonomy
         gold_q = GoldQuery(
             id=item.question_id,
             question=item.question,
@@ -542,7 +501,6 @@ def run_end_to_end_benchmark(
         rel_top10 = any(is_chunk_gold_relevant(r, gold_q, target_doc_id).is_relevant for r in reranked_cands)
         rel_pool = any(is_chunk_gold_relevant(f, gold_q, target_doc_id).is_relevant for f in fused_cands)
 
-        # Failure Taxonomy Assignment
         fail_cat = assign_error_taxonomy(
             must_abstain=must_abstain,
             is_abstention=is_abstention,
@@ -595,9 +553,6 @@ def run_end_to_end_benchmark(
         status_flag = "PASS" if fail_cat == "NO_FAILURE" else fail_cat
         print(f"[{idx:02d}/{len(gold_items):02d}] {item.question_id:<16} | Type: {item.question_type:<15} | Cov: {cov_score:.2f} | F1: {f1_similarity:.2f} | {status_flag}")
 
-    # =====================================================================
-    # 4. AGGREGATE CALCULATIONS
-    # =====================================================================
     bert_traces = [t for t in traces if not t.must_abstain]
     unsupported_traces = [t for t in traces if t.must_abstain]
 
@@ -615,33 +570,28 @@ def run_end_to_end_benchmark(
     med_f1 = round(statistics.median(bert_f1s), 4) if bert_f1s else 0.0
     mean_relevance = round(statistics.mean(bert_rel), 4) if bert_rel else 0.0
 
-    # Groundedness
     grounding_pass_count = sum(1 for t in traces if t.grounding_verdict == "PASS")
     grounding_pass_rate = round(grounding_pass_count / len(traces), 4)
     avg_supp_ratio = round(statistics.mean([t.evidence_supported_claim_ratio for t in traces]), 4)
     tot_unsupp = sum(len(t.unsupported_claims) for t in traces)
     questions_with_unsupp = sum(1 for t in traces if len(t.unsupported_claims) > 0)
 
-    # Citations
     citation_presence_rate = round(sum(1 for t in bert_traces if t.citation_presence) / len(bert_traces), 4)
     citation_validity_rate = round(statistics.mean([t.citation_validity for t in bert_traces if t.citation_presence]), 4)
     citation_coverage_rate = round(statistics.mean([t.citation_coverage for t in bert_traces]), 4)
     citation_precision_rate = round(statistics.mean([t.citation_precision for t in bert_traces if t.citation_presence]), 4)
 
-    # Abstention metrics
     total_unsupp_q = len(unsupported_traces)
     abst_acc = round(sum(1 for t in unsupported_traces if t.is_abstention) / total_unsupp_q, 4) if total_unsupp_q else 1.0
     false_ans_rate = round(1.0 - abst_acc, 4)
     unsupp_claim_rate = round(sum(1 for t in unsupported_traces if not t.is_abstention) / total_unsupp_q, 4) if total_unsupp_q else 0.0
 
-    # Taxonomy counts
     tax_counts: Dict[str, int] = {}
     for t in traces:
         tax_counts[t.failure_category] = tax_counts.get(t.failure_category, 0) + 1
 
     tax_pcts = {k: round(v / len(traces) * 100.0, 2) for k, v in tax_counts.items()}
 
-    # Category Breakdown
     cat_groups: Dict[str, List[QuestionEvalTrace]] = {}
     for t in traces:
         cat_groups.setdefault(t.question_type, []).append(t)
@@ -661,7 +611,6 @@ def run_end_to_end_benchmark(
             "citation_coverage": c_cit
         }
 
-    # Latency percentiles
     def p50(arr: List[float]) -> float:
         return round(float(statistics.median(arr)), 2) if arr else 0.0
 
@@ -681,7 +630,6 @@ def run_end_to_end_benchmark(
         "p95_total_latency_ms": p95(total_latencies)
     }
 
-    # Critical Question Traces
     critical_ids = ["bert_003", "bert_013", "bert_015", "bert_016", "bert_018", "bert_020", "bert_028"]
     critical_traces: Dict[str, Dict[str, Any]] = {}
     for qid in critical_ids:
@@ -752,12 +700,10 @@ def run_end_to_end_benchmark(
         "all_question_results": [t.model_dump() for t in traces]
     }
 
-    # Save JSON Report
     output_report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_report_path, "w", encoding="utf-8") as f:
         json.dump(full_report, f, indent=2)
 
-    # Save Markdown Summary
     summary_md = generate_summary_markdown(full_report)
     with open(output_summary_path, "w", encoding="utf-8") as f:
         f.write(summary_md)
@@ -768,11 +714,10 @@ def run_end_to_end_benchmark(
 
     return full_report
 
-
 def generate_summary_markdown(report: Dict[str, Any]) -> str:
-    """
-    Constructs the exhaustive Markdown report for Phase 5.
-    """
+\
+\
+
     meta = report["metadata"]
     om = report["overall_metrics"]
     gm = report["groundedness_metrics"]
@@ -894,7 +839,6 @@ def generate_summary_markdown(report: Dict[str, Any]) -> str:
     ])
 
     return "\n".join(md)
-
 
 if __name__ == "__main__":
     dataset_p = Path("evaluation/datasets/bert_answer_gold.json")

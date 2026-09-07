@@ -57,7 +57,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
     }
   };
 
-  // Extract metadata string for the active document
   const getDocMetadataString = () => {
     if (!activeDocument) return "No source active";
     if (activeDocument.filename.includes("1810.04805") || activeDocument.title.toLowerCase().includes("bert")) {
@@ -66,22 +65,13 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
     return `Research Corpus · 2024 · ${activeDocument.page_count} Pages`;
   };
 
-  // Helper to strip stray or unclosed asterisks that are not numeric multiplication
   const cleanStrayAsterisks = (str: string): string => {
     return str.replace(/(?<!\d)\*+|\*+(?!\d)/g, "");
   };
 
-  // Render inline formatting: citations [1], [2], bold ***text***, **text**, *text*, inline code, and math
   const renderFormattedInline = (text: string, keyPrefix: string = "inline"): React.ReactNode => {
     if (!text) return null;
 
-    // Regex matches:
-    // 1. Citations: [1] or [1, 2]
-    // 3. Bold-Italic: ***text***
-    // 5. Bold: **text**
-    // 7. Italic: *text*
-    // 9. Inline code: `code`
-    // 11. Inline math: $formula$
     const INLINE_REGEX = /(\[(\d+(?:,\s*\d+)*)\])|(\*\*\*([^*]+)\*\*\*)|(\*\*([^*]+)\*\*)|(\*([^*\n]+)\*)|(`([^`]+)`)|(\$([^$\n]+)\$)/g;
 
     const parts: React.ReactNode[] = [];
@@ -100,7 +90,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       }
 
       if (match[1]) {
-        // Citation pills [1] or [1, 2]
         const citeNumbers = match[2]
           .split(",")
           .map((n) => parseInt(n.trim(), 10))
@@ -132,7 +121,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </span>
         );
       } else if (match[3]) {
-        // ***Bold Italic***
         parts.push(
           <strong
             key={`${keyPrefix}-bolditalic-${matchStart}`}
@@ -142,7 +130,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </strong>
         );
       } else if (match[5]) {
-        // **Bold**
         parts.push(
           <strong
             key={`${keyPrefix}-bold-${matchStart}`}
@@ -152,7 +139,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </strong>
         );
       } else if (match[7]) {
-        // *Italic*
         parts.push(
           <em
             key={`${keyPrefix}-italic-${matchStart}`}
@@ -162,7 +148,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </em>
         );
       } else if (match[9]) {
-        // `Inline Code`
         parts.push(
           <code
             key={`${keyPrefix}-code-${matchStart}`}
@@ -172,7 +157,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </code>
         );
       } else if (match[11]) {
-        // $Inline Math$
         parts.push(
           <span
             key={`${keyPrefix}-math-${matchStart}`}
@@ -231,11 +215,9 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
     "Conclusion",
   ];
 
-  // Render answer text with professional typography, Markdown headings, lists, inline emphasis, and citations
   const renderAnswerWithCitations = (answerText: string) => {
     if (!answerText) return null;
 
-    // Normalization and splitting of glued headers or malformed markdown wrappers
     const titleRegexStr = KNOWN_HEADERS.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
     const splitPattern = new RegExp(
       `^\\s*(?:\\*{2,3}|#{1,4}\\s*)?\\s*(${titleRegexStr})(?:\\*{2,3})?(?:\\s*[:\\-–—]\\s*|\\s+)(.+)$`,
@@ -256,7 +238,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
         continue;
       }
 
-      // Preserve existing markdown list syntax or heading syntax
       if (/^[-*•]\s+/.test(line) || /^\d+\.\s+/.test(line) || /^#{1,6}\s+/.test(line)) {
         preprocessedLines.push(line);
         continue;
@@ -282,7 +263,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           break;
         }
 
-        // If a long line is entirely wrapped in **...** or ***...***, strip the outer wrap
         if (
           ((curr.startsWith("**") && curr.endsWith("**")) ||
             (curr.startsWith("***") && curr.endsWith("***"))) &&
@@ -292,7 +272,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           continue;
         }
 
-        // If line is a short standalone bold title (e.g. **Title** or ***Title***)
         const mShortBold = curr.match(/^\*{2,3}([^*:]+)\*{2,3}:?\s*$/);
         if (mShortBold && mShortBold[1].length <= 50 && !mShortBold[1].endsWith(".")) {
           preprocessedLines.push(`### ${mShortBold[1].trim()}`);
@@ -305,7 +284,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       }
     }
 
-    // Group lines into structured blocks
     const blocks: ContentBlock[] = [];
     let currentParagraph: string[] = [];
 
@@ -457,7 +435,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       queryResponse.answer.includes("don't have sufficient evidence") ||
       queryResponse.answer.includes("insufficient evidence"));
 
-  // Key findings derived from query response or fallback synthesis
   const findings = queryResponse?.key_points && queryResponse.key_points.length > 0
     ? queryResponse.key_points
     : [
@@ -475,9 +452,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-[14px] overflow-hidden shadow-xs transition-colors ${className || ""}`}
       aria-label="Research Workspace"
     >
-      {/* SECTION 11 & 12: Breadcrumb & Document Header */}
       <div className="px-4 sm:px-7 pt-4 sm:pt-5 pb-0 border-b border-cri-border bg-cri-surface shrink-0 space-y-3">
-        {/* Breadcrumb: Research > Document */}
         <div className="flex items-center gap-1.5 text-[11px] text-cri-textMuted font-mono">
           <span className="hover:text-cri-textSecondary cursor-pointer">Research</span>
           {activeDocument && (
@@ -490,7 +465,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           )}
         </div>
 
-        {/* Document Header Row */}
         {activeDocument ? (
           <div className="flex items-center justify-between gap-4 pb-2.5">
             <div className="min-w-0 flex-1">
@@ -506,13 +480,11 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 </h1>
               </div>
 
-              {/* Metadata row: Author · Year · Pages */}
               <div className="mt-1 flex items-center gap-2 text-[12px] text-cri-textSecondary truncate pl-10 sm:pl-11 font-sans">
                 <span>{getDocMetadataString()}</span>
               </div>
             </div>
 
-            {/* Right Header Actions: View Document (Section 12) */}
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
@@ -540,7 +512,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         )}
 
-        {/* SECTION 13: Lightweight Document Tabs with thin orange underline */}
         {activeDocument && (
           <div className="flex items-center gap-4 sm:gap-7 pt-2 border-t border-cri-border text-xs overflow-x-auto no-scrollbar scroll-smooth">
             {(
@@ -575,9 +546,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
         )}
       </div>
 
-      {/* Scrollable Center Body with generous breathing room (24px padding) */}
       <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-7">
-        {/* SECTION 15: EMPTY CENTER STATE (Visually centered and calm) */}
         {!activeDocument ? (
           <div className="max-w-2xl mx-auto pt-14 pb-8 space-y-8 text-center">
             <div className="space-y-2.5">
@@ -589,7 +558,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               </p>
             </div>
 
-            {/* Disabled research input */}
             <div className="rounded-[14px] border border-cri-border bg-cri-surfaceSecondary p-4 sm:p-[18px] opacity-60 text-left shadow-sm min-h-[135px] sm:min-h-[150px] flex flex-col justify-between">
               <textarea
                 disabled
@@ -609,13 +577,10 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
             </div>
           </div>
         ) : (
-          /* TAB 1: ASK (Primary Q&A Workspace) */
           activeTab === "ask" && (
             <div className="space-y-7 max-w-4xl mx-auto">
-              {/* Core Research Question Input: ONLY textarea and Run analysis */}
               <form onSubmit={handleSubmit} className="relative">
                 <div className="min-h-[135px] sm:min-h-[150px] rounded-[14px] border border-cri-border bg-cri-surfaceSecondary shadow-sm focus-within:border-cri-orange transition-all p-4 sm:p-[18px] flex flex-col justify-between">
-                  {/* Textarea: comfortable 16px normal-weight font */}
                   <textarea
                     ref={inputRef}
                     value={questionInput}
@@ -627,14 +592,12 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     className="w-full bg-transparent text-[16px] font-normal text-cri-textPrimary placeholder:text-cri-textMuted resize-none focus:outline-none leading-relaxed"
                   />
 
-                  {/* Bottom Action: Run analysis aligned naturally to bottom-right */}
                   <div className="flex items-center justify-end gap-3 pt-2 text-xs">
                     <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px] select-none">
                       <span>⌘</span>
                       <span>Enter</span>
                     </kbd>
 
-                    {/* Run analysis button */}
                     <button
                       type="submit"
                       disabled={isLoading || !questionInput.trim()}
@@ -660,7 +623,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 </div>
               </form>
 
-              {/* Loading Skeleton & Progress */}
               {isLoading && (
                 <div className="p-6 rounded-[14px] bg-cri-surface border border-cri-border flex flex-col items-center justify-center space-y-3 text-center">
                   <Loader2 className="w-6 h-6 text-cri-orange animate-spin" />
@@ -673,10 +635,8 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 </div>
               )}
 
-              {/* SECTION 12: Analysis Result */}
               {queryResponse && !isLoading && (
                 <div className="space-y-6">
-                  {/* Abstention Experience */}
                   {isAbstention ? (
                     <div className="p-6 rounded-[14px] border border-cri-orange/80 bg-cri-surface space-y-3">
                       <div className="flex items-center gap-2 text-cri-orange">
@@ -693,9 +653,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       </p>
                     </div>
                   ) : (
-                    /* Main Report Surface - Visually Dominant Document Experience (NotebookLM style) */
                     <div className="rounded-[14px] border border-cri-border bg-cri-surface p-5 sm:p-7 space-y-6 shadow-sm">
-                      {/* Research Conclusion Headline */}
                       <div className="border-b border-cri-border pb-4">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-cri-orange font-mono mb-1.5">
                           Research Synthesis
@@ -705,12 +663,10 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         </h2>
                       </div>
 
-                      {/* Supporting Explanation with Provenance Citations */}
                       <div className="cri-answer-body font-normal text-[15px] sm:text-[15.5px] leading-[1.7] text-cri-textPrimary">
                         {renderAnswerWithCitations(queryResponse.answer)}
                       </div>
 
-                      {/* KEY FINDINGS */}
                       <div className="pt-6 border-t border-cri-border space-y-3.5">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
@@ -750,9 +706,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     </div>
                   )}
 
-                  {/* SECTION 19 & 20: Confidence, Evidence Used, Methodology Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                    {/* SECTION 19: Confidence */}
                     <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
@@ -776,7 +730,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       </p>
                     </div>
 
-                    {/* SECTION 20: Evidence Used */}
                     <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
                       <div>
                         <div className="flex items-center justify-between">
@@ -792,7 +745,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         </p>
                       </div>
 
-                      {/* Source Chips */}
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {queryResponse.citations && queryResponse.citations.length > 0 ? (
                           queryResponse.citations.slice(0, 3).map((cite) => (
@@ -815,7 +767,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       </div>
                     </div>
 
-                    {/* SECTION 20: Methodology */}
                     <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
@@ -850,7 +801,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           )
         )}
 
-        {/* TAB 2: SUMMARY */}
         {activeTab === "summary" && (
           <div className="max-w-4xl mx-auto p-6 rounded-[14px] bg-cri-surface border border-cri-border space-y-4 text-xs">
             <h2 className="text-sm font-bold text-cri-textPrimary font-mono uppercase tracking-wider">
@@ -880,7 +830,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         )}
 
-        {/* TAB 3: KEY TAKEAWAYS */}
         {activeTab === "takeaways" && (
           <div className="max-w-4xl mx-auto p-6 rounded-[14px] bg-cri-surface border border-cri-border space-y-3 text-xs">
             <h2 className="text-sm font-bold text-cri-textPrimary font-mono uppercase tracking-wider">
@@ -899,7 +848,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         )}
 
-        {/* TAB 4: CITATIONS */}
         {activeTab === "citations" && (
           <div className="max-w-4xl mx-auto p-6 rounded-[14px] bg-cri-surface border border-cri-border space-y-3 text-xs">
             <h2 className="text-sm font-bold text-cri-textPrimary font-mono uppercase tracking-wider">
@@ -942,7 +890,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           </div>
         )}
 
-        {/* TAB 5: RELATED WORK */}
         {activeTab === "related" && (
           <div className="max-w-4xl mx-auto p-6 rounded-[14px] bg-cri-surface border border-cri-border space-y-3 text-xs">
             <h2 className="text-sm font-bold text-cri-textPrimary font-mono uppercase tracking-wider">

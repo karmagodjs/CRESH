@@ -31,7 +31,6 @@ def ingest_document_safely(file_bytes: bytes, filename: str) -> DocumentResponse
     vector_store = get_vector_store()
     bm25_index = get_bm25_index()
 
-    # SAFE REINDEX: Delete any existing chunks for this document_id before inserting to prevent duplicates
     vector_store.delete_document(parsed_doc.metadata.document_id)
     bm25_index.delete_document(parsed_doc.metadata.document_id)
 

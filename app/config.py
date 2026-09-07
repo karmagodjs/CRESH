@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = Field(default='*')
 
     def validate_configuration(self) -> None:
-        """Validates critical startup configuration and fails fast on errors."""
+
         errors = []
         if not self.QDRANT_LOCATION:
             errors.append("QDRANT_LOCATION must not be empty.")
@@ -65,7 +65,7 @@ class Settings(BaseSettings):
             raise ValueError(f"Configuration validation failed: {'; '.join(errors)}")
 
     def get_safe_dict(self) -> dict:
-        """Returns configuration dictionary with all secrets securely redacted."""
+
         data = self.model_dump()
         if data.get('COHERE_API_KEY'):
             data['COHERE_API_KEY'] = '[REDACTED_SECRET]'

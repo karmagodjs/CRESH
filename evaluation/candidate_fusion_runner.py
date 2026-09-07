@@ -43,7 +43,6 @@ from evaluation.retrieval_evaluator import (
 
 logger = get_logger("candidate_fusion_runner")
 
-
 class CandidateFusionMetrics(BaseModel):
     name: str
     display_name: str
@@ -66,7 +65,6 @@ class CandidateFusionMetrics(BaseModel):
     rerank_calls_per_query: int
     total_api_calls: int
 
-
 class DeltaAgainstBaseline(BaseModel):
     config_name: str
     display_name: str
@@ -82,12 +80,11 @@ class DeltaAgainstBaseline(BaseModel):
     rel_change_latency_pct: float
     delta_avg_pool_size: float
 
-
 def deduplicated_union(primary_list: List[SearchResult], secondary_list: List[SearchResult]) -> List[SearchResult]:
-    """
-    Deduplicates candidates preserving document_id and chunk_id metadata and original chunk objects.
-    Preserves primary list items in order, followed by secondary list items not yet present.
-    """
+\
+\
+\
+
     seen_ids = set()
     union_results: List[SearchResult] = []
     for item in primary_list + secondary_list:
@@ -96,7 +93,6 @@ def deduplicated_union(primary_list: List[SearchResult], secondary_list: List[Se
             seen_ids.add(cid)
             union_results.append(item)
     return union_results
-
 
 def compute_delta_vs_baseline(baseline: CandidateFusionMetrics, target: CandidateFusionMetrics) -> DeltaAgainstBaseline:
     def rel_pct(base_val: float, targ_val: float) -> float:
@@ -120,7 +116,6 @@ def compute_delta_vs_baseline(baseline: CandidateFusionMetrics, target: Candidat
         delta_avg_pool_size=round(target.avg_pool_size_before_rerank - baseline.avg_pool_size_before_rerank, 2)
     )
 
-
 def run_candidate_fusion_study(
     dataset_path: Path,
     bert_pdf_path: Path,
@@ -136,7 +131,6 @@ def run_candidate_fusion_study(
     gold_queries = [GoldQuery(**item) for item in raw_gold]
     n_queries = len(gold_queries)
 
-    # Ingest document
     with open(bert_pdf_path, "rb") as fp:
         bert_bytes = fp.read()
     doc_resp = ingest_document_safely(file_bytes=bert_bytes, filename=bert_pdf_path.name)
@@ -195,7 +189,6 @@ def run_candidate_fusion_study(
     for idx, gold in enumerate(gold_queries, 1):
         q = gold.question
 
-        # Fetch dense candidates up to 50
         t0_embed = time.perf_counter()
         q_vec = retriever.cohere_client.embed([q], input_type="search_query")[0]
         dense_50 = retriever.vector_store.similarity_search(
@@ -207,7 +200,6 @@ def run_candidate_fusion_study(
         t1_embed = time.perf_counter()
         lat_dense_ms = (t1_embed - t0_embed) * 1000.0
 
-        # Fetch BM25 candidates up to 50
         t0_bm25 = time.perf_counter()
         bm25_50 = retriever.bm25_index.search(
             query=q,
@@ -222,9 +214,6 @@ def run_candidate_fusion_study(
         dense_10 = dense_50[:10]
         bm25_25 = bm25_50[:25]
 
-        # -------------------------------------------------------------
-        # Config A: Baseline RRF Top 25 -> Rerank Top 10
-        # -------------------------------------------------------------
         t0_a = time.perf_counter()
         fused_a = retriever._reciprocal_rank_fusion(dense_25, bm25_25, top_k=25)
         fused_a = [c for c in fused_a if c.metadata.document_id == target_doc_id]
@@ -234,9 +223,6 @@ def run_candidate_fusion_study(
         t1_a = time.perf_counter()
         lat_a_ms = lat_dense_ms + lat_bm25_ms + (t1_a - t0_a) * 1000.0
 
-        # -------------------------------------------------------------
-        # Config B: Union Dense 25 + BM25 25 -> Rerank Top 10
-        # -------------------------------------------------------------
         t0_b = time.perf_counter()
         pool_b = deduplicated_union(bm25_25, dense_25)
         rr_b = retriever.reranker.rerank(q, pool_b, top_n=10)
@@ -244,9 +230,6 @@ def run_candidate_fusion_study(
         t1_b = time.perf_counter()
         lat_b_ms = lat_dense_ms + lat_bm25_ms + (t1_b - t0_b) * 1000.0
 
-        # -------------------------------------------------------------
-        # Config C: Union Dense 50 + BM25 50 -> Rerank Top 10
-        # -------------------------------------------------------------
         t0_c = time.perf_counter()
         pool_c = deduplicated_union(bm25_50, dense_50)
         rr_c = retriever.reranker.rerank(q, pool_c, top_n=10)
@@ -254,9 +237,6 @@ def run_candidate_fusion_study(
         t1_c = time.perf_counter()
         lat_c_ms = lat_dense_ms + lat_bm25_ms + (t1_c - t0_c) * 1000.0
 
-        # -------------------------------------------------------------
-        # Config D: BM25 25 + Dense 10 -> Rerank Top 10
-        # -------------------------------------------------------------
         t0_d = time.perf_counter()
         pool_d = deduplicated_union(bm25_25, dense_10)
         rr_d = retriever.reranker.rerank(q, pool_d, top_n=10)
@@ -264,9 +244,6 @@ def run_candidate_fusion_study(
         t1_d = time.perf_counter()
         lat_d_ms = lat_dense_ms + lat_bm25_ms + (t1_d - t0_d) * 1000.0
 
-        # -------------------------------------------------------------
-        # Config E: BM25 50 + Dense 25 -> Rerank Top 10
-        # -------------------------------------------------------------
         t0_e = time.perf_counter()
         pool_e = deduplicated_union(bm25_50, dense_25)
         rr_e = retriever.reranker.rerank(q, pool_e, top_n=10)
@@ -274,7 +251,6 @@ def run_candidate_fusion_study(
         t1_e = time.perf_counter()
         lat_e_ms = lat_dense_ms + lat_bm25_ms + (t1_e - t0_e) * 1000.0
 
-        # Latencies & Pool Sizes
         per_config_latencies["config_a"].append(lat_a_ms)
         per_config_latencies["config_b"].append(lat_b_ms)
         per_config_latencies["config_c"].append(lat_c_ms)
@@ -287,7 +263,6 @@ def run_candidate_fusion_study(
         per_config_pool_sizes["config_d"].append(len(pool_d))
         per_config_pool_sizes["config_e"].append(len(pool_e))
 
-        # Binary Relevance
         bin_a = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in rr_a]
         bin_b = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in rr_b]
         bin_c = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in rr_c]
@@ -300,7 +275,6 @@ def run_candidate_fusion_study(
         per_config_bins["config_d"].append(bin_d)
         per_config_bins["config_e"].append(bin_e)
 
-        # Track targeted queries
         if gold.id in tracked_ids:
             ranks_a = [i + 1 for i, c in enumerate(rr_a) if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant]
             ranks_b = [i + 1 for i, c in enumerate(rr_b) if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant]
@@ -321,9 +295,6 @@ def run_candidate_fusion_study(
                 "pool_size_c": len(pool_c)
             }
 
-    # =================================================================
-    # Calculate Metrics for all 5 Configurations
-    # =================================================================
     config_metric_objects: Dict[str, CandidateFusionMetrics] = {}
 
     for k in config_keys:
@@ -369,9 +340,6 @@ def run_candidate_fusion_study(
             total_api_calls=n_queries * 2
         )
 
-    # =================================================================
-    # Calculate Deltas Against Baseline Configuration A
-    # =================================================================
     baseline_m = config_metric_objects["config_a"]
     deltas = [
         compute_delta_vs_baseline(baseline_m, config_metric_objects["config_b"]),
@@ -380,7 +348,6 @@ def run_candidate_fusion_study(
         compute_delta_vs_baseline(baseline_m, config_metric_objects["config_e"])
     ]
 
-    # Detailed trace for bert_015 and bert_028
     detailed_bert_015_trace = {
         "question_id": "bert_015",
         "question": "What activation function is used in BERT's intermediate feed-forward layers?",
@@ -423,13 +390,11 @@ def run_candidate_fusion_study(
         }
     }
 
-    # Save JSON report
     output_report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
     logger.info(f"Saved candidate fusion JSON report to {output_report_path}")
 
-    # Generate Markdown Summary
     md_content = generate_markdown_summary(report, config_metric_objects, deltas, query_traces, detailed_bert_015_trace, detailed_bert_028_trace)
     output_summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_summary_path, "w", encoding="utf-8") as f:
@@ -437,7 +402,6 @@ def run_candidate_fusion_study(
     logger.info(f"Saved candidate fusion summary markdown to {output_summary_path}")
 
     return report
-
 
 def generate_markdown_summary(
     report: Dict[str, Any],
@@ -563,7 +527,6 @@ def generate_markdown_summary(
 
     return "\n".join(lines)
 
-
 def main():
     parser = argparse.ArgumentParser(description="Run Phase 3 CRI Candidate-Union Fusion Study")
     parser.add_argument("--dataset", type=Path, default=Path("evaluation/datasets/bert_gold.json"))
@@ -588,7 +551,6 @@ def main():
     print(f"JSON Report:    {args.report}")
     print(f"Summary Report: {args.summary}")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()

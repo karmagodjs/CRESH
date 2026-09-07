@@ -30,14 +30,12 @@ def execute_research_query(req: QueryRequest) -> QueryResponse:
     start_total_time = time.perf_counter()
     settings = get_settings()
 
-    # Resource safety: query length limit
     if len(req.query) > 2000:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Query exceeds maximum permitted length of 2000 characters."
         )
 
-    # Identifiers
     request_id = req.request_id or f"req-{uuid.uuid4()}"
     trace_id = req.trace_id or f"trace-{uuid.uuid4()}"
     question_id = req.question_id

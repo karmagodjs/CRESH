@@ -61,7 +61,6 @@ class BM25Index:
         elif document_id:
             target_doc_ids = [document_id]
 
-        # HARD ISOLATION GUARD: Refuse to search BM25 without explicit document scope
         if not target_doc_ids:
             logger.warning("BM25Index.search: No selected document IDs provided. Refusing to search BM25 without document scope filter.")
             return []
@@ -70,7 +69,6 @@ class BM25Index:
         for did in target_doc_ids:
             valid_indices.update(self._doc_id_to_indices.get(did, []))
         scored_pairs = [p for p in scored_pairs if p[0] in valid_indices]
-
 
         query_set = set(tokens)
         valid_pairs = []

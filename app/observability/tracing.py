@@ -3,7 +3,6 @@ import uuid
 from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
-
 class TraceSpan(BaseModel):
     name: str
     start_time: float
@@ -19,12 +18,11 @@ class TraceSpan(BaseModel):
         self.status = status
         self.error = error
 
-
 class ModelCallRecord(BaseModel):
-    """Instruments an external model or API call."""
+
     provider: str = 'cohere'
     model: str
-    operation: str  # 'embed', 'rerank', 'chat_generate'
+    operation: str
     request_count: int = 1
     input_tokens: Union[int, str] = 'unavailable'
     output_tokens: Union[int, str] = 'unavailable'
@@ -34,9 +32,8 @@ class ModelCallRecord(BaseModel):
     latency_ms: float = 0.0
     status: str = 'success'
 
-
 def compute_percentiles(values: List[float]) -> Dict[str, float]:
-    """Computes mean, p50, p95, p99 for a list of latency samples."""
+
     if not values:
         return {'mean': 0.0, 'p50': 0.0, 'p95': 0.0, 'p99': 0.0}
     sorted_vals = sorted(values)
@@ -54,9 +51,8 @@ def compute_percentiles(values: List[float]) -> Dict[str, float]:
         'p99': round(get_pct(0.99), 2)
     }
 
-
 class GlobalMetricsRegistry:
-    """Thread-safe collector for system-wide node and end-to-end latencies."""
+
     def __init__(self) -> None:
         self._node_latencies: Dict[str, List[float]] = {}
         self._model_calls: List[ModelCallRecord] = []
@@ -123,16 +119,12 @@ class GlobalMetricsRegistry:
         self._model_calls.clear()
         self._e2e_latencies.clear()
 
-
 _GLOBAL_METRICS = GlobalMetricsRegistry()
-
 
 def get_global_metrics() -> GlobalMetricsRegistry:
     return _GLOBAL_METRICS
 
-
 class ExecutionTracer:
-    """Execution tracer tracking trace ID, request ID, spans, latencies, and token usage."""
 
     def __init__(
         self,
@@ -198,4 +190,3 @@ class ExecutionTracer:
             'model_calls': [mc.model_dump() for mc in self.model_calls],
             'spans': [span.model_dump() for span in self.spans]
         }
-

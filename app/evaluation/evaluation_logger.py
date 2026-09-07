@@ -10,7 +10,6 @@ logger = get_logger('evaluation.logger')
 DEFAULT_EVAL_LOG_DIR = Path('data/evaluation_logs')
 DEFAULT_EVAL_LOG_FILE = DEFAULT_EVAL_LOG_DIR / 'retrieval_eval_log.jsonl'
 
-
 def log_query_evaluation(
     query: str,
     intent: str,
@@ -26,7 +25,7 @@ def log_query_evaluation(
     log_path: Optional[Path] = None,
     extra_metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Records a structured query evaluation entry to JSONL."""
+
     log_file = log_path or DEFAULT_EVAL_LOG_FILE
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -56,9 +55,8 @@ def log_query_evaluation(
 
     return entry
 
-
 def record_state_evaluation(state: Dict[str, Any], log_path: Optional[Path] = None) -> Dict[str, Any]:
-    """Extracts evaluation metrics directly from ResearchState and records it."""
+
     retrieval_debug = state.get('retrieval_debug', {}) or {}
     grounding = state.get('grounding', {}) or {}
 

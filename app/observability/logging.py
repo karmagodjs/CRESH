@@ -5,13 +5,11 @@ import sys
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 
-# Sensitive key patterns to redact
 _SENSITIVE_KEY_PATTERN = re.compile(r'(?i)(api[_-]?key|secret|token|password|auth|credential|bearer)')
 _SECRET_VALUE_PATTERN = re.compile(r'(?i)(bearer\s+[a-zA-Z0-9_\-\.]{10,}|co_[a-zA-Z0-9]{20,}|sk-[a-zA-Z0-9]{20,})')
 
-
 def redact_secrets(data: Any) -> Any:
-    """Recursively redacts secret values and sensitive keys in data structures."""
+
     if isinstance(data, str):
         return _SECRET_VALUE_PATTERN.sub('[REDACTED_SECRET]', data)
     elif isinstance(data, dict):
@@ -26,22 +24,20 @@ def redact_secrets(data: Any) -> Any:
         return [redact_secrets(item) for item in data]
     return data
 
-
 class JSONFormatter(logging.Formatter):
-    """
-    Structured JSON log formatter compliant with CRI Phase 7 observability specs.
-    Output fields:
-    {
-      "timestamp": "...",
-      "level": "INFO",
-      "event": "...",
-      "request_id": "...",
-      "trace_id": "...",
-      "document_ids": [...],
-      "latency_ms": ...,
-      "status": "..."
-    }
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
 
     def format(self, record: logging.LogRecord) -> str:
         log_data: Dict[str, Any] = {
@@ -51,13 +47,11 @@ class JSONFormatter(logging.Formatter):
             'message': record.getMessage(),
         }
 
-        # Event name
         if hasattr(record, 'event') and record.event:
             log_data['event'] = str(record.event)
         elif hasattr(record, 'node') and record.node:
             log_data['event'] = f"{record.node}_event"
 
-        # Trace and request identifiers
         if hasattr(record, 'request_id') and record.request_id:
             log_data['request_id'] = str(record.request_id)
         if hasattr(record, 'trace_id') and record.trace_id:
@@ -65,13 +59,11 @@ class JSONFormatter(logging.Formatter):
         if hasattr(record, 'question_id') and record.question_id:
             log_data['question_id'] = str(record.question_id)
 
-        # Document scoping
         if hasattr(record, 'document_ids') and record.document_ids is not None:
             log_data['document_ids'] = list(record.document_ids)
         elif hasattr(record, 'document_id') and record.document_id:
             log_data['document_ids'] = [str(record.document_id)]
 
-        # Latency and status
         if hasattr(record, 'latency_ms') and record.latency_ms is not None:
             try:
                 log_data['latency_ms'] = round(float(record.latency_ms), 2)
@@ -81,7 +73,6 @@ class JSONFormatter(logging.Formatter):
         if hasattr(record, 'status') and record.status:
             log_data['status'] = str(record.status)
 
-        # Extra metadata
         if hasattr(record, 'metadata') and isinstance(record.metadata, dict):
             for k, v in record.metadata.items():
                 if k not in log_data:
@@ -92,7 +83,6 @@ class JSONFormatter(logging.Formatter):
 
         clean_log_data = redact_secrets(log_data)
         return json.dumps(clean_log_data)
-
 
 def log_event(
     logger: logging.Logger,
@@ -106,7 +96,7 @@ def log_event(
     msg: Optional[str] = None,
     **kwargs: Any
 ) -> None:
-    """Convenience helper to emit structured JSON events."""
+
     if isinstance(document_ids, str):
         document_ids = [document_ids]
 
@@ -124,7 +114,6 @@ def log_event(
     message_text = msg or f"Event '{event}' status: {status}"
     logger.log(log_level_int, message_text, extra=extra)
 
-
 def setup_logging(log_level: str = 'INFO', json_format: bool = False) -> None:
     root_logger = logging.getLogger('cri')
     root_logger.setLevel(getattr(logging, log_level.upper(), logging.INFO))
@@ -141,7 +130,6 @@ def setup_logging(log_level: str = 'INFO', json_format: bool = False) -> None:
         handler.setFormatter(standard_formatter)
     root_logger.addHandler(handler)
     root_logger.propagate = False
-
 
 def get_logger(name: Optional[str] = None) -> logging.Logger:
     if name:

@@ -172,19 +172,15 @@ class PDFParser:
         if self._is_metadata_or_stamp(first_line, is_single_line=(len(lines) == 1)):
             return False, '', '', 'other'
 
-        # 1. Abstract
         if first_line.lower() == 'abstract':
             return True, '', 'Abstract', 'abstract'
 
-        # 2. References
         if first_line.lower() in ['references', 'bibliography']:
             return True, '', 'References', 'references'
 
-        # 3. Conclusion
         if first_line.lower() in ['conclusion', 'conclusions']:
             return True, '', first_line.title(), 'conclusion'
 
-        # 4. Multi-line numbered heading (e.g. line 0 is "1", line 1 is "Introduction")
         if len(lines) >= 2 and re.match(r'^[1-9]\d?(?:\.\d+){0,2}$', lines[0]):
             title_cand = lines[1].strip()
             if re.search(r'[A-Za-z]{3,}', title_cand) and len(title_cand.split()) <= 7 and not title_cand.endswith(('.', ',', ';', ':')):
@@ -193,7 +189,6 @@ class PDFParser:
                     name = title_cand
                     return True, num, name, self._classify_section_type(name, num)
 
-        # 5. Single-line numbered heading (e.g. "1 Introduction" or "3.1 Pre-training BERT")
         m = re.match(r'^([1-9]\d?(?:\.\d+){0,2})\s+([A-Z][A-Za-z0-9\s,\-:–—]+)$', first_line)
         if m:
             num = m.group(1)
@@ -201,7 +196,6 @@ class PDFParser:
             if len(name.split()) <= 7 and not name.endswith(('.', ',', ';', ':')) and not ('[' in name or ']' in name):
                 return True, num, name, self._classify_section_type(name, num)
 
-        # 6. Specific well-known unnumbered headings
         known_unnum = {
             'introduction': 'introduction',
             'related work': 'related_work',
@@ -217,7 +211,6 @@ class PDFParser:
         if first_line.lower() in known_unnum:
             return True, '', first_line.title(), known_unnum[first_line.lower()]
 
-        # 7. Appendix
         if re.match(r'^Appendix(?:\s+[A-Z])?(?::|\s+|$)', first_line, re.I):
             return True, '', first_line, 'appendix'
 
@@ -307,7 +300,7 @@ class PDFParser:
         return sections
 
     def _join_content_parts(self, parts: List[str]) -> str:
-        """Joins text blocks, healing sentences split across page or column breaks."""
+
         if not parts:
             return ""
 

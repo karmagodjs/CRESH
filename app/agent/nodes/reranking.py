@@ -10,7 +10,6 @@ from app.observability.logging import get_logger
 
 logger = get_logger('node.reranking')
 
-
 def score_candidate_evidence(
     candidate: RerankedResult,
     query: str,
@@ -20,26 +19,23 @@ def score_candidate_evidence(
     requested_facts: Optional[List[str]] = None,
     target_concept: Optional[str] = None
 ) -> Dict[str, Any]:
-    """
-    Explicit evidence relevance, answerability scoring, and anti-contamination layer.
-    Computes:
-    final_evidence_score = rerank_score + 0.3*entity_match + 0.3*intent_match + 0.3*section_match
-                           + 0.5*answerability + 0.2*specificity + anti_contamination_penalty
-    """
+\
+\
+\
+\
+\
+
     doc_text = f"{candidate.context_header}\n{candidate.text}" if candidate.context_header else candidate.text
     doc_lower = doc_text.lower()
     q_low = query.lower()
 
-    # 1. Semantic relevance (Rerank score)
     rerank_score = max(0.0, min(1.0, candidate.rerank_score))
 
-    # 2. Section Match & Ablation Detection
     section_match = 0.0
     sec_type = candidate.metadata.section_type.lower()
     sec_name = (candidate.metadata.section_name or candidate.metadata.section_title or '').lower()
     sec_num = str(candidate.metadata.section_number or '')
 
-    # Feature-based approach (Section 5.3) is NOT an ablation study
     is_feature_based_sec = 'feature-based' in sec_name or 'feature-based' in doc_lower or 'section: 5.3' in doc_lower
     is_ablation_sec = (
         ('effect of' in sec_name or 'ablation' in sec_name or 'section: effect of' in doc_lower or 'section: ablation' in doc_lower or sec_num in ['5.1', '5.2'])
@@ -54,7 +50,6 @@ def score_candidate_evidence(
         elif any(p in doc_lower for p in section_preferences):
             section_match = 0.4
 
-    # Appendix / references penalties
     is_appendix = (
         'section: appendix' in doc_lower
         or 'section: references' in doc_lower
@@ -66,7 +61,6 @@ def score_candidate_evidence(
     if is_appendix and not any(k in q_low for k in ['appendix', 'reference']):
         section_match -= 0.50
 
-    # 3. Entity & Concept Match
     entity_match = 0.0
     effective_concept = target_concept.lower() if target_concept else None
 
@@ -136,7 +130,6 @@ def score_candidate_evidence(
             matched_w = sum(1 for w in q_words if w in doc_lower)
             entity_match = min(1.0, matched_w / len(q_words))
 
-    # 4. Intent Match
     intent_match = 0.0
     if query_intent == 'contribution':
         if any(k in doc_lower for k in ['contributions of our paper', 'our contributions are', 'we demonstrate the importance', 'advances the state of the art for eleven']):
@@ -182,7 +175,6 @@ def score_candidate_evidence(
         elif 'we introduce' in doc_lower or 'stands for' in doc_lower:
             intent_match = 0.8
 
-    # 5. Answerability
     answerability = 0.1
     if effective_concept in ['next sentence prediction', 'nsp']:
         has_nsp_mechanism = any(k in doc_lower for k in ['isnext', 'notnext', '50% of the time', 'actual next sentence', 'random sentence', 'binarized'])
@@ -252,14 +244,11 @@ def score_candidate_evidence(
     else:
         answerability = max(0.2, rerank_score)
 
-    # 6. Specificity
     text_len = len(candidate.text.split())
     specificity = min(0.5, text_len / 200.0 * 0.5)
 
-    # 7. Anti-Contamination Penalties (Requirement 7)
     anti_contamination_penalty = 0.0
 
-    # A. Specific NSP query -> Heavily penalize unrelated MLM chunks
     is_pure_nsp_q = (
         (effective_concept in ['next sentence prediction', 'nsp']) or
         (any(k in q_low for k in ['next sentence', 'nsp']) and not any(k in q_low for k in ['masked language', 'mlm', 'two pre-training', 'both tasks', 'two tasks']))
@@ -269,7 +258,6 @@ def score_candidate_evidence(
         if is_mlm_chunk:
             anti_contamination_penalty = -0.75
 
-    # B. Specific MLM query -> Heavily penalize unrelated NSP chunks
     is_pure_mlm_q = (
         (effective_concept in ['masked language modeling', 'mlm']) or
         (any(k in q_low for k in ['masked language', 'mlm', 'mask token']) and not any(k in q_low for k in ['next sentence', 'nsp', 'two pre-training', 'both tasks', 'two tasks']))
@@ -279,7 +267,6 @@ def score_candidate_evidence(
         if is_nsp_chunk:
             anti_contamination_penalty = -0.75
 
-    # C. Specific Fine-Tuning query -> Heavily penalize unrelated pre-training chunks
     is_pure_ft_q = (
         (effective_concept == 'fine-tuning') and
         not any(k in q_low for k in ['feature-based', 'compare', 'difference', 'vs', 'pre-training'])
@@ -288,7 +275,6 @@ def score_candidate_evidence(
         if ('task #1' in doc_lower or 'task #2' in doc_lower or 'pre-training bert' in doc_lower) and 'fine-tuning' not in doc_lower:
             anti_contamination_penalty = -0.60
 
-    # D. Specific Benchmark query -> Heavily penalize ablation chunks
     is_pure_benchmark_q = (
         any(k in q_low for k in ['glue', 'squad']) and
         not any(k in q_low for k in ['ablation', 'without', 'no nsp'])
@@ -296,7 +282,6 @@ def score_candidate_evidence(
     if is_pure_benchmark_q and is_ablation_sec:
         anti_contamination_penalty = -0.60
 
-    # E. Specific No-NSP ablation query -> Boost No-NSP, penalize non-ablation
     if query_wants_ablation:
         if 'no nsp' in doc_lower or 'without' in doc_lower or 'effect of pre-training' in doc_lower:
             anti_contamination_penalty = 0.50
@@ -340,9 +325,8 @@ def score_candidate_evidence(
         'selection_reason': reason
     }
 
-
 def are_chunks_duplicate(c1: RerankedResult, c2: RerankedResult) -> bool:
-    """Detects near-duplicate chunks based on token overlap or identical section prefixes."""
+
     if c1.chunk_id == c2.chunk_id:
         return True
     w1 = set(re.findall(r'\w+', c1.text.lower()))
@@ -357,7 +341,6 @@ def are_chunks_duplicate(c1: RerankedResult, c2: RerankedResult) -> bool:
         return True
     return False
 
-
 def select_diversified_evidence(
     reranked: List[RerankedResult],
     query: str,
@@ -368,11 +351,11 @@ def select_diversified_evidence(
     top_k: int = 5,
     required_concepts: Optional[List[str]] = None
 ) -> Tuple[List[RerankedResult], Dict[str, str], Dict[str, List[RerankedResult]]]:
-    """
-    Selects top evidence chunks with explicit concept coverage, answerability, and deduplication.
-    Returns:
-        (selected_chunks, selection_reasons, evidence_by_concept)
-    """
+\
+\
+\
+\
+
     concepts = required_concepts or []
     evidence_by_concept: Dict[str, List[RerankedResult]] = {}
     selected: List[RerankedResult] = []
@@ -382,7 +365,7 @@ def select_diversified_evidence(
     def try_add(r: RerankedResult, reason: str, concept: Optional[str] = None) -> bool:
         if r.chunk_id in selected_ids:
             return False
-        # Diversity check against already selected chunks
+
         for s in selected:
             if are_chunks_duplicate(r, s):
                 return False
@@ -394,12 +377,11 @@ def select_diversified_evidence(
             evidence_by_concept.setdefault(concept, []).append(r)
         return True
 
-    # 1. Multi-concept queries (Comparison, Multi-part tasks, Multi-benchmark)
     if len(concepts) >= 2:
         budget_per_concept = max(2, top_k // len(concepts))
         for c in concepts:
             evidence_by_concept[c] = []
-            # Score all candidates specifically for concept c
+
             concept_scored: List[Tuple[float, RerankedResult, str]] = []
             for r in reranked:
                 sc = score_candidate_evidence(
@@ -426,7 +408,6 @@ def select_diversified_evidence(
                     if try_add(cand_copy, cand_copy.selection_reason, concept=c):
                         added_for_c += 1
 
-    # 2. Single-concept queries (Definition, Mechanism, Contributions, Ablation)
     else:
         main_concept = concepts[0] if concepts else (target_entities[0] if target_entities else "core_topic")
         evidence_by_concept[main_concept] = []
@@ -457,7 +438,6 @@ def select_diversified_evidence(
                 if try_add(cand_copy, reason, concept=main_concept):
                     pass
 
-    # 3. Overview queries: Ensure structural coverage (Abstract, Intro, Method, Results)
     if query_intent == 'overview' and len(selected) < top_k:
         target_types = ['abstract', 'introduction', 'methodology', 'conclusion', 'experiments']
         for stype in target_types:
@@ -468,11 +448,9 @@ def select_diversified_evidence(
                     try_add(r, f"Structural overview component: {stype}", concept="overview")
                     break
 
-    # 4. Fallback: if nothing selected, take top candidate
     if not selected and reranked:
         try_add(reranked[0], "Top semantic candidate fallback", concept="fallback")
 
-    # 5. Neighbor Expansion on selected evidence (Continuity)
     vs = get_vector_store()
     for s in selected:
         doc_id = s.metadata.document_id
@@ -484,7 +462,6 @@ def select_diversified_evidence(
                 s.text = f"{s.text.strip()}\n\n{next_p[:300]}..."
 
     return selected, selection_reasons, evidence_by_concept
-
 
 def reranking_node(state: ResearchState) -> Dict[str, Any]:
     start_time = time.perf_counter()
@@ -539,7 +516,6 @@ def reranking_node(state: ResearchState) -> Dict[str, Any]:
 
     allowed_set = set(current_doc_ids)
 
-    # Reconstitute candidate chunks
     candidates: List[SearchResult] = []
     vs = get_vector_store()
     for doc in retrieved_docs:
@@ -572,15 +548,12 @@ def reranking_node(state: ResearchState) -> Dict[str, Any]:
             )
         )
 
-    # Rerank candidates using Cohere Rerank with ORIGINAL USER QUESTION (unexpanded for chunk purity)
     reranker = CohereReranker(top_k=len(candidates))
     reranked_results = reranker.rerank(query=original_query, candidates=candidates, top_n=len(candidates))
 
-    # Provenance guard
     if current_doc_ids:
         reranked_results = [r for r in reranked_results if r.metadata.document_id in allowed_set]
 
-    # Explicit concept-aware evidence scoring & selection
     diversified_results, selection_reasons, evidence_by_concept = select_diversified_evidence(
         reranked=reranked_results,
         query=original_query,
@@ -615,7 +588,6 @@ def reranking_node(state: ResearchState) -> Dict[str, Any]:
         for idx, r in enumerate(diversified_results)
     ]
 
-    # Concept-Level Coverage Evaluation (Requirement 12 & 14)
     covered_concepts = [
         c for c in required_concepts
         if c in evidence_by_concept and len(evidence_by_concept[c]) > 0 and any((e.answerability_score or 0.0) >= 0.25 or (e.final_evidence_score or 0.0) >= 0.20 for e in evidence_by_concept[c])
@@ -675,7 +647,6 @@ def reranking_node(state: ResearchState) -> Dict[str, Any]:
         ]
     }
 
-    # Diagnostic Output for selected evidence
     diag_evidence = [
         f"\n==================== SELECTED EVIDENCE PASSAGES ({len(reranked_docs)}) ====================",
         f"OVERALL COVERAGE: {len(covered_concepts)}/{len(required_concepts)} ({coverage_score * 100:.0f}%) | CONCEPTS: {required_concepts}",

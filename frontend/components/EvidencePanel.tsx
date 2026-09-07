@@ -28,7 +28,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [activeTab, setActiveTab] = useState<"all" | "supporting" | "contradicting">("all");
 
-  // Scroll active passage into view when citation is clicked
   useEffect(() => {
     if (selectedCitationIndex !== null && itemRefs.current[selectedCitationIndex]) {
       const el = itemRefs.current[selectedCitationIndex];
@@ -51,7 +50,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
 
   const hasEvidence = Boolean(queryResponse && !isAbstention && citations.length > 0);
 
-  // Classify citations: in scientific research without controversy, citations supporting the answer are supporting
   const supportingCount = citations.length;
   const contradictingCount = 0;
 
@@ -67,7 +65,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
       className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-[14px] select-none overflow-hidden shadow-xs transition-colors ${className || ""}`}
       aria-label="Evidence & Verification Workspace"
     >
-      {/* SECTION 21: Header with Verification Badge */}
       <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
@@ -88,7 +85,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
         )}
       </div>
 
-      {/* SECTION 22: Evidence Tabs (All, Supporting, Contradicting) - Only shown after query when evidence exists */}
       {hasEvidence && (
         <div className="p-2.5 border-b border-[#2A2F35] bg-[#15171A] shrink-0">
           <div className="grid grid-cols-3 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
@@ -131,9 +127,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
         </div>
       )}
 
-      {/* Scrollable Evidence Content */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-        {/* SECTION 21: BEFORE QUERY / NO EVIDENCE STATE (Calm, centered, clean, no tabs) */}
         {!hasEvidence && !isAbstention && (
           <div className="h-full min-h-[160px] flex flex-col items-center justify-center text-center p-6 space-y-2">
             <p className="text-xs font-semibold text-cri-textPrimary">No evidence yet</p>
@@ -143,7 +137,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
           </div>
         )}
 
-        {/* ABSTENTION STATE */}
         {queryResponse && isAbstention && (
           <div className="p-3.5 rounded-[12px] border border-cri-orange/60 bg-[#1A1E22] space-y-2">
             <div className="flex items-center gap-1.5 text-cri-orange">
@@ -159,14 +152,12 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
           </div>
         )}
 
-        {/* SECTION 22 & 23: EVIDENCE CARDS */}
         {queryResponse && !isAbstention && filteredCitations.length > 0 && (
           <div className="space-y-2.5">
             {filteredCitations.map((cite) => {
               const idx = cite.citation_index;
               const isSelected = selectedCitationIndex === idx;
 
-              // Find corresponding reranked passage text
               const matchedReranked = rerankedPassages.find(
                 (p) => p.chunk_id === cite.chunk_id || p.section_title === cite.section_title
               );
@@ -186,7 +177,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
                       : "bg-[#171A1D] border-[#2A2F35] hover:bg-[#1A1E22] border-l-[3px] border-l-transparent"
                   }`}
                 >
-                  {/* Card Header: Number, Title, Classification Badge, Confidence */}
                   <div className="flex items-start justify-between gap-1.5 mb-1.5">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
                       <span
@@ -207,7 +197,6 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      {/* Classification Badge (Supporting: green) */}
                       <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-cri-success/10 text-cri-success border border-cri-success/30 font-medium">
                         Supporting
                       </span>
@@ -217,12 +206,10 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
                     </div>
                   </div>
 
-                  {/* Quoted Evidence Snippet */}
                   <p className="text-[11px] text-cri-textSecondary leading-relaxed line-clamp-5 font-sans italic my-2">
                     &ldquo;{passageText}&rdquo;
                   </p>
 
-                  {/* Document Title, Page & Jump Icon */}
                   <div
                     className="pt-2 border-t border-[#2A2F35]/60 flex items-center justify-between text-[10px] text-cri-textMuted font-mono hover:text-cri-orange transition-colors cursor-pointer"
                     onClick={(e) => {

@@ -13,7 +13,6 @@ from app.retrieval.vector_store import get_vector_store
 NO_DOC_REFUSAL = "No document is currently selected. Please upload a document before asking questions."
 INSUFFICIENT_EVIDENCE_REFUSAL = "I don't have sufficient evidence in the selected document to answer this question."
 
-
 @pytest.fixture(scope="module")
 def setup_bert_and_medusa():
     vs = get_vector_store()
@@ -39,7 +38,6 @@ def setup_bert_and_medusa():
         "bert_id": bert_doc.document_id,
         "medusa_id": medusa_doc.document_id,
     }
-
 
 def make_initial_state(query: str, document_ids=None):
     doc_ids = document_ids or []
@@ -78,9 +76,8 @@ def make_initial_state(query: str, document_ids=None):
         "execution_trace": [],
     }
 
-
 def test_a_no_document_selected_bert_query(setup_bert_and_medusa):
-    """TEST A: No document selected, query 'What is BERT?' -> Hard refusal, 0 generation calls."""
+
     client = get_cohere_client()
     client.reset_generation_call_count()
 
@@ -100,9 +97,8 @@ def test_a_no_document_selected_bert_query(setup_bert_and_medusa):
     assert "Blocked (No Document Selected)" in final_state.get("execution_trace", [])
     assert "Generation (Cohere Command)" not in final_state.get("execution_trace", [])
 
-
 def test_b_no_document_selected_medusa_query(setup_bert_and_medusa):
-    """TEST B: No document selected, query 'What is Medusa decoding?' -> Hard refusal, 0 generation calls."""
+
     client = get_cohere_client()
     client.reset_generation_call_count()
 
@@ -118,9 +114,8 @@ def test_b_no_document_selected_medusa_query(setup_bert_and_medusa):
     assert final_state["citations"] == []
     assert client.generation_call_count == 0
 
-
 def test_c_no_document_selected_python_query(setup_bert_and_medusa):
-    """TEST C: No document selected, query 'What is Python?' -> Hard refusal, 0 generation calls."""
+
     client = get_cohere_client()
     client.reset_generation_call_count()
 
@@ -136,9 +131,8 @@ def test_c_no_document_selected_python_query(setup_bert_and_medusa):
     assert final_state["citations"] == []
     assert client.generation_call_count == 0
 
-
 def test_d_bert_selected_mlm_query(setup_bert_and_medusa):
-    """TEST D: BERT selected, query 'What is Masked Language Modeling?' -> Answers from BERT evidence, confidence >= 0.8."""
+
     bert_id = setup_bert_and_medusa["bert_id"]
     client = get_cohere_client()
     client.reset_generation_call_count()
@@ -163,9 +157,8 @@ def test_d_bert_selected_mlm_query(setup_bert_and_medusa):
 
     assert client.generation_call_count >= 1
 
-
 def test_e_bert_selected_medusa_query_negative(setup_bert_and_medusa):
-    """TEST E: BERT selected, query 'What is Medusa decoding?' -> Refusal due to insufficient evidence, no leakage."""
+
     bert_id = setup_bert_and_medusa["bert_id"]
     graph = get_research_graph()
     initial_state = make_initial_state("What is Medusa decoding?", document_ids=[bert_id])
@@ -177,24 +170,20 @@ def test_e_bert_selected_medusa_query_negative(setup_bert_and_medusa):
     assert final_state.get("grounding_status") in ["INSUFFICIENT", "INSUFFICIENT_EVIDENCE"]
     assert len(final_state.get("citations", [])) == 0
 
-    # Ensure no Medusa content leaked into answer
     assert "multiple decoding heads" not in answer
     assert "speculative decoding" not in answer
 
-
 def test_f_session_reset_deselection(setup_bert_and_medusa):
-    """TEST F: Select BERT -> ask question -> clear/deselect document -> ask 'What is BERT?' -> Blocked with 0 generation calls."""
+
     bert_id = setup_bert_and_medusa["bert_id"]
     client = get_cohere_client()
     graph = get_research_graph()
 
-    # Step 1: BERT selected
     state_step1 = make_initial_state("What is BERT?", document_ids=[bert_id])
     res_step1 = graph.invoke(state_step1)
     assert len(res_step1["answer"]) > 0
     assert res_step1["confidence"] > 0.0
 
-    # Step 2 & 3: Clear/deselect document and reset generation call count
     client.reset_generation_call_count()
     state_step2 = make_initial_state("What is BERT?", document_ids=[])
     res_step2 = graph.invoke(state_step2)
@@ -207,14 +196,12 @@ def test_f_session_reset_deselection(setup_bert_and_medusa):
     assert res_step2["citations"] == []
     assert client.generation_call_count == 0
 
-
 def test_g_ingestion_without_selection(setup_bert_and_medusa):
-    """TEST G: Ingestion without selection -> select neither -> ask 'What is Medusa?' -> Blocked with 0 generation calls."""
+
     client = get_cohere_client()
     client.reset_generation_call_count()
     graph = get_research_graph()
 
-    # Both papers are ingested in the fixture, but neither is selected
     state_no_doc = make_initial_state("What is Medusa?", document_ids=[])
     res_no_doc = graph.invoke(state_no_doc)
 
@@ -226,9 +213,8 @@ def test_g_ingestion_without_selection(setup_bert_and_medusa):
     assert res_no_doc["citations"] == []
     assert client.generation_call_count == 0
 
-
 def test_h_document_isolation_sanity(setup_bert_and_medusa):
-    """TEST H: Document isolation sanity -> when BERT selected, only BERT chunks appear in retrieved and candidates."""
+
     bert_id = setup_bert_and_medusa["bert_id"]
     medusa_id = setup_bert_and_medusa["medusa_id"]
     graph = get_research_graph()
@@ -258,14 +244,12 @@ def test_h_document_isolation_sanity(setup_bert_and_medusa):
         assert cit["document_id"] == bert_id
         assert cit["document_id"] != medusa_id
 
-
 def test_api_no_document_selected():
-    """FastAPI endpoint verification: /query with no selected documents returns BLOCKED refusal."""
+
     client = TestClient(app)
     cohere_client = get_cohere_client()
     cohere_client.reset_generation_call_count()
 
-    # Test with selected_document_ids=[]
     response = client.post("/query", json={"query": "What is BERT?", "selected_document_ids": []})
     assert response.status_code == 200
     data = response.json()
@@ -280,7 +264,6 @@ def test_api_no_document_selected():
     assert data["reranked_passages"] == []
     assert cohere_client.generation_call_count == 0
 
-    # Test with allowed_document_ids=[]
     response2 = client.post("/query", json={"query": "What is Medusa?", "allowed_document_ids": []})
     assert response2.status_code == 200
     data2 = response2.json()

@@ -17,11 +17,6 @@ from evaluation.retrieval_evaluator import (
     is_chunk_gold_relevant,
 )
 
-
-# =====================================================================
-# 1. METRIC TESTS
-# =====================================================================
-
 class TestRecallAtK:
     def test_empty_list(self):
         assert compute_recall_at_k([], k=5) == 0.0
@@ -48,7 +43,6 @@ class TestRecallAtK:
     def test_no_relevant(self):
         assert compute_recall_at_k([0, 0, 0, 0, 0], k=5) == 0.0
 
-
 class TestPrecisionAtK:
     def test_empty_list(self):
         assert compute_precision_at_k([], k=5) == 0.0
@@ -66,7 +60,6 @@ class TestPrecisionAtK:
 
     def test_none_relevant(self):
         assert compute_precision_at_k([0, 0, 0, 0, 0], k=5) == 0.0
-
 
 class TestMRRAtK:
     def test_empty_list(self):
@@ -92,7 +85,6 @@ class TestMRRAtK:
     def test_no_relevant(self):
         assert compute_mrr_at_k([0, 0, 0, 0, 0], k=10) == 0.0
 
-
 class TestNDCGAtK:
     def test_empty_list(self):
         assert compute_ndcg_at_k([], k=10) == 0.0
@@ -114,11 +106,6 @@ class TestNDCGAtK:
         assert 0.0 < ndcg_suboptimal < 1.0
         assert ndcg_optimal > ndcg_suboptimal
 
-
-# =====================================================================
-# 2. SEMANTIC GOLD RELEVANCE MATCHING TESTS
-# =====================================================================
-
 class TestSemanticGoldRelevance:
     @pytest.fixture
     def sample_gold(self):
@@ -132,7 +119,7 @@ class TestSemanticGoldRelevance:
         )
 
     def test_strict_document_isolation(self, sample_gold):
-        # Chunk has identical content but from a different document ID
+
         alien_chunk = {
             "text": "Task #1: Masked LM. In order to train a deep bidirectional representation, we simply mask some percentage of the input tokens at random, and then predict those masked tokens.",
             "metadata": {
@@ -161,7 +148,7 @@ class TestSemanticGoldRelevance:
         assert res.score >= 0.9
 
     def test_isolated_concept_without_section(self, sample_gold):
-        # Mentions one concept in passing in Related Work without section match
+
         passing_chunk = {
             "text": "Existing approaches include predict those masked tokens concepts from Cloze tests.",
             "metadata": {

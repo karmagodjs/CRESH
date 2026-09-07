@@ -67,7 +67,6 @@ CRITICAL ANSWER-TARGETING RULES:
 
 Generate your complete, rigorous grounded response:"""
 
-
 OVERVIEW_GENERATION_PROMPT = """You are Cohere Research Intelligence, an expert AI research scientist.
 Synthesize a comprehensive, cohesive, and strictly grounded scientific overview of the paper based ONLY on the provided evidence passages.
 

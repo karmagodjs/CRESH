@@ -11,9 +11,9 @@ def test_qdrant_vector_store_crud(in_memory_vector_store: QdrantVectorStore, moc
     assert count_added == 2
     assert in_memory_vector_store.count() == 2
     q_vec = mock_cohere_client.embed(['Query'])[0]
-    # Unscoped similarity_search must return []
+
     assert in_memory_vector_store.similarity_search(query_vector=q_vec, top_k=2) == []
-    # Scoped similarity_search returns results
+
     results = in_memory_vector_store.similarity_search(query_vector=q_vec, top_k=2, allowed_document_ids=['doc1', 'doc2'])
     assert len(results) == 2
     deleted = in_memory_vector_store.delete_document('doc1')

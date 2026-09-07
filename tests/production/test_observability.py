@@ -8,15 +8,13 @@ from app.observability.tracing import (
 )
 from app.agent.graph import get_research_graph
 
-
 def test_redact_secrets():
-    # String pattern matching
+
     raw_key = "Bearer co_1234567890abcdef1234567890"
     redacted = redact_secrets(raw_key)
     assert "co_1234567890" not in redacted
     assert "[REDACTED_SECRET]" in redacted
 
-    # Dictionary key matching
     sensitive_dict = {
         "api_key": "secret_cohere_key_xyz",
         "COHERE_API_KEY": "co_abcdef1234567890",
@@ -28,7 +26,6 @@ def test_redact_secrets():
     assert cleaned["COHERE_API_KEY"] == "[REDACTED]"
     assert cleaned["nested"]["bearer_token"] == "[REDACTED]"
     assert cleaned["safe_field"] == "public_data"
-
 
 def test_json_formatter():
     formatter = JSONFormatter()
@@ -58,7 +55,6 @@ def test_json_formatter():
     assert parsed["status"] == "success"
     assert "timestamp" in parsed
 
-
 def test_compute_percentiles():
     samples = [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
     stats = compute_percentiles(samples)
@@ -66,7 +62,6 @@ def test_compute_percentiles():
     assert stats["p50"] == 50.0 or stats["p50"] == 60.0
     assert stats["p95"] >= 90.0
     assert stats["p99"] == 100.0
-
 
 def test_execution_tracer():
     tracer = ExecutionTracer(
@@ -97,7 +92,6 @@ def test_execution_tracer():
     assert "dense_search" in dump["latency_breakdown"]
     assert len(dump["model_calls"]) == 1
     assert dump["model_calls"][0]["operation"] == "chat_generate"
-
 
 def test_trace_propagation_through_graph():
     graph = get_research_graph()

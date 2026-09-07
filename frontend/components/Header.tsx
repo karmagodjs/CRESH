@@ -43,14 +43,12 @@ export const Header: React.FC<HeaderProps> = ({
       className="h-[64px] mx-[10px] mt-2 mb-0 px-5 rounded-[16px] bg-cri-headerBg border border-cri-border flex items-center justify-between shrink-0 select-none z-30 shadow-xs transition-colors duration-200"
       aria-label="Workspace Header"
     >
-      {/* LEFT: Product Identity */}
       <div className="flex items-center min-w-0">
         <span className="text-[18px] sm:text-[19px] font-bold tracking-tight text-cri-textPrimary font-sans">
           CRI Research
         </span>
       </div>
 
-      {/* CENTER: Research (Hidden on mobile <= 768px, visible on desktop) */}
       <div className="hidden md:flex items-center justify-center">
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-[10px] bg-cri-surfaceElevated border border-cri-border text-[13px] font-semibold text-cri-textPrimary shadow-xs">
           <span className="w-2 h-2 rounded-full bg-cri-orange shrink-0" />
@@ -58,7 +56,6 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* RIGHT: Theme toggle only (44px touch target) */}
       <div className="flex items-center justify-end">
         <button
           type="button"

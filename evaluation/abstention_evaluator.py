@@ -42,7 +42,6 @@ from evaluation.end_to_end_evaluator import (
 from evaluation.reranker_diagnostic_runner import expand_query_clean
 from evaluation.retrieval_evaluator import GoldQuery, is_chunk_gold_relevant
 
-
 class GoldAbstentionItem(BaseModel):
     question_id: str
     question: str
@@ -53,7 +52,6 @@ class GoldAbstentionItem(BaseModel):
     gold_document_id: str = ""
     gold_section_keywords: List[str] = Field(default_factory=list)
     must_abstain: bool = False
-
 
 class QueryTrace(BaseModel):
     question_id: str
@@ -78,7 +76,6 @@ class QueryTrace(BaseModel):
     generation_latency_ms: float
     total_latency_ms: float
 
-
 class ConfusionMatrix(BaseModel):
     true_positives: int
     true_negatives: int
@@ -92,7 +89,6 @@ class ConfusionMatrix(BaseModel):
     f1_score: float
     abstention_accuracy: float
     false_answer_rate: float
-
 
 class ConfigEvaluationSummary(BaseModel):
     config_name: str
@@ -115,20 +111,19 @@ class ConfigEvaluationSummary(BaseModel):
     p95_total_latency_ms: float
     focus_traces: List[QueryTrace]
 
-
 def evaluate_question_alignment(
     query: str,
     answer: str,
     is_abstention: bool,
     must_abstain: bool
 ) -> Tuple[float, str]:
-    """
-    Evaluates whether the first sentence directly answers the specific question.
-    Returns (score, first_sentence):
-      1.0 = Direct factual answer first sentence
-      0.5 = Partially direct
-      0.0 = Generic paper summary / preamble first sentence
-    """
+\
+\
+\
+\
+\
+\
+
     if must_abstain:
         if is_abstention:
             return 1.0, answer.split('\n')[0]
@@ -138,7 +133,6 @@ def evaluate_question_alignment(
     if is_abstention:
         return 0.0, answer.split('\n')[0]
 
-    # Find the first non-header substantive sentence
     lines = answer.split('\n')
     first_substantive = ""
     for l in lines:
@@ -157,7 +151,6 @@ def evaluate_question_alignment(
     first_low = first_substantive.lower()
     q_low = query.lower()
 
-    # Generic opening markers
     generic_preambles = [
         'the paper introduces bert',
         'in this paper, the authors',
@@ -174,7 +167,6 @@ def evaluate_question_alignment(
     if not is_overview_q and any(p in first_low for p in generic_preambles):
         return 0.0, first_substantive
 
-    # Direct answer triggers
     direct_match = False
     if 'stand for' in q_low and 'stands for bidirectional' in first_low:
         direct_match = True
@@ -222,7 +214,6 @@ def evaluate_question_alignment(
 
     return 0.0, first_substantive
 
-
 def assign_error_taxonomy(
     must_abstain: bool,
     is_abstention: bool,
@@ -235,17 +226,17 @@ def assign_error_taxonomy(
     citation_validity: float,
     question_alignment: float
 ) -> str:
-    """
-    Mutually exclusive error taxonomy:
-      - ABSTENTION_FAILURE: System answered when it should have abstained.
-      - RETRIEVAL_FAILURE: Correct evidence not retrieved in top 10.
-      - EVIDENCE_SELECTION_FAILURE: Evidence was in candidate pool but dropped before top 10.
-      - GROUNDING_FAILURE: Generated answer contains unsupported claims.
-      - GENERATION_FAILURE: Evidence present in top 10, but answer missed key concepts (<50% coverage).
-      - ANSWER_TARGETING_FAILURE: Answer is grounded and evidence present, but fails to directly answer the question first (alignment < 0.5).
-      - CITATION_FAILURE: Answer correct but citation missing or invalid (<80% validity).
-      - NO_FAILURE: Correct, targeted, grounded, properly cited.
-    """
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+
     if must_abstain:
         if is_abstention:
             return "NO_FAILURE"
@@ -273,7 +264,6 @@ def assign_error_taxonomy(
         return "CITATION_FAILURE"
 
     return "NO_FAILURE"
-
 
 def run_configuration(
     config_name: str,
@@ -317,7 +307,6 @@ def run_configuration(
 
         t_total_start = time.perf_counter()
 
-        # Step 1: Retrieval via next-gen candidate
         q_vec = retriever.cohere_client.embed([q_exp], input_type="search_query")[0]
         dense_cands = retriever.vector_store.similarity_search(
             query_vector=q_vec, top_k=25, allowed_document_ids=[target_doc_id]
@@ -346,7 +335,6 @@ def run_configuration(
             for r in reranked_cands
         ]
 
-        # Step 2: Build State for Production Nodes
         state = {
             "query": q,
             "original_query": q,
@@ -362,11 +350,9 @@ def run_configuration(
             "token_usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
         }
 
-        # Step 3: Grounding Gate
         ev_gate_res = evidence_check_node(state)
         state.update(ev_gate_res)
 
-        # Step 4: Generation / Refusal
         t_gen_start = time.perf_counter()
         if state.get("evidence_sufficient"):
             gen_res = generation_node(state)
@@ -407,7 +393,6 @@ def run_configuration(
             else:
                 tp += 1
 
-        # Metrics computation
         cov_score, matched_c, missing_c = check_concept_coverage(
             item.required_concepts, ans_text, is_abstention, must_abstain
         )
@@ -546,7 +531,6 @@ def run_configuration(
         focus_traces=focus_traces
     )
 
-
 def verify_no_document_precondition() -> Dict[str, Any]:
     state = {
         "query": "What is BERT?",
@@ -577,7 +561,6 @@ def verify_no_document_precondition() -> Dict[str, Any]:
         "evidence_sufficient": state.get("evidence_sufficient"),
         "grounding_status": state.get("grounding_status")
     }
-
 
 def run_phase6_benchmark(
     dataset_path: Path,
@@ -656,7 +639,6 @@ def run_phase6_benchmark(
     print(f"  Summary saved to: {output_summary_path}\n")
 
     return report_dict
-
 
 def generate_markdown_summary(report_data: Dict[str, Any], output_path: Path):
     b = report_data["baseline_summary"]
@@ -771,7 +753,6 @@ def generate_markdown_summary(report_data: Dict[str, Any], output_path: Path):
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-
 
 if __name__ == "__main__":
     dataset_file = Path("evaluation/datasets/bert_abstention_gold.json")

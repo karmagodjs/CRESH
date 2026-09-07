@@ -94,4 +94,3 @@ class ResearchState(TypedDict, total=False):
     token_usage: Dict[str, Any]
     model_accounting: List[Dict[str, Any]]
     execution_trace: List[str]
-

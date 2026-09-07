@@ -47,7 +47,6 @@ from evaluation.retrieval_evaluator import (
 
 logger = get_logger("reranker_diagnostic_runner")
 
-
 class DiagnosticMetrics(BaseModel):
     name: str
     display_name: str
@@ -67,7 +66,6 @@ class DiagnosticMetrics(BaseModel):
     total_rerank_calls: int
     total_api_calls: int
 
-
 class FormulationDelta(BaseModel):
     config_name: str
     display_name: str
@@ -82,19 +80,14 @@ class FormulationDelta(BaseModel):
     delta_avg_latency_ms: float
     rel_change_latency_pct: float
 
-
-# =====================================================================
-# 1. STRICT ZERO-LEAKAGE QUERY REWRITERS
-# =====================================================================
-
 def expand_query_clean(q: str) -> str:
-    """
-    Expands question using ONLY terms and syntactic rephrasings derivable directly
-    from the question tokens itself. Zero external answers or gold concepts injected.
-    """
+\
+\
+\
+
     ql = q.lower()
     additions = []
-    
+
     if "activation" in ql:
         additions.append("activation function non-linear layer operation")
     if "intermediate" in ql or "hidden" in ql:
@@ -116,11 +109,10 @@ def expand_query_clean(q: str) -> str:
 
     return f"{q} {' '.join(additions)}"
 
-
 def generate_multi_queries_clean(q: str) -> List[str]:
-    """
-    Generates 3 semantically distinct retrieval queries using ONLY terms from the user question.
-    """
+\
+\
+
     clean = re.sub(r"[^\w\s]", "", q).strip()
     words = [w for w in clean.split() if w.lower() not in {"what", "is", "are", "the", "in", "of", "used", "does", "did", "for", "how", "this", "paper", "to"}]
     subject = " ".join(words) if words else clean
@@ -130,11 +122,10 @@ def generate_multi_queries_clean(q: str) -> List[str]:
     q3 = f"Experimental analysis and evaluation of {subject}"
     return [q1, q2, q3]
 
-
 def classify_and_rewrite_clean(q: str) -> Tuple[str, str]:
-    """
-    Classifies intent and produces a document-targeted academic phrasing without gold terms.
-    """
+\
+\
+
     ql = q.lower()
     clean = re.sub(r"[^\w\s]", "", q).strip()
     words = [w for w in clean.split() if w.lower() not in {"what", "is", "are", "the", "in", "of", "used", "does", "did", "for", "how", "this", "paper", "to"}]
@@ -170,11 +161,10 @@ def classify_and_rewrite_clean(q: str) -> Tuple[str, str]:
 
     return qtype, rewritten
 
-
 def verify_leakage_audit(orig_query: str, rewritten_query: str, gold: GoldQuery) -> Tuple[bool, List[str]]:
-    """
-    Strictly verifies that no gold-only concept or answer was injected into the rewritten query.
-    """
+\
+\
+
     orig_lower = orig_query.lower()
     rewritten_lower = rewritten_query.lower()
     leaks = []
@@ -183,16 +173,15 @@ def verify_leakage_audit(orig_query: str, rewritten_query: str, gold: GoldQuery)
         concept_lower = concept.lower()
         if concept_lower in orig_lower:
             continue
-        # Extract distinct answer-specific tokens (length >= 4)
+
         tokens = [w for w in re.findall(r"[a-z0-9]+", concept_lower) if len(w) >= 4 and w not in {"with", "from", "that", "this", "model", "paper", "layers", "bert", "evaluation", "results", "training", "linear", "unit", "function"}]
         for t in tokens:
-            # Word-boundary check: exact token match
+
             if re.search(r"\b" + re.escape(t) + r"\b", rewritten_lower) and not re.search(r"\b" + re.escape(t) + r"\b", orig_lower):
                 leaks.append(f"Concept '{concept}' token '{t}'")
                 break
 
     return len(leaks) > 0, leaks
-
 
 def multi_query_rrf_merge(ranked_lists: List[List[Any]], top_k: int = 25, rrf_k: int = 60) -> List[Any]:
     chunk_pool: Dict[str, Any] = {}
@@ -205,7 +194,6 @@ def multi_query_rrf_merge(ranked_lists: List[List[Any]], top_k: int = 25, rrf_k:
             rrf_scores[cid] = rrf_scores.get(cid, 0.0) + (1.0 / (rrf_k + rank))
     sorted_cids = sorted(rrf_scores.keys(), key=lambda c: rrf_scores[c], reverse=True)
     return [chunk_pool[cid] for cid in sorted_cids[:top_k]]
-
 
 def compute_delta(baseline: DiagnosticMetrics, target: DiagnosticMetrics) -> FormulationDelta:
     def rel_pct(base_val: float, targ_val: float) -> float:
@@ -227,11 +215,6 @@ def compute_delta(baseline: DiagnosticMetrics, target: DiagnosticMetrics) -> For
         delta_avg_latency_ms=round(target.avg_latency_ms - baseline.avg_latency_ms, 2),
         rel_change_latency_pct=rel_pct(baseline.avg_latency_ms, target.avg_latency_ms)
     )
-
-
-# =====================================================================
-# 2. RUNNER PIPELINE
-# =====================================================================
 
 def run_reranker_diagnostic_study(
     dataset_path: Path,
@@ -298,7 +281,6 @@ def run_reranker_diagnostic_study(
     for idx, gold in enumerate(gold_queries, 1):
         q = gold.question
 
-        # Perform anti-leakage audit
         q_exp = expand_query_clean(q)
         q_multi = generate_multi_queries_clean(q)
         q_type, q_rewr = classify_and_rewrite_clean(q)
@@ -316,9 +298,6 @@ def run_reranker_diagnostic_study(
             "has_leakage": has_leak_exp or has_leak_rewr
         })
 
-        # -------------------------------------------------------------
-        # Config A: Baseline
-        # -------------------------------------------------------------
         t0_a = time.perf_counter()
         q_vec_a = retriever.cohere_client.embed([q], input_type="search_query")[0]
         dense_a = retriever.vector_store.similarity_search(query_vector=q_vec_a, top_k=25, allowed_document_ids=[target_doc_id])
@@ -332,9 +311,6 @@ def run_reranker_diagnostic_study(
         t1_a = time.perf_counter()
         lat_a = (t1_a - t0_a) * 1000.0
 
-        # -------------------------------------------------------------
-        # Config B: Query Expansion
-        # -------------------------------------------------------------
         t0_b = time.perf_counter()
         q_vec_b = retriever.cohere_client.embed([q_exp], input_type="search_query")[0]
         dense_b = retriever.vector_store.similarity_search(query_vector=q_vec_b, top_k=25, allowed_document_ids=[target_doc_id])
@@ -348,9 +324,6 @@ def run_reranker_diagnostic_study(
         t1_b = time.perf_counter()
         lat_b = (t1_b - t0_b) * 1000.0
 
-        # -------------------------------------------------------------
-        # Config C: Multi-Query Retrieval
-        # -------------------------------------------------------------
         t0_c = time.perf_counter()
         sub_fused = []
         for sq in q_multi:
@@ -367,9 +340,6 @@ def run_reranker_diagnostic_study(
         t1_c = time.perf_counter()
         lat_c = (t1_c - t0_c) * 1000.0
 
-        # -------------------------------------------------------------
-        # Config D: Question-Type-Aware Rewrite
-        # -------------------------------------------------------------
         t0_d = time.perf_counter()
         q_vec_d = retriever.cohere_client.embed([q_rewr], input_type="search_query")[0]
         dense_d = retriever.vector_store.similarity_search(query_vector=q_vec_d, top_k=25, allowed_document_ids=[target_doc_id])
@@ -383,7 +353,6 @@ def run_reranker_diagnostic_study(
         t1_d = time.perf_counter()
         lat_d = (t1_d - t0_d) * 1000.0
 
-        # Latencies & lengths
         per_config_latencies["baseline"].append(lat_a)
         per_config_latencies["expansion"].append(lat_b)
         per_config_latencies["multi_query"].append(lat_c)
@@ -394,7 +363,6 @@ def run_reranker_diagnostic_study(
         per_config_qlens["multi_query"].append(int(sum(len(sq) for sq in q_multi) / len(q_multi)))
         per_config_qlens["type_rewrite"].append(len(q_rewr))
 
-        # Binary relevance
         bin_a = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in rr_a]
         bin_b = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in rr_b]
         bin_c = [1 if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant else 0 for c in rr_c]
@@ -405,7 +373,6 @@ def run_reranker_diagnostic_study(
         per_config_bins["multi_query"].append(bin_c)
         per_config_bins["type_rewrite"].append(bin_d)
 
-        # Track focus queries
         if gold.id in tracked_ids:
             ranks_a = [i + 1 for i, c in enumerate(rr_a) if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant]
             ranks_b = [i + 1 for i, c in enumerate(rr_b) if is_chunk_gold_relevant(c, gold, target_doc_id).is_relevant]
@@ -421,7 +388,6 @@ def run_reranker_diagnostic_study(
                 "ranks_type_rewrite": ranks_d
             }
 
-        # Detailed trace specifically for bert_015
         if gold.id == "bert_015":
             def get_stat(cands):
                 matches = [(i + 1, round(float(getattr(c, "rerank_score", None) or getattr(c, "score", 0.0)), 4))
@@ -474,9 +440,6 @@ def run_reranker_diagnostic_study(
                 }
             }
 
-    # =================================================================
-    # Calculate Metrics & Deltas
-    # =================================================================
     config_metric_objects: Dict[str, DiagnosticMetrics] = {}
 
     for k in config_keys:
@@ -548,13 +511,11 @@ def run_reranker_diagnostic_study(
         }
     }
 
-    # Save JSON report
     output_report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
     logger.info(f"Saved diagnostic JSON report to {output_report_path}")
 
-    # Generate Markdown Summary
     md_content = generate_markdown_summary(report, config_metric_objects, deltas, bert_015_detailed, tracked_traces)
     output_summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_summary_path, "w", encoding="utf-8") as f:
@@ -562,7 +523,6 @@ def run_reranker_diagnostic_study(
     logger.info(f"Saved diagnostic summary markdown to {output_summary_path}")
 
     return report
-
 
 def generate_markdown_summary(
     report: Dict[str, Any],
@@ -683,7 +643,6 @@ def generate_markdown_summary(
 
     return "\n".join(lines)
 
-
 def main():
     parser = argparse.ArgumentParser(description="Run Phase 4 CRI Reranker Diagnostic Study")
     parser.add_argument("--dataset", type=Path, default=Path("evaluation/datasets/bert_gold.json"))
@@ -708,7 +667,6 @@ def main():
     print(f"JSON Report:    {args.report}")
     print(f"Summary Report: {args.summary}")
     print("=" * 65)
-
 
 if __name__ == "__main__":
     main()

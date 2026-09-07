@@ -7,35 +7,29 @@ from evaluation.abstention_evaluator import (
     evaluate_question_alignment,
 )
 
-
 def test_targeted_prompt_presence():
     assert "CRITICAL ANSWER-TARGETING RULES" in TARGETED_GENERATION_PROMPT
     assert "DIRECT ANSWER FIRST" in TARGETED_GENERATION_PROMPT
     assert "FACTUAL PRECISION" in TARGETED_GENERATION_PROMPT
     assert "GROUNDING & CITATIONS" in TARGETED_GENERATION_PROMPT
 
-
 def test_question_alignment_scoring():
-    # Direct answer first -> 1.0
+
     direct_ans = "### Direct Factual Answer\nBERT stands for Bidirectional Encoder Representations from Transformers [1].\n\n### Technical Elaboration\n- Details here."
     score, first_s = evaluate_question_alignment("What does the acronym BERT stand for?", direct_ans, False, False)
     assert score == 1.0
     assert "BERT stands for" in first_s
 
-    # Generic overview opening -> 0.0
     generic_ans = "### Technical Summary\nThe paper introduces BERT, a language representation model designed to pre-train deep representations [1]."
     score, first_s = evaluate_question_alignment("What activation function is used in BERT?", generic_ans, False, False)
     assert score == 0.0
 
-    # Abstention on unsupported question -> 1.0
     abst_ans = "I don't have sufficient evidence in the selected document to answer this question."
     score, first_s = evaluate_question_alignment("What is the parameter count of GPT-4?", abst_ans, True, True)
     assert score == 1.0
 
-    # False answer on unsupported question -> 0.0
     score, first_s = evaluate_question_alignment("What is the parameter count of GPT-4?", direct_ans, False, True)
     assert score == 0.0
-
 
 def test_critical_focus_queries_targeting():
     client = CohereClient()
@@ -70,9 +64,8 @@ Recent empirical improvements due to transfer learning with language models have
         first_line = [l.strip() for l in res.text.split('\n') if l.strip() and not l.strip().startswith('#')][0]
         assert expected_key.lower() in first_line.lower(), f"Failed for {qid}: {first_line}"
 
-
 def test_answer_targeting_failure_taxonomy():
-    # If grounded and evidence in top-10, but alignment < 0.5 -> ANSWER_TARGETING_FAILURE
+
     cat = assign_error_taxonomy(
         must_abstain=False,
         is_abstention=False,
@@ -87,7 +80,6 @@ def test_answer_targeting_failure_taxonomy():
     )
     assert cat == "ANSWER_TARGETING_FAILURE"
 
-    # If alignment >= 0.5 and all else passes -> NO_FAILURE
     cat_pass = assign_error_taxonomy(
         must_abstain=False,
         is_abstention=False,
@@ -102,11 +94,10 @@ def test_answer_targeting_failure_taxonomy():
     )
     assert cat_pass == "NO_FAILURE"
 
-
 def test_feature_flags_default():
     settings = get_settings()
     assert hasattr(settings, "ENABLE_HARDENED_ABSTENTION")
     assert hasattr(settings, "ENABLE_ANSWER_TARGETING")
-    # Production default must be False until explicitly toggled
+
     assert settings.ENABLE_HARDENED_ABSTENTION is False
     assert settings.ENABLE_ANSWER_TARGETING is False

@@ -75,7 +75,6 @@ class QueryResponse(BaseModel):
     token_usage: Dict[str, Any]
     estimated_cost_usd: float
 
-    # Phase 7 Observability Fields
     request_id: str = ''
     trace_id: str = ''
     question_id: Optional[str] = None

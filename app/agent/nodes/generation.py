@@ -18,7 +18,6 @@ def generation_node(state: ResearchState) -> Dict[str, Any]:
     grounded = state.get('grounded', True)
     regeneration_attempt = state.get('regeneration_attempt', 0)
 
-    # Extract allowed document IDs strictly
     current_doc_ids = [str(d).strip() for d in state.get('current_document_ids', []) if d and str(d).strip()]
     if not current_doc_ids:
         meta = state.get('metadata', {})
@@ -27,7 +26,6 @@ def generation_node(state: ResearchState) -> Dict[str, Any]:
         elif meta.get('document_id'):
             current_doc_ids = [str(meta['document_id']).strip()]
 
-    # HARD PRECONDITION: All 6 conditions must hold before Cohere Command can be invoked
     cond_valid_doc = bool(current_doc_ids)
     cond_has_evidence = bool(evidence) and len(evidence) > 0
     cond_all_in_scope = cond_has_evidence and all(
@@ -94,7 +92,6 @@ def generation_node(state: ResearchState) -> Dict[str, Any]:
     from app.observability.logging import log_event
     from app.observability.tracing import get_global_metrics
 
-    # Context length safety check
     MAX_CONTEXT_CHARS = 32000
     if len(evidence_str) > MAX_CONTEXT_CHARS:
         logger.warning(f"Evidence context exceeded {MAX_CONTEXT_CHARS} characters ({len(evidence_str)} chars). Truncating context safely.")

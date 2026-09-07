@@ -34,14 +34,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [retryKey, setRetryKey] = useState<number>(0);
   const [textContent, setTextContent] = useState<string | null>(null);
 
-  // Sync initialPage when changed
   useEffect(() => {
     if (initialPage && initialPage >= 1) {
       setCurrentPage(initialPage);
     }
   }, [initialPage]);
 
-  // Reset loading and error when document or modal changes
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
@@ -50,14 +48,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     }
   }, [isOpen, document?.document_id, retryKey]);
 
-  // Resolve PDF / file URL from document or local uploads
   const getDocumentSourceUrl = useCallback((): string | null => {
     if (fileUrl) return fileUrl;
     if (!document) return null;
 
     const fn = document.filename.toLowerCase();
 
-    // Map known papers to local static assets
     if (fn.includes("1810.04805") || document.title.toLowerCase().includes("bert")) {
       return "/data/sample_papers/1810.04805v2.pdf";
     }
@@ -74,7 +70,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       return "/data/sample_papers/speculative_decoding.pdf";
     }
 
-    // Default static path for sample papers
     if (document.filename) {
       return `/data/sample_papers/${document.filename}`;
     }
@@ -87,7 +82,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     document?.filename.endsWith(".txt") || document?.filename.endsWith(".md")
   );
 
-  // If text file, fetch and display text directly
   useEffect(() => {
     if (isOpen && isTextFile && resolvedUrl) {
       setIsLoading(true);
@@ -108,7 +102,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     }
   }, [isOpen, isTextFile, resolvedUrl, retryKey]);
 
-  // Keyboard navigation: Escape to close, arrows for pages
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -152,7 +145,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         className="relative flex flex-col bg-cri-surface border border-cri-border rounded-[12px] sm:rounded-[14px] shadow-2xl overflow-hidden w-full max-w-[1100px] h-[94vh] sm:h-[90vh] max-h-[850px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* SECTION 7: VIEWER HEADER */}
         <div className="h-[60px] px-3.5 sm:px-5 border-b border-cri-border bg-cri-surface flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-8 h-8 rounded-[8px] bg-cri-surfaceElevated border border-cri-border flex items-center justify-center text-cri-orange shrink-0">
@@ -206,7 +198,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           </div>
         </div>
 
-        {/* SECTION 14: NO DOCUMENT STATE */}
         {!document ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-cri-surface">
             <div className="w-10 h-10 rounded-[10px] bg-cri-surfaceElevated border border-cri-border flex items-center justify-center text-cri-textMuted">
@@ -227,7 +218,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </button>
           </div>
         ) : hasError ? (
-          /* SECTION 12: ERROR STATE (Graceful in-app error, no 404!) */
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-cri-surface">
             <div className="w-10 h-10 rounded-[10px] bg-cri-surfaceElevated border border-cri-border flex items-center justify-center text-cri-orange">
               <AlertCircle className="w-5 h-5 text-cri-orange" />
@@ -259,9 +249,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </div>
           </div>
         ) : (
-          /* VIEWER BODY: PDF or TEXT */
           <div className="relative flex-1 w-full h-full overflow-hidden bg-cri-bg">
-            {/* SECTION 13: LOADING STATE */}
             {isLoading && (
               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-cri-surface space-y-2">
                 <Loader2 className="w-6 h-6 animate-spin text-cri-orange" />
@@ -294,7 +282,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           </div>
         )}
 
-        {/* SECTION 8: PAGE CONTROLS */}
         {document && !hasError && totalPages > 1 && (
           <div className="h-[52px] px-3 sm:px-5 border-t border-cri-border bg-cri-surface flex items-center justify-between shrink-0 text-xs">
             <button

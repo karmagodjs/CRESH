@@ -43,7 +43,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   const [activeFilter, setActiveFilter] = useState<"all" | "papers" | "web">("all");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Web source input states
   const [webUrl, setWebUrl] = useState("");
   const [webUrlError, setWebUrlError] = useState<string | null>(null);
   const [isAddingWeb, setIsAddingWeb] = useState(false);
@@ -52,7 +51,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -98,7 +96,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
   const webDocs = documents.filter(isWebDoc);
   const activeDoc = documents.find((d) => d.document_id === activeDocumentId);
 
-  // Helper to extract clean author/year metadata for display
   const getDocAuthorYear = (doc: DocumentResponse) => {
     if (doc.filename.includes("1810.04805") || doc.title.toLowerCase().includes("bert")) {
       return "Google AI · 2018";
@@ -109,7 +106,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
     return "Research Corpus · 2024";
   };
 
-  // Submit Web URL handler
   const handleAddWebUrl = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmed = webUrl.trim();
@@ -135,8 +131,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
     setIsAddingWeb(true);
 
-    // As audited: FastAPI backend does NOT support web scraping or URL ingestion endpoints.
-    // Per Section 7: show clear, honest in-app message:
     setTimeout(() => {
       setIsAddingWeb(false);
       setWebBackendMessage(
@@ -150,7 +144,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
       className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-[14px] select-none overflow-hidden shadow-xs ${className || ""}`}
       aria-label="Sources Library"
     >
-      {/* SECTION 5: Panel Header with Single Add Source button and Dropdown Menu */}
       <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0 relative">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
@@ -161,7 +154,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           </span>
         </div>
 
-        {/* Primary Add Source Button Container (Shown ONLY when sources exist) */}
         {filteredDocs.length > 0 && (
           <div className="relative" ref={menuRef}>
             <button
@@ -174,7 +166,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
               <span>Add source</span>
             </button>
 
-            {/* Dropdown Menu */}
             {isMenuOpen && (
               <div className="absolute right-0 top-full mt-2 w-52 bg-[#1A1E22] border border-[#2A2F35] rounded-[10px] shadow-2xl p-1.5 z-40 space-y-1">
                 <button
@@ -217,7 +208,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         )}
       </div>
 
-      {/* Source Search & Filters */}
       <div className="p-3 border-b border-[#2A2F35] space-y-2.5 shrink-0">
         <div className="relative">
           <Search className="w-4 h-4 text-cri-textMuted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -243,7 +233,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           )}
         </div>
 
-        {/* Segmented Controls (8px radius) */}
         <div className="grid grid-cols-3 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
           {(["all", "papers", "web"] as const).map((filter) => {
             const isActive = activeFilter === filter;
@@ -265,12 +254,9 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         </div>
       </div>
 
-      {/* Main Panel Content: Sources List or Dedicated Web View */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2.5 flex flex-col">
-        {/* If WEB tab is active: Render Dedicated Web Source Input Container */}
         {activeFilter === "web" ? (
           <div className="space-y-3 flex-1 flex flex-col">
-            {/* Dedicated Web Source Input Card */}
             <div className="bg-[#1C2024] border border-[#2A2F35] rounded-[12px] p-3.5 space-y-3 shrink-0">
               <div className="flex items-center justify-between border-b border-[#2A2F35] pb-2">
                 <div className="flex items-center gap-1.5">
@@ -350,7 +336,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
               </form>
             </div>
 
-            {/* List of Web Sources or Empty Notice */}
             <div className="flex-1 overflow-y-auto space-y-2">
               {webDocs.length > 0 ? (
                 webDocs.map((doc) => {
@@ -408,14 +393,11 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
             </div>
           </div>
         ) : filteredDocs.length === 0 ? (
-          /* Centered Empty State with Add Source Button */
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 select-none">
-            {/* Document Icon: icon → title: 16px */}
             <div className="w-12 h-12 rounded-[12px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center mx-auto text-cri-orange mb-4 shadow-xs">
               <FileText className="w-6 h-6 text-cri-orange stroke-[1.75]" />
             </div>
 
-            {/* Title: title → description: 8px */}
             <h3 className="text-sm font-semibold text-cri-textPrimary leading-tight mb-2">
               {searchQuery
                 ? "No matching sources"
@@ -424,7 +406,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 : "No sources yet"}
             </h3>
 
-            {/* Description: description → button: 18px */}
             <p className="text-xs text-cri-textSecondary leading-relaxed max-w-[220px] mx-auto mb-[18px]">
               {searchQuery
                 ? "Try refining your search query."
@@ -433,7 +414,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 : "Add your first research source to begin."}
             </p>
 
-            {/* Centered Add Source Button */}
             {!searchQuery && (
               <button
                 type="button"
@@ -446,7 +426,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
             )}
           </div>
         ) : (
-          /* Normal Sources List */
           filteredDocs.map((doc) => {
             const isActive = doc.document_id === activeDocumentId;
             const authorYear = getDocAuthorYear(doc);

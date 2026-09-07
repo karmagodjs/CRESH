@@ -27,7 +27,6 @@ const config: Config = {
           warning: "var(--warning)",
           error: "var(--error)",
           info: "var(--info)",
-          // backward compatibility aliases
           ink: "var(--bg)",
           paper: "var(--text-primary)",
           graphite: "var(--surface-secondary)",

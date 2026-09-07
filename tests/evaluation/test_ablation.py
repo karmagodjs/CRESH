@@ -10,7 +10,6 @@ from evaluation.ablation_runner import (
     compute_delta,
 )
 
-
 class TestAblationMetricsAndDeltas:
     @pytest.fixture
     def sample_config_a(self):
@@ -63,23 +62,23 @@ class TestAblationMetricsAndDeltas:
         assert delta.transition == "B - A"
         assert delta.from_config == "dense"
         assert delta.to_config == "bm25"
-        # Recall@5: 0.90 - 0.50 = +40.0 percentage points
+
         assert delta.recall_at_5_delta_pp == 40.0
         assert delta.recall_at_5_rel_change_pct == 80.0
-        # Recall@10: 1.00 - 0.80 = +20.0 percentage points
+
         assert delta.recall_at_10_delta_pp == 20.0
         assert delta.recall_at_10_rel_change_pct == 25.0
-        # MRR: 0.80 - 0.40 = +0.40
+
         assert delta.mrr_at_10_delta == 0.40
         assert delta.mrr_at_10_rel_change_pct == 100.0
-        # Precision@5: 0.50 - 0.20 = +30.0 percentage points
+
         assert delta.precision_at_5_delta_pp == 30.0
         assert delta.precision_at_5_rel_change_pct == 150.0
-        # Latency delta: 2.0 - 10.0 = -8.0 ms
+
         assert delta.avg_latency_delta_ms == -8.0
 
     def test_compute_delta_negative(self, sample_config_a, sample_config_b):
-        # B -> A (negative transition)
+
         delta = compute_delta(sample_config_b, sample_config_a, "A - B")
         assert delta.recall_at_5_delta_pp == -40.0
         assert pytest.approx(delta.recall_at_5_rel_change_pct, rel=1e-2) == -44.44

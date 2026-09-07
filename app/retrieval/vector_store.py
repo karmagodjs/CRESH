@@ -118,7 +118,6 @@ class QdrantVectorStore(VectorStore):
         elif document_id:
             target_doc_ids = [document_id]
 
-        # HARD ISOLATION GUARD: Refuse to query Qdrant without explicit document scope
         if not target_doc_ids:
             logger.warning("VectorStore.similarity_search: No selected document IDs provided. Refusing to query Qdrant collection without document scope filter.")
             return []
@@ -127,7 +126,6 @@ class QdrantVectorStore(VectorStore):
             query_filter = Filter(must=[FieldCondition(key='document_id', match=MatchValue(value=target_doc_ids[0]))])
         else:
             query_filter = Filter(must=[FieldCondition(key='document_id', match=MatchAny(any=target_doc_ids))])
-
 
         try:
             results = self.client.query_points(

@@ -3,7 +3,6 @@ from app.main import app
 
 client = TestClient(app)
 
-
 def test_get_health_endpoint():
     resp = client.get('/health')
     assert resp.status_code == 200
@@ -13,7 +12,6 @@ def test_get_health_endpoint():
     assert 'vector_store_health' in data
     assert 'total_indexed_chunks' in data
 
-
 def test_get_ready_endpoint():
     resp = client.get('/ready')
     assert resp.status_code == 200
@@ -22,7 +20,6 @@ def test_get_ready_endpoint():
     assert 'dependencies' in data
     assert data['dependencies']['configuration'] == 'valid'
     assert 'vector_store' in data['dependencies']
-
 
 def test_get_metrics_endpoint_percentiles():
     resp = client.get('/metrics')

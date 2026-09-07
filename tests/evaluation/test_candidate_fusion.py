@@ -13,7 +13,6 @@ from evaluation.candidate_fusion_runner import (
     deduplicated_union,
 )
 
-
 class TestCandidateUnionLogic:
     def _make_mock_chunk(self, chunk_id: str, doc_id: str, text: str, score: float) -> SearchResult:
         meta = ChunkMetadata(
@@ -48,13 +47,13 @@ class TestCandidateUnionLogic:
     def test_deduplicated_union_overlapping_preserves_order_and_metadata(self):
         c1_bm25 = self._make_mock_chunk("c1", "doc1", "bm25 text 1", 15.0)
         c2_bm25 = self._make_mock_chunk("c2", "doc1", "bm25 text 2", 12.0)
-        c1_dense = self._make_mock_chunk("c1", "doc1", "dense text 1", 0.85)  # Duplicate of c1
+        c1_dense = self._make_mock_chunk("c1", "doc1", "dense text 1", 0.85)
         c3_dense = self._make_mock_chunk("c3", "doc1", "dense text 3", 0.75)
 
         res = deduplicated_union([c1_bm25, c2_bm25], [c1_dense, c3_dense])
         assert len(res) == 3
         assert [c.chunk_id for c in res] == ["c1", "c2", "c3"]
-        # Primary list occurrence was preserved
+
         assert res[0].score == 15.0
         assert res[0].metadata.document_id == "doc1"
         assert res[0].metadata.section_name == "Section A"
@@ -66,9 +65,8 @@ class TestCandidateUnionLogic:
         union = deduplicated_union([c1], [c2])
         union_ids = {c.chunk_id for c in union}
         assert union_ids == {"c1", "c2"}
-        # Verify no external candidate was injected
-        assert "c3" not in union_ids
 
+        assert "c3" not in union_ids
 
 class TestDeltaVsBaseline:
     @pytest.fixture

@@ -18,7 +18,6 @@ def verification_node(state: ResearchState) -> Dict[str, Any]:
     evidence_sufficient = state.get('evidence_sufficient', True)
     current_doc_ids = set([d for d in state.get('current_document_ids', []) if d])
 
-    # If evidence is insufficient or answer expresses failure to ground, immediately fail grounding
     if not evidence_sufficient or not evidence or 'insufficient evidence' in answer.lower():
         grounding_data = GroundingAssessment(
             is_grounded=False,
@@ -39,7 +38,6 @@ def verification_node(state: ResearchState) -> Dict[str, Any]:
             'latency': latency
         }
 
-    # Cross-document citation check: If any citation points to unauthorized document, fail grounding
     if current_doc_ids:
         unauthorized_citations = [c for c in citations if c.get('document_id') not in current_doc_ids]
         if unauthorized_citations:
@@ -76,11 +74,9 @@ def verification_node(state: ResearchState) -> Dict[str, Any]:
             cleaned = gen_res.text.strip().strip('`').replace('json\n', '')
             parsed = json.loads(cleaned)
 
-        # 1. Evidence Relevance: average rerank score of evidence
         avg_score = sum([float(e.get('rerank_score', 0.5)) for e in evidence]) / len(evidence) if evidence else 0.0
         evidence_relevance = min(1.0, max(0.0, avg_score))
 
-        # 2. Evidence Coverage: section representation
         query_intent = state.get('query_intent', 'factual')
         if query_intent == 'overview':
             ev_types = {e.get('metadata', {}).get('section_type') for e in evidence}
@@ -90,7 +86,6 @@ def verification_node(state: ResearchState) -> Dict[str, Any]:
         else:
             evidence_coverage = float(parsed.get('evidence_coverage', 0.85))
 
-        # 3. Citation Validity
         citation_validity = 1.0
         if not citations:
             citation_validity = 0.5
@@ -100,7 +95,6 @@ def verification_node(state: ResearchState) -> Dict[str, Any]:
                     citation_validity = 0.0
                     break
 
-        # 4. Document Scope Validity
         document_scope_validity = 1.0
         if current_doc_ids:
             for e in evidence:
@@ -108,11 +102,9 @@ def verification_node(state: ResearchState) -> Dict[str, Any]:
                     document_scope_validity = 0.0
                     break
 
-        # 5. Answer-Evidence Alignment
         unsupported = parsed.get('unsupported_claims', [])
         answer_evidence_alignment = max(0.0, 1.0 - 0.25 * len(unsupported))
 
-        # Composite Application Confidence Score
         calculated_conf = round(
             0.30 * evidence_relevance +
             0.25 * evidence_coverage +
@@ -210,4 +202,3 @@ def verification_node(state: ResearchState) -> Dict[str, Any]:
     except Exception as e:
         logger.warning(f"Evaluation logging failed: {e}")
     return out_dict
-
