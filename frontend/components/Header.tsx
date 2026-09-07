@@ -3,7 +3,6 @@
 import React from "react";
 import { DocumentResponse } from "@/lib/types";
 import {
-  Sliders,
   Search,
   Bell,
   ChevronDown,
@@ -11,26 +10,18 @@ import {
 } from "lucide-react";
 
 interface HeaderProps {
-  activeView: "research" | "evaluation" | "architecture" | "observability";
-  onSelectView: (view: "research" | "evaluation" | "architecture" | "observability") => void;
   activeDocument: DocumentResponse | null;
-  onOpenTrace: () => void;
-  hasTrace: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  activeView,
-  onSelectView,
   activeDocument,
-  onOpenTrace,
-  hasTrace,
 }) => {
   return (
     <header className="h-[60px] border-b border-cri-border bg-cri-surface/95 backdrop-blur-sm px-4 lg:px-6 flex items-center justify-between shrink-0 select-none z-30 transition-colors">
       {/* LEFT: Product Identity & Subtitle */}
       <div className="flex items-center gap-3.5 min-w-0">
         <div className="flex items-center gap-3">
-          {/* Hexagonal / Geometric Logo Mark */}
+          {/* Geometric Logo Mark */}
           <div className="w-8 h-8 rounded-[8px] bg-gradient-to-br from-cri-orange to-[#D4551E] flex items-center justify-center text-white font-bold text-sm shadow-sm ring-1 ring-white/10 shrink-0">
             C
           </div>
@@ -64,84 +55,12 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* CENTER: Navigation Tabs */}
-      <nav className="hidden md:flex items-center gap-1 bg-cri-surfaceSecondary/70 p-1 rounded-[10px] border border-cri-border/80" aria-label="Main Navigation">
-        <button
-          type="button"
-          onClick={() => onSelectView("research")}
-          className={`px-3 py-1.5 text-[13px] font-medium rounded-[8px] transition-all relative ${
-            activeView === "research"
-              ? "text-cri-textPrimary bg-cri-surfaceElevated border border-cri-border shadow-xs font-semibold"
-              : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
-          }`}
-        >
-          Research
-          {activeView === "research" && (
-            <span className="absolute -bottom-1 left-3 right-3 h-[2px] bg-cri-orange rounded-full" />
-          )}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onSelectView("evaluation")}
-          className={`px-3 py-1.5 text-[13px] font-medium rounded-[8px] transition-all relative ${
-            activeView === "evaluation"
-              ? "text-cri-textPrimary bg-cri-surfaceElevated border border-cri-border shadow-xs font-semibold"
-              : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
-          }`}
-        >
-          Evaluation
-          {activeView === "evaluation" && (
-            <span className="absolute -bottom-1 left-3 right-3 h-[2px] bg-cri-orange rounded-full" />
-          )}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onSelectView("architecture")}
-          className={`px-3 py-1.5 text-[13px] font-medium rounded-[8px] transition-all relative ${
-            activeView === "architecture"
-              ? "text-cri-textPrimary bg-cri-surfaceElevated border border-cri-border shadow-xs font-semibold"
-              : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
-          }`}
-        >
-          Architecture
-          {activeView === "architecture" && (
-            <span className="absolute -bottom-1 left-3 right-3 h-[2px] bg-cri-orange rounded-full" />
-          )}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onSelectView("observability")}
-          className={`px-3 py-1.5 text-[13px] font-medium rounded-[8px] transition-all relative ${
-            activeView === "observability"
-              ? "text-cri-textPrimary bg-cri-surfaceElevated border border-cri-border shadow-xs font-semibold"
-              : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
-          }`}
-        >
-          Observability
-          {activeView === "observability" && (
-            <span className="absolute -bottom-1 left-3 right-3 h-[2px] bg-cri-orange rounded-full" />
-          )}
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenTrace}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-[8px] transition-all ${
-            hasTrace
-              ? "text-cri-textPrimary hover:bg-cri-surfaceElevated text-cri-orange"
-              : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
-          }`}
-          title="Open Engineering Trace & Latency Breakdown"
-        >
-          <Sliders className="w-3.5 h-3.5 text-cri-orange" />
-          <span>Trace</span>
-          {hasTrace && (
-            <span className="w-1.5 h-1.5 rounded-full bg-cri-orange inline-block animate-pulse" />
-          )}
-        </button>
+      {/* CENTER: Focused Research Workspace Tab */}
+      <nav className="hidden md:flex items-center" aria-label="Main Navigation">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-cri-surfaceElevated border border-cri-border rounded-[8px] text-[13px] font-semibold text-cri-textPrimary shadow-xs">
+          <span className="w-2 h-2 rounded-full bg-cri-orange" />
+          <span>Research</span>
+        </div>
       </nav>
 
       {/* RIGHT: Global Search, Notifications, User Profile */}

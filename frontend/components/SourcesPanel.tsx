@@ -302,7 +302,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           </div>
 
           <p className="text-[11px] text-cri-textSecondary leading-relaxed">
-            Questions are answered using evidence from the selected document only.
+            Answers use evidence from the selected document.
           </p>
         </div>
       </div>

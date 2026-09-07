@@ -24,7 +24,6 @@ interface ResearchPanelProps {
   onRunQuery: (question: string) => void;
   onCitationClick: (citationIndex: number) => void;
   selectedCitationIndex: number | null;
-  onOpenTrace?: () => void;
 }
 
 export const ResearchPanel: React.FC<ResearchPanelProps> = ({
@@ -34,7 +33,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
   onRunQuery,
   onCitationClick,
   selectedCitationIndex,
-  onOpenTrace,
 }) => {
   const [questionInput, setQuestionInput] = useState("");
   const [activeTab, setActiveTab] = useState<"ask" | "summary" | "takeaways" | "citations" | "related">("ask");
@@ -68,9 +66,9 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
   const getDocMetadataString = () => {
     if (!activeDocument) return "No source active";
     if (activeDocument.filename.includes("1810.04805") || activeDocument.title.toLowerCase().includes("bert")) {
-      return "Google AI · 2018 · 16 Pages · arXiv:1810.04805 · NAACL 2019";
+      return "Google AI · 2018 · 16 Pages";
     }
-    return `Research Corpus · 2024 · ${activeDocument.page_count} Pages · Strict Isolation`;
+    return `Research Corpus · 2024 · ${activeDocument.page_count} Pages`;
   };
 
   // Render answer text with interactive citation links [1], [2]
@@ -432,16 +430,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     <span>Analysis complete</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-cri-textSecondary">
-                    <span>Grounded synthesis</span>
-                    {onOpenTrace && (
-                      <button
-                        type="button"
-                        onClick={onOpenTrace}
-                        className="text-[11px] font-medium text-cri-orange hover:underline flex items-center gap-0.5 transition-colors"
-                      >
-                        <span>View trace →</span>
-                      </button>
-                    )}
+                    <span>Verified from cited evidence</span>
                   </div>
                 </div>
 
@@ -450,15 +439,15 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   <div className="p-6 rounded-[14px] border border-cri-orange/80 bg-cri-surface space-y-3">
                     <div className="flex items-center gap-2 text-cri-orange">
                       <AlertTriangle className="w-4 h-4 shrink-0" />
-                      <span className="text-xs font-bold uppercase tracking-wider font-mono">
-                        Insufficient Evidence — Safe Abstention
+                      <span className="text-xs font-bold uppercase tracking-wider font-sans">
+                        Insufficient Evidence
                       </span>
                     </div>
                     <h2 className="text-base font-semibold text-cri-textPrimary leading-snug">
                       I don&apos;t have sufficient evidence in the selected document to answer this question.
                     </h2>
                     <p className="text-xs text-cri-textSecondary leading-relaxed">
-                      The 3-tier Evidence Sufficiency Gate rejected generation because the question is out of scope or ungrounded in the active document. Parametric hallucinations were strictly prevented.
+                      The question cannot be answered using evidence from the selected document. To ensure factual accuracy, an ungrounded answer was not generated.
                     </p>
                   </div>
                 ) : (
@@ -522,7 +511,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   {/* SECTION 15: Simplified Confidence Panel */}
                   <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
                         Confidence
                       </span>
                       <button
@@ -531,7 +520,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                         className="text-[11px] font-medium text-cri-orange hover:underline cursor-pointer"
                         title="Explain confidence score calculation"
                       >
-                        Why?
+                        {showConfidenceWhy ? "Hide details" : "View details →"}
                       </button>
                     </div>
 
@@ -581,7 +570,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
                           Evidence Used
                         </span>
                         <span className="text-[10px] font-mono text-cri-textMuted">
@@ -601,7 +590,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                             key={cite.citation_index}
                             type="button"
                             onClick={() => onCitationClick(cite.citation_index)}
-                            className="text-[10px] font-mono px-2 py-1 rounded-[6px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textPrimary flex items-center gap-1 transition-colors"
+                            className="text-[10px] font-mono px-2 py-1 rounded-[6px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textPrimary flex items-center gap-1 transition-colors cursor-pointer"
                           >
                             <span className="text-cri-orange font-bold">[{cite.citation_index}]</span>
                             <span className="truncate max-w-[90px]">{cite.section_title || `p. ${cite.page_number}`}</span>
@@ -613,25 +602,19 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     </div>
                   </div>
 
-                  {/* SECTION 17: Simplified Methodology */}
+                  {/* SECTION 17: Synthesis Note */}
                   <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
-                        Methodology
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
+                        Synthesis
                       </span>
                       <p className="text-xs text-cri-textSecondary leading-relaxed mt-2">
-                        Evidence-based synthesis using document retrieval, reranking, and citation verification.
+                        Answer synthesized from retrieved evidence and verified citations.
                       </p>
                     </div>
-                    <div className="pt-1">
-                      <button
-                        type="button"
-                        onClick={onOpenTrace}
-                        className="text-xs font-semibold text-cri-orange hover:text-cri-orange-hover hover:underline inline-flex items-center gap-1 transition-colors cursor-pointer"
-                      >
-                        <span>View trace</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                    <div className="flex items-center gap-1.5 text-xs text-cri-success font-medium pt-1">
+                      <Check className="w-3.5 h-3.5 text-cri-success" />
+                      <span>Grounded output</span>
                     </div>
                   </div>
                 </div>

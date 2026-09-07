@@ -14,7 +14,6 @@ interface EvidencePanelProps {
   selectedCitationIndex: number | null;
   onSelectCitation: (index: number) => void;
   activeDocumentFilename?: string;
-  onOpenTrace?: () => void;
 }
 
 export const EvidencePanel: React.FC<EvidencePanelProps> = ({
@@ -22,10 +21,10 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
   selectedCitationIndex,
   onSelectCitation,
   activeDocumentFilename,
-  onOpenTrace,
 }) => {
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [activeTab, setActiveTab] = useState<"all" | "supporting" | "contradicting" | "neutral">("all");
+  const [showVerificationDetails, setShowVerificationDetails] = useState(false);
 
   // Scroll active passage into view when citation is clicked
   useEffect(() => {
@@ -239,28 +238,31 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
 
         {/* Verification Summary */}
         {queryResponse && !isAbstention && (
-          <div className="pt-2 border-t border-cri-border space-y-2">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono flex items-center justify-between">
-              <span>Verification</span>
-              <span className="text-[10px] text-cri-success flex items-center gap-1 font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-cri-success" />
-                Verified
-              </span>
-            </div>
+          <div className="pt-2.5 border-t border-cri-border space-y-2">
+            <div className="p-2.5 rounded-[10px] bg-cri-surfaceSecondary border border-cri-border space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-cri-success font-semibold text-xs">
+                  <ShieldCheck className="w-4 h-4 text-cri-success shrink-0" />
+                  <span>Evidence verified</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowVerificationDetails(!showVerificationDetails)}
+                  className="text-[11px] text-cri-orange hover:underline font-medium cursor-pointer"
+                >
+                  {showVerificationDetails ? "Hide details" : "View details →"}
+                </button>
+              </div>
 
-            <div className="bg-cri-surfaceSecondary rounded-[10px] border border-cri-border divide-y divide-cri-border/60 text-xs">
-              <div className="p-2.5 flex items-center justify-between">
-                <span className="text-cri-textSecondary text-[11px]">Citation Grounding</span>
-                <span className="text-[11px] font-semibold text-cri-success">
-                  Well supported
-                </span>
-              </div>
-              <div className="p-2.5 flex items-center justify-between">
-                <span className="text-cri-textSecondary text-[11px]">Scope Enforced</span>
-                <span className="text-[11px] font-semibold text-cri-textPrimary truncate max-w-[140px]">
-                  {activeDocumentFilename || "This document only"}
-                </span>
-              </div>
+              {showVerificationDetails && (
+                <div className="pt-2 border-t border-cri-border/60 text-[11px] text-cri-textSecondary space-y-1.5 leading-relaxed">
+                  <p>Every claim in the generated answer is directly backed by cited passages in the scoped source document.</p>
+                  <div className="text-cri-textMuted flex items-center justify-between pt-0.5">
+                    <span>Citation grounding</span>
+                    <span className="text-cri-success font-semibold">Well supported</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
