@@ -7,7 +7,6 @@ import {
   ArrowRight,
   AlertTriangle,
   Loader2,
-  CheckCircle2,
   Check,
   BookOpen,
 } from "lucide-react";
@@ -591,17 +590,17 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
             </div>
 
             {/* Disabled research input */}
-            <div className="rounded-[14px] border border-cri-border bg-cri-surfaceSecondary p-4 sm:p-5 opacity-60 text-left shadow-sm min-h-[125px] flex flex-col justify-between space-y-4">
+            <div className="rounded-[14px] border border-cri-border bg-cri-surfaceSecondary p-4 sm:p-[18px] opacity-60 text-left shadow-sm min-h-[135px] sm:min-h-[150px] flex flex-col justify-between">
               <textarea
                 disabled
-                rows={3}
+                rows={2}
                 placeholder="Select a source to ask research questions..."
-                className="w-full bg-transparent text-[15px] text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed cursor-not-allowed"
+                className="w-full bg-transparent text-[16px] font-normal text-cri-textPrimary placeholder:text-cri-textMuted resize-none focus:outline-none leading-relaxed cursor-not-allowed"
               />
-              <div className="flex items-center justify-end">
+              <div className="flex items-center justify-end pt-2">
                 <button
                   disabled
-                  className="h-[40px] px-5 rounded-[10px] bg-cri-surfaceElevated text-cri-textMuted text-xs font-semibold cursor-not-allowed border border-cri-border flex items-center gap-2"
+                  className="h-[42px] px-[18px] rounded-[10px] bg-cri-surfaceElevated text-cri-textMuted text-xs font-semibold cursor-not-allowed border border-cri-border flex items-center gap-2"
                 >
                   <span>Run analysis</span>
                   <ArrowRight className="w-4 h-4" />
@@ -615,22 +614,22 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
             <div className="space-y-7 max-w-4xl mx-auto">
               {/* Core Research Question Input: ONLY textarea and Run analysis */}
               <form onSubmit={handleSubmit} className="relative">
-                <div className="min-h-[140px] rounded-[14px] border border-cri-border bg-cri-surfaceSecondary shadow-sm focus-within:border-cri-orange transition-all p-4 sm:p-5 flex flex-col justify-between space-y-3.5">
-                  {/* Textarea: comfortable 15px font */}
+                <div className="min-h-[135px] sm:min-h-[150px] rounded-[14px] border border-cri-border bg-cri-surfaceSecondary shadow-sm focus-within:border-cri-orange transition-all p-4 sm:p-[18px] flex flex-col justify-between">
+                  {/* Textarea: comfortable 16px normal-weight font */}
                   <textarea
                     ref={inputRef}
                     value={questionInput}
                     onChange={(e) => setQuestionInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     disabled={isLoading}
-                    rows={3}
+                    rows={2}
                     placeholder="Ask a research question about this document..."
-                    className="w-full bg-transparent text-[15px] text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed"
+                    className="w-full bg-transparent text-[16px] font-normal text-cri-textPrimary placeholder:text-cri-textMuted resize-none focus:outline-none leading-relaxed"
                   />
 
                   {/* Bottom Action: Run analysis aligned naturally to bottom-right */}
-                  <div className="flex items-center justify-end gap-3 pt-1 text-xs">
-                    <kbd className="hidden sm:flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px]">
+                  <div className="flex items-center justify-end gap-3 pt-2 text-xs">
+                    <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px] select-none">
                       <span>⌘</span>
                       <span>Enter</span>
                     </kbd>
@@ -639,7 +638,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     <button
                       type="submit"
                       disabled={isLoading || !questionInput.trim()}
-                      className={`w-full sm:w-auto h-[44px] min-h-[44px] sm:h-[40px] px-5 rounded-[10px] text-[13px] font-semibold tracking-tight transition-all shadow-xs flex items-center justify-center gap-2 ${
+                      className={`h-[42px] px-[18px] rounded-[10px] text-[13px] font-semibold tracking-tight transition-all shadow-xs flex items-center justify-center gap-2 ${
                         isLoading || !questionInput.trim()
                           ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
                           : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer active:scale-98"
@@ -677,17 +676,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               {/* SECTION 12: Analysis Result */}
               {queryResponse && !isLoading && (
                 <div className="space-y-6">
-                  {/* Status Bar: ✓ Analysis complete */}
-                  <div className="flex items-center justify-between px-4 py-2.5 rounded-[10px] bg-cri-surface border border-cri-border text-xs">
-                    <div className="flex items-center gap-2 text-cri-success font-semibold">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Analysis complete</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-cri-textSecondary">
-                      <span>Verified from cited evidence</span>
-                    </div>
-                  </div>
-
                   {/* Abstention Experience */}
                   {isAbstention ? (
                     <div className="p-6 rounded-[14px] border border-cri-orange/80 bg-cri-surface space-y-3">
