@@ -183,15 +183,19 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       className="h-full flex flex-col bg-cri-bg overflow-hidden border-r border-cri-border transition-colors"
       aria-label="Research Workspace"
     >
-      {/* SECTION 11: Breadcrumb & Document Header */}
+      {/* Breadcrumb & Document Header */}
       <div className="px-6 pt-4 pb-3 border-b border-cri-border bg-cri-surface shrink-0 space-y-2">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-[11px] text-cri-textMuted font-mono">
           <span className="hover:text-cri-textSecondary cursor-pointer">Research</span>
-          <span>&gt;</span>
-          <span className="text-cri-textSecondary truncate max-w-sm">
-            {activeDocument ? activeDocument.filename : "Select Source"}
-          </span>
+          {activeDocument && (
+            <>
+              <span>&gt;</span>
+              <span className="text-cri-textSecondary truncate max-w-sm">
+                {activeDocument.title || activeDocument.filename}
+              </span>
+            </>
+          )}
         </div>
 
         {/* Document Header Row */}
@@ -201,18 +205,22 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               <div className="p-1.5 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-cri-orange shrink-0">
                 <FileText className="w-4 h-4" />
               </div>
-              <h1 className="text-lg sm:text-xl font-bold text-cri-textPrimary tracking-tight truncate" title={activeDocument?.title || activeDocument?.filename}>
-                {activeDocument ? (activeDocument.title || activeDocument.filename) : "Frontier Research Desk"}
+              <h1 className="text-lg sm:text-xl font-bold text-cri-textPrimary tracking-tight truncate" title={activeDocument?.title || activeDocument?.filename || "Select a source"}>
+                {activeDocument ? (activeDocument.title || activeDocument.filename) : "Select a source"}
               </h1>
             </div>
 
             {/* Metadata row */}
             <div className="mt-1 flex items-center gap-2 text-xs text-cri-textSecondary truncate pl-9">
-              <span>{getDocMetadataString()}</span>
+              {activeDocument ? (
+                <span>{getDocMetadataString()}</span>
+              ) : (
+                <span>Choose a document from Sources to begin research.</span>
+              )}
             </div>
           </div>
 
-          {/* Right Header Actions: View Document, More Menu */}
+          {/* Right Header Actions: View Document, More Menu (only when active document) */}
           {activeDocument && (
             <div className="flex items-center gap-2 shrink-0">
               <button
@@ -220,7 +228,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 onClick={() => {
                   window.open(`/data/sample_papers/${activeDocument.filename}`, "_blank");
                 }}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-[9px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-xs font-semibold text-cri-textPrimary transition-colors"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-[9px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
                 title="View original research document"
               >
                 <BookOpen className="w-3.5 h-3.5 text-cri-orange" />
@@ -228,7 +236,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               </button>
               <button
                 type="button"
-                className="p-1.5 rounded-[8px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textMuted hover:text-cri-textPrimary transition-colors"
+                className="p-1.5 rounded-[8px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
                 title="Document actions"
               >
                 <MoreHorizontal className="w-4 h-4" />
@@ -237,37 +245,39 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           )}
         </div>
 
-        {/* SECTION 12: Document Tabs */}
-        <div className="flex items-center gap-1 pt-2 border-t border-cri-border/60 text-xs">
-          {(
-            [
-              { id: "ask", label: "Ask" },
-              { id: "summary", label: "Summary" },
-              { id: "takeaways", label: "Key Takeaways" },
-              { id: "citations", label: "Citations" },
-              { id: "related", label: "Related Work" },
-            ] as const
-          ).map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 font-medium rounded-[7px] transition-all relative ${
-                  isActive
-                    ? "text-cri-textPrimary font-semibold bg-cri-surfaceElevated"
-                    : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
-                }`}
-              >
-                {tab.label}
-                {isActive && (
-                  <span className="absolute -bottom-2.5 left-2 right-2 h-[2px] bg-cri-orange rounded-full" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+        {/* Document Tabs (visible only when active document is selected) */}
+        {activeDocument && (
+          <div className="flex items-center gap-1 pt-2 border-t border-cri-border/60 text-xs">
+            {(
+              [
+                { id: "ask", label: "Ask" },
+                { id: "summary", label: "Summary" },
+                { id: "takeaways", label: "Key Takeaways" },
+                { id: "citations", label: "Citations" },
+                { id: "related", label: "Related Work" },
+              ] as const
+            ).map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-3 py-1.5 font-medium rounded-[7px] transition-all relative ${
+                    isActive
+                      ? "text-cri-textPrimary font-semibold bg-cri-surfaceElevated"
+                      : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
+                  }`}
+                >
+                  {tab.label}
+                  {isActive && (
+                    <span className="absolute -bottom-2.5 left-2 right-2 h-[2px] bg-cri-orange rounded-full" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Scrollable Center Body */}
@@ -275,27 +285,29 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
         {/* TAB 1: ASK (Primary Q&A Workspace) */}
         {activeTab === "ask" && (
           <div className="space-y-6 max-w-4xl mx-auto">
-            {/* SECTION 13: Research Question Input Container */}
+            {/* Research Question Input Container */}
             <form onSubmit={handleSubmit} className="relative">
-              <div className="rounded-[14px] border border-cri-border bg-cri-surface shadow-md focus-within:border-cri-orange focus-within:ring-1 focus-within:ring-cri-orange transition-all p-3.5 space-y-3">
+              <div
+                className={`rounded-[14px] border transition-all p-3.5 space-y-3 ${
+                  activeDocument
+                    ? "border-cri-border bg-cri-surface shadow-xs focus-within:border-cri-orange focus-within:ring-1 focus-within:ring-cri-orange"
+                    : "border-cri-border/60 bg-cri-surface/60 opacity-60"
+                }`}
+              >
                 {/* Textarea */}
                 <textarea
                   ref={inputRef}
                   value={questionInput}
                   onChange={(e) => setQuestionInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  disabled={isLoading}
+                  disabled={isLoading || !activeDocument}
                   rows={2}
-                  placeholder={
-                    activeDocument
-                      ? "Ask a research question about this document..."
-                      : "Select a source to ask research questions..."
-                  }
-                  className="w-full bg-transparent text-sm text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed"
+                  placeholder="Ask a research question about this document..."
+                  className="w-full bg-transparent text-sm text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed disabled:cursor-not-allowed"
                 />
 
-                {/* Example Suggestion Chips (Clickable) */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-cri-border/50">
+                {/* Example Suggestion Chips */}
+                <div className={`flex flex-wrap items-center gap-1.5 pt-1 border-t border-cri-border/50 ${!activeDocument ? "opacity-60 pointer-events-none" : ""}`}>
                   {[
                     "What are the main findings?",
                     "How does this compare to previous work?",
@@ -306,20 +318,22 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       key={cIdx}
                       type="button"
                       onClick={() => handleSelectSuggested(chip)}
-                      className="text-[11px] px-2.5 py-1 rounded-[7px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary hover:text-cri-textPrimary transition-colors truncate max-w-xs"
+                      disabled={!activeDocument}
+                      className="text-[11px] px-2.5 py-1 rounded-[7px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary hover:text-cri-textPrimary transition-colors truncate max-w-xs cursor-pointer"
                     >
                       {chip}
                     </button>
                   ))}
                 </div>
 
-                {/* Bottom Controls: Add Context, Focus Dropdown, ⌘ Enter, Run Analysis */}
+                {/* Bottom Controls: Add Context, Focus, ⌘ Enter, Run Analysis */}
                 <div className="flex items-center justify-between pt-2 border-t border-cri-border/50 text-xs">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => inputRef.current?.focus()}
-                      className="flex items-center gap-1 text-[11px] font-medium text-cri-textMuted hover:text-cri-textPrimary px-2 py-1 rounded-[7px] hover:bg-cri-surfaceSecondary transition-colors"
+                      disabled={!activeDocument}
+                      className="flex items-center gap-1 text-[11px] font-medium text-cri-textMuted hover:text-cri-textPrimary px-2 py-1 rounded-[7px] hover:bg-cri-surfaceSecondary transition-colors disabled:cursor-not-allowed"
                       title="Attach additional context"
                     >
                       <Paperclip className="w-3.5 h-3.5 text-cri-orange" />
@@ -341,7 +355,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     <button
                       type="submit"
                       disabled={isLoading || !questionInput.trim() || !activeDocument}
-                      className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold tracking-tight transition-all shadow-sm ${
+                      className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold tracking-tight transition-all shadow-xs ${
                         isLoading || !questionInput.trim() || !activeDocument
                           ? "bg-cri-surfaceSecondary text-cri-textMuted cursor-not-allowed border border-cri-border"
                           : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer active:scale-98"
@@ -377,46 +391,27 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               </div>
             )}
 
-            {/* Empty State when no query is executed */}
-            {!queryResponse && !isLoading && (
-              <div className="space-y-4">
-                <div className="p-5 rounded-[14px] bg-cri-surface border border-cri-border space-y-2.5">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-cri-orange" />
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary font-sans">
-                      {activeDocument ? activeDocument.filename : "Isolated Research Environment"}
-                    </h2>
-                  </div>
-                  <p className="text-xs text-cri-textSecondary leading-relaxed">
-                    {activeDocument
-                      ? activeDocument.title || "Target source loaded. All retrieval is strictly scoped to this document to eliminate cross-document contamination."
-                      : "Select a research paper from the Sources panel to initialize document-isolated retrieval and evidence verification."}
-                  </p>
+            {/* Curated Suggested Questions (only shown when document is selected and no query executed) */}
+            {!queryResponse && !isLoading && activeDocument && (
+              <div className="space-y-2.5 pt-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
+                  Curated Research Questions
                 </div>
-
-                {/* Suggested Questions */}
-                {activeDocument && (
-                  <div className="space-y-2">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
-                      Curated Research Questions
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {SUGGESTED_QUESTIONS.map((q, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleSelectSuggested(q)}
-                          className="text-left p-3 rounded-[10px] bg-cri-surface hover:bg-cri-surfaceSecondary border border-cri-border hover:border-cri-borderLight text-xs text-cri-textPrimary flex items-center justify-between group transition-colors"
-                        >
-                          <span className="group-hover:text-cri-orange transition-colors truncate pr-2 font-medium">
-                            {q}
-                          </span>
-                          <ArrowRight className="w-3.5 h-3.5 text-cri-textMuted group-hover:text-cri-orange shrink-0" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {SUGGESTED_QUESTIONS.map((q, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectSuggested(q)}
+                      className="text-left p-3 rounded-[10px] bg-cri-surface hover:bg-cri-surfaceSecondary border border-cri-border hover:border-cri-borderLight text-xs text-cri-textPrimary flex items-center justify-between group transition-colors cursor-pointer"
+                    >
+                      <span className="group-hover:text-cri-orange transition-colors truncate pr-2 font-medium">
+                        {q}
+                      </span>
+                      <ArrowRight className="w-3.5 h-3.5 text-cri-textMuted group-hover:text-cri-orange shrink-0" />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

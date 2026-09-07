@@ -5,7 +5,6 @@ import { QueryResponse } from "@/lib/types";
 import {
   ShieldCheck,
   AlertCircle,
-  Layers,
   ExternalLink,
 } from "lucide-react";
 
@@ -47,6 +46,8 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
       queryResponse.answer.includes("don't have sufficient evidence") ||
       queryResponse.answer.includes("insufficient evidence"));
 
+  const hasEvidence = Boolean(queryResponse && !isAbstention && citations.length > 0);
+
   // Classify citations: in scientific research without controversy, citations supporting the answer are supporting
   const supportingCount = citations.length;
   const neutralCount = 0;
@@ -65,84 +66,87 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
       className="h-full flex flex-col bg-cri-surface border-l border-cri-border select-none overflow-hidden transition-colors"
       aria-label="Evidence & Verification Workspace"
     >
-      {/* SECTION 18: Header with Verification Badge */}
+      {/* Header with Verification Badge */}
       <div className="p-3.5 border-b border-cri-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary font-sans">
             Evidence
           </span>
-          {citations.length > 0 && (
+          {hasEvidence && (
             <span className="text-[11px] font-mono px-1.5 py-0.5 bg-cri-surfaceSecondary text-cri-textSecondary rounded-[6px] border border-cri-border font-medium">
               {citations.length}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-[6px] bg-cri-surfaceSecondary border border-cri-border text-cri-success">
-          <ShieldCheck className="w-3.5 h-3.5 text-cri-success" />
-          <span>Verified</span>
-        </div>
+        {hasEvidence && (
+          <div className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-[6px] bg-cri-surfaceSecondary border border-cri-border text-cri-success">
+            <ShieldCheck className="w-3.5 h-3.5 text-cri-success" />
+            <span>Verified</span>
+          </div>
+        )}
       </div>
 
-      {/* SECTION 18: Evidence Tabs (All, Supporting, Contradicting, Neutral) */}
-      <div className="p-2 border-b border-cri-border bg-cri-surfaceSecondary/50 shrink-0">
-        <div className="grid grid-cols-4 gap-1 p-0.5 bg-cri-surface rounded-[8px] border border-cri-border text-[11px]">
-          <button
-            type="button"
-            onClick={() => setActiveTab("all")}
-            className={`py-1 text-center font-medium rounded-[6px] transition-all ${
-              activeTab === "all"
-                ? "bg-cri-surfaceElevated text-cri-textPrimary shadow-xs font-semibold border border-cri-border"
-                : "text-cri-textMuted hover:text-cri-textSecondary"
-            }`}
-          >
-            All {citations.length}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("supporting")}
-            className={`py-1 text-center font-medium rounded-[6px] transition-all ${
-              activeTab === "supporting"
-                ? "bg-cri-surfaceElevated text-cri-success shadow-xs font-semibold border border-cri-border"
-                : "text-cri-textMuted hover:text-cri-textSecondary"
-            }`}
-          >
-            Support {supportingCount}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("contradicting")}
-            className={`py-1 text-center font-medium rounded-[6px] transition-all ${
-              activeTab === "contradicting"
-                ? "bg-cri-surfaceElevated text-cri-error shadow-xs font-semibold border border-cri-border"
-                : "text-cri-textMuted hover:text-cri-textSecondary"
-            }`}
-          >
-            Contra {contradictingCount}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("neutral")}
-            className={`py-1 text-center font-medium rounded-[6px] transition-all ${
-              activeTab === "neutral"
-                ? "bg-cri-surfaceElevated text-cri-info shadow-xs font-semibold border border-cri-border"
-                : "text-cri-textMuted hover:text-cri-textSecondary"
-            }`}
-          >
-            Neutral {neutralCount}
-          </button>
+      {/* Evidence Tabs (All, Supporting, Contradicting, Neutral) - Only shown after query when evidence exists */}
+      {hasEvidence && (
+        <div className="p-2 border-b border-cri-border bg-cri-surfaceSecondary/50 shrink-0">
+          <div className="grid grid-cols-4 gap-1 p-0.5 bg-cri-surface rounded-[8px] border border-cri-border text-[11px]">
+            <button
+              type="button"
+              onClick={() => setActiveTab("all")}
+              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer ${
+                activeTab === "all"
+                  ? "bg-cri-surfaceElevated text-cri-textPrimary shadow-xs font-semibold border border-cri-border"
+                  : "text-cri-textMuted hover:text-cri-textSecondary"
+              }`}
+            >
+              All {citations.length}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("supporting")}
+              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer ${
+                activeTab === "supporting"
+                  ? "bg-cri-surfaceElevated text-cri-success shadow-xs font-semibold border border-cri-border"
+                  : "text-cri-textMuted hover:text-cri-textSecondary"
+              }`}
+            >
+              Support {supportingCount}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("contradicting")}
+              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer ${
+                activeTab === "contradicting"
+                  ? "bg-cri-surfaceElevated text-cri-error shadow-xs font-semibold border border-cri-border"
+                  : "text-cri-textMuted hover:text-cri-textSecondary"
+              }`}
+            >
+              Contra {contradictingCount}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("neutral")}
+              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer ${
+                activeTab === "neutral"
+                  ? "bg-cri-surfaceElevated text-cri-info shadow-xs font-semibold border border-cri-border"
+                  : "text-cri-textMuted hover:text-cri-textSecondary"
+              }`}
+            >
+              Neutral {neutralCount}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Scrollable Evidence Content */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
-        {/* BEFORE QUERY STATE */}
-        {!queryResponse && (
-          <div className="py-14 px-3 text-center space-y-2">
-            <Layers className="w-6 h-6 text-cri-textMuted mx-auto opacity-40" />
-            <p className="text-xs font-semibold text-cri-textPrimary">No active query</p>
-            <p className="text-[11px] text-cri-textSecondary leading-relaxed">
-              Submit a research question to inspect supporting passages and verification scores.
+        {/* BEFORE QUERY / NO EVIDENCE STATE */}
+        {!hasEvidence && !isAbstention && (
+          <div className="py-16 px-4 text-center space-y-1.5">
+            <p className="text-xs font-semibold text-cri-textPrimary">No evidence yet</p>
+            <p className="text-[11px] text-cri-textMuted leading-relaxed">
+              Ask a question to see the passages supporting the answer.
             </p>
           </div>
         )}

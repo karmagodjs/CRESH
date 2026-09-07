@@ -88,10 +88,10 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         <button
           type="button"
           onClick={onOpenUpload}
-          className="flex items-center gap-1 text-xs font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover px-2.5 py-1.2 rounded-[9px] shadow-xs transition-colors"
-          title="Add new source (PDF, TXT, MD)"
+          className="h-[34px] px-3.5 flex items-center gap-1.5 text-xs font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[9px] transition-colors shadow-xs cursor-pointer"
+          title="Add new research source (PDF, TXT, MD)"
         >
-          <Plus className="w-3.5 h-3.5 text-white" />
+          <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
           <span>Add source</span>
         </button>
       </div>
@@ -147,19 +147,29 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
       {/* Sources List (Scrollable Area) */}
       <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5">
         {filteredDocs.length === 0 ? (
-          <div className="py-10 px-3 text-center space-y-2">
-            <FileText className="w-6 h-6 text-cri-textMuted mx-auto opacity-40" />
-            <p className="text-xs font-medium text-cri-textSecondary">
-              {searchQuery ? "No matching sources" : "No documents indexed"}
-            </p>
+          <div className="py-8 px-4 text-center space-y-2.5">
+            <div className="w-8 h-8 rounded-[8px] bg-cri-surfaceSecondary border border-cri-border flex items-center justify-center mx-auto text-cri-textMuted">
+              <FileText className="w-4 h-4 opacity-50" />
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-cri-textPrimary">
+                {searchQuery ? "No matching sources" : "No sources yet"}
+              </p>
+              <p className="text-[11px] text-cri-textSecondary leading-relaxed max-w-[200px] mx-auto">
+                {searchQuery ? "Try refining your search query." : "Add your first research document to begin."}
+              </p>
+            </div>
             {!searchQuery && (
-              <button
-                type="button"
-                onClick={onOpenUpload}
-                className="text-xs text-cri-orange hover:underline font-semibold"
-              >
-                + Ingest your first document
-              </button>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={onOpenUpload}
+                  className="h-[30px] px-3 inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[8px] transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 text-white" />
+                  <span>Add source</span>
+                </button>
+              </div>
             )}
           </div>
         ) : (
@@ -276,36 +286,36 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         </div>
       )}
 
-      {/* SCOPE INDICATOR & SYSTEM STATUS */}
-      <div className="p-3 border-t border-cri-border bg-cri-surface shrink-0 text-xs">
-        <div className="p-2.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-cri-orange inline-block" />
-              <span className="text-xs font-bold text-cri-textPrimary font-sans">Research scope</span>
-            </div>
-            {activeDoc && (
+      {/* SCOPE INDICATOR (Visible only when a document is selected) */}
+      {activeDoc && (
+        <div className="p-3 border-t border-cri-border bg-cri-surface shrink-0 text-xs">
+          <div className="p-2.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-cri-orange inline-block" />
+                <span className="text-xs font-bold text-cri-textPrimary font-sans">Research scope</span>
+              </div>
               <button
                 type="button"
                 onClick={() => onSelectDocument(null)}
-                className="text-[11px] text-cri-orange hover:text-cri-orange-hover font-semibold flex items-center gap-0.5 transition-colors"
-                title="Deselect active source"
+                className="text-[11px] text-cri-orange hover:text-cri-orange-hover font-semibold flex items-center gap-0.5 transition-colors cursor-pointer"
+                title="Clear scope"
               >
                 <span>Clear scope</span>
                 <X className="w-3 h-3" />
               </button>
-            )}
-          </div>
+            </div>
 
-          <div className="text-xs font-semibold text-cri-textPrimary">
-            {activeDoc ? "This document only" : "All sources (select one)"}
-          </div>
+            <div className="text-xs font-semibold text-cri-textPrimary">
+              This document only
+            </div>
 
-          <p className="text-[11px] text-cri-textSecondary leading-relaxed">
-            Answers use evidence from the selected document.
-          </p>
+            <p className="text-[11px] text-cri-textSecondary leading-relaxed">
+              Answers use evidence from the selected document.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 };
