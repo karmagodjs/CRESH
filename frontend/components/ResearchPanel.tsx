@@ -24,6 +24,8 @@ interface ResearchPanelProps {
   onRunQuery: (question: string) => void;
   onCitationClick: (citationIndex: number) => void;
   selectedCitationIndex: number | null;
+  onViewDocument?: () => void;
+  onOpenCitationDocument?: (pageNumber: number) => void;
 }
 
 export const ResearchPanel: React.FC<ResearchPanelProps> = ({
@@ -33,6 +35,8 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
   onRunQuery,
   onCitationClick,
   selectedCitationIndex,
+  onViewDocument,
+  onOpenCitationDocument,
 }) => {
   const [questionInput, setQuestionInput] = useState("");
   const [activeTab, setActiveTab] = useState<"ask" | "summary" | "takeaways" | "citations" | "related">("ask");
@@ -231,7 +235,9 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  window.open(`/data/sample_papers/${activeDocument.filename}`, "_blank");
+                  if (onViewDocument) {
+                    onViewDocument();
+                  }
                 }}
                 className="hidden sm:flex items-center gap-1.5 h-[34px] px-3.5 rounded-[9px] bg-[#1C2024] hover:bg-[#20252A] border border-[#2A2F35] text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
                 title="View original research document"
@@ -718,13 +724,25 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                       <span className="font-semibold text-cri-textPrimary">{c.section_title || c.section}</span>
                       <span className="text-cri-textMuted font-mono">Page {c.page_number}</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => onCitationClick(c.citation_index)}
-                      className="text-xs text-cri-orange hover:underline font-semibold"
-                    >
-                      Highlight passage →
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => onCitationClick(c.citation_index)}
+                        className="text-xs text-cri-orange hover:underline font-semibold cursor-pointer"
+                      >
+                        Highlight passage →
+                      </button>
+                      {onOpenCitationDocument && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenCitationDocument(c.page_number)}
+                          className="text-xs text-cri-textSecondary hover:text-cri-textPrimary font-medium cursor-pointer"
+                          title={`View page ${c.page_number} in document viewer`}
+                        >
+                          View page {c.page_number} ↗
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

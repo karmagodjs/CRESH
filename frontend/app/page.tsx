@@ -6,6 +6,7 @@ import { SourcesPanel } from "@/components/SourcesPanel";
 import { ResearchPanel } from "@/components/ResearchPanel";
 import { EvidencePanel } from "@/components/EvidencePanel";
 import { AddSourceModal } from "@/components/AddSourceModal";
+import { DocumentViewer } from "@/components/DocumentViewer";
 import { fetchDocuments, executeQuery, getApiBaseUrl } from "@/lib/api";
 import { DocumentResponse, QueryResponse } from "@/lib/types";
 import { FileText, ShieldCheck, AlertTriangle } from "lucide-react";
@@ -17,6 +18,9 @@ export default function WorkspacePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCitationIndex, setSelectedCitationIndex] = useState<number | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [viewerPage, setViewerPage] = useState<number>(1);
+  const [uploadedFileUrls, setUploadedFileUrls] = useState<Record<string, string>>({});
   const [mobileTab, setMobileTab] = useState<"sources" | "research" | "evidence">("research");
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -90,7 +94,25 @@ export default function WorkspacePage() {
     }
   };
 
-  const handleDocumentUploaded = (newDoc: DocumentResponse) => {
+  const handleViewDocument = () => {
+    setViewerPage(1);
+    setIsViewerOpen(true);
+  };
+
+  const handleOpenCitationDocument = (pageNumber: number) => {
+    setViewerPage(pageNumber || 1);
+    setIsViewerOpen(true);
+  };
+
+  const handleDocumentUploaded = (newDoc: DocumentResponse, file?: File) => {
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setUploadedFileUrls((prev) => ({
+        ...prev,
+        [newDoc.document_id]: url,
+        [newDoc.filename]: url,
+      }));
+    }
     setDocuments((prev) => [newDoc, ...prev.filter((d) => d.document_id !== newDoc.document_id)]);
     setActiveDocumentId(newDoc.document_id);
   };
@@ -195,6 +217,8 @@ export default function WorkspacePage() {
               onRunQuery={handleRunQuery}
               onCitationClick={handleCitationClick}
               selectedCitationIndex={selectedCitationIndex}
+              onViewDocument={handleViewDocument}
+              onOpenCitationDocument={handleOpenCitationDocument}
             />
           </div>
 
@@ -209,6 +233,7 @@ export default function WorkspacePage() {
               selectedCitationIndex={selectedCitationIndex}
               onSelectCitation={setSelectedCitationIndex}
               activeDocumentFilename={activeDoc?.filename}
+              onOpenCitationDocument={handleOpenCitationDocument}
             />
           </div>
         </div>
@@ -219,6 +244,19 @@ export default function WorkspacePage() {
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onDocumentUploaded={handleDocumentUploaded}
+      />
+
+      {/* CRI Document Viewer Modal */}
+      <DocumentViewer
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        document={activeDoc}
+        initialPage={viewerPage}
+        fileUrl={
+          activeDoc
+            ? uploadedFileUrls[activeDoc.document_id] || uploadedFileUrls[activeDoc.filename]
+            : null
+        }
       />
     </div>
   );

@@ -1,0 +1,30 @@
+# Fast Inference from Transformers via Speculative Decoding
+
+## Abstract
+Inference from large autoregressive models like Transformers is notoriously slow because generation is strictly sequential: generating K tokens requires K serial forward passes. We introduce Speculative Decoding, an algorithmic framework that speeds up decoding without altering the model's output distribution. A smaller, faster draft model generates candidate tokens speculatively, and the larger target model evaluates them in parallel in a single forward pass.
+
+## 1. Introduction
+Autoregressive sequence generation models compute output probabilities token-by-token. For modern Large Language Models (LLMs) running on modern accelerators (GPUs/TPUs), the latency of executing a forward pass is dominated by memory bandwidth (reading model weights from High Bandwidth Memory into on-chip SRAM) rather than arithmetic compute. Consequently, generating a single token requires almost the same wall-clock time as computing several tokens in parallel.
+
+## 2. Methodology & Algorithm
+Speculative Decoding leverages two models:
+1. A draft model $M_{draft}$ (e.g., 100M parameters) which is computationally cheap and memory-efficient.
+2. A target model $M_{target}$ (e.g., 70B parameters) whose exact probability distribution we wish to preserve.
+
+At each step:
+- $M_{draft}$ autoregressively predicts a draft sequence of length $K = \gamma$ (typically $\gamma \in [3, 6]$).
+- $M_{target}$ executes a single forward pass over all $K$ proposed tokens in parallel.
+- A modified rejection sampling scheme is applied to determine how many prefix tokens are accepted:
+  $$\alpha = \min\left(1, \frac{P_{target}(x)}{P_{draft}(x)}\right)$$
+- If a token is rejected, a replacement token is sampled from the adjusted distribution $(P_{target}(x) - P_{draft}(x))^+$, and the remaining proposed tokens are discarded.
+
+## 3. Empirical Evaluation & Benchmarks
+We evaluate Speculative Decoding across T5-XXL, Chinchilla, and PaLM architectures on standard benchmarks (WMT, CNN/DailyMail, HumanEval).
+- Speedup: Observed wall-clock latency reduction ranges from 2.0x to 2.8x depending on domain entropy and draft model alignment.
+- Output Equivalence: The output distribution is mathematically identical to standard autoregressive sampling from $M_{target}$ (sampling difference $\equiv 0$).
+- Acceptance Rate: Mean acceptance rate $\beta$ per token ranges between 65% and 82%.
+
+## 4. Limitations & Trade-offs
+- Memory Footprint: Requires hosting both draft and target models in accelerator memory simultaneously.
+- Draft Model Training: Obtaining high acceptance rates requires the draft model vocabulary and tokenizer to match the target model.
+- Low-latency / High-concurrency: Under high batch-size conditions where the GPU is compute-bound rather than memory-bandwidth-bound, the relative speedup diminishes.

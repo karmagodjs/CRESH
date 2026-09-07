@@ -1,0 +1,28 @@
+# Medusa: Simple LLM Inference Acceleration with Multiple Decoding Heads
+
+## Abstract
+Speculative decoding accelerates LLM inference by generating draft tokens with a separate model. However, training and serving a secondary model introduces engineering complexity and memory overhead. We present Medusa, an architecture-efficient alternative that attaches multiple lightweight decoding heads to the frozen backbone LLM. Medusa generates multiple draft tokens in parallel without an auxiliary model and verifies them using tree-based attention in a single forward pass.
+
+## 1. Introduction
+Modern LLM serving is bottlenecked by the arithmetic intensity of memory-bound autoregressive decoding. While speculative decoding mitigates this with a draft model, managing two separate model graphs complicates scheduling and consumes GPU VRAM. Medusa solves this by adding $K$ small linear or 1-layer MLP heads on top of the base LLM's final hidden representation.
+
+## 2. Architecture & Approach
+Medusa comprises two main components:
+1. Medusa Heads: $K$ lightweight heads ($H_1, H_2, \dots, H_K$) attached to the final hidden state $h_t$. Head $H_k$ predicts the token at position $t + k + 1$.
+2. Tree-Based Attention: Instead of proposing a single linear sequence of candidate tokens, Medusa combines top predictions from multiple heads into a candidate tree.
+3. Verification Mask: A customized 2D attention mask evaluates the entire candidate tree simultaneously in a single forward pass of the backbone LLM.
+
+Training of Medusa heads requires minimal compute:
+- The base LLM parameters are completely frozen.
+- Only the Medusa heads are trained using standard cross-entropy loss on target domain text.
+- Parameter overhead is under 2% of the base model size.
+
+## 3. Experimental Results
+We benchmark Medusa across Vicuna-7B, Vicuna-13B, and LLaMA-2-70B on MT-Bench and GSM8K.
+- Speedup: Achieves 2.2x to 3.1x wall-clock speedup over standard autoregressive decoding.
+- Acceptance Length: Average accepted tokens per step reaches 2.5 to 3.2 tokens per forward pass.
+- Comparison with Speculative Decoding: Medusa matches or exceeds the throughput of speculative decoding with draft models, while requiring zero additional model loading or KV-cache synchronization overhead.
+
+## 4. Limitations
+- Non-zero loss of precision if combined with typical acceptance threshold approximations; exact sampling requires strict rejection filtering.
+- Requires dedicated fine-tuning of the head weights for each new base model checkpoint.

@@ -13,6 +13,7 @@ interface EvidencePanelProps {
   selectedCitationIndex: number | null;
   onSelectCitation: (index: number) => void;
   activeDocumentFilename?: string;
+  onOpenCitationDocument?: (pageNumber: number) => void;
 }
 
 export const EvidencePanel: React.FC<EvidencePanelProps> = ({
@@ -20,6 +21,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
   selectedCitationIndex,
   onSelectCitation,
   activeDocumentFilename,
+  onOpenCitationDocument,
 }) => {
   const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const [activeTab, setActiveTab] = useState<"all" | "supporting" | "contradicting" | "neutral">("all");
@@ -234,11 +236,20 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
                   </p>
 
                   {/* Document Title, Page & Jump Icon */}
-                  <div className="pt-2 border-t border-[#2A2F35]/60 flex items-center justify-between text-[10px] text-cri-textMuted font-mono">
+                  <div
+                    className="pt-2 border-t border-[#2A2F35]/60 flex items-center justify-between text-[10px] text-cri-textMuted font-mono hover:text-cri-orange transition-colors cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onOpenCitationDocument) {
+                        onOpenCitationDocument(cite.page_number);
+                      }
+                    }}
+                    title={`Open document viewer on page ${cite.page_number}`}
+                  >
                     <span className="truncate max-w-[170px]" title={cite.filename || activeDocumentFilename || "Document"}>
                       {cite.filename || activeDocumentFilename || "Document"} · p.{cite.page_number}
                     </span>
-                    <ExternalLink className="w-3 h-3 text-cri-textMuted hover:text-cri-orange transition-colors" />
+                    <ExternalLink className="w-3 h-3 text-cri-textMuted hover:text-cri-orange transition-colors shrink-0" />
                   </div>
                 </div>
               );

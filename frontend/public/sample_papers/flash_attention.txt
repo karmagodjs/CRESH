@@ -1,0 +1,23 @@
+# FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness
+
+## Abstract
+Transformers are slow and memory-intensive for long sequences because standard self-attention exhibits $O(N^2)$ time and memory complexity in sequence length $N$. We introduce FlashAttention, an IO-aware exact attention algorithm that uses tiling to reduce the number of memory reads/writes between GPU High Bandwidth Memory (HBM) and GPU on-chip SRAM.
+
+## 1. Introduction
+Standard attention implementations materialize intermediate $N \times N$ attention matrices $S = QK^T$ and $P = \text{softmax}(S)$ in slow HBM. Because GPU SRAM is significantly faster (19 TB/s) than HBM (1.5 TB/s on A100), memory access is the primary performance bottleneck. FlashAttention computes exact softmax attention without materializing the large intermediate attention matrix.
+
+## 2. Algorithm & IO-Aware Tiling
+FlashAttention splits query, key, and value matrices into blocks that fit within on-chip SRAM:
+1. Tiling: Loops over blocks of $K$ and $V$, loading them into SRAM.
+2. Online Softmax: Incrementally computes scaling factors and running softmax sums $\ell_i$ and $m_i$ using the online softmax trick:
+   $$m^{new} = \max(m, \max(S_j)), \quad \ell^{new} = e^{m - m^{new}}\ell + \sum e^{S_j - m^{new}}$$
+3. Block Recomputation in Backward Pass: To save memory during training, intermediate attention matrices are not saved; instead, they are recomputed on-the-fly in SRAM during the backward pass.
+
+## 3. Results & Benchmarks
+- Speedup: FlashAttention yields 2x to 4x wall-clock speedup on BERT and GPT-2 compared to PyTorch standard attention.
+- Memory Footprint: Memory scaling is strictly linear $O(N)$ with sequence length instead of quadratic $O(N^2)$, enabling sequence lengths up to 64k tokens on single GPUs.
+- Exactness: Does not approximate attention; numerical results are exact up to floating-point precision.
+
+## 4. Limitations
+- Hardware Specificity: Kernel requires tuning for specific GPU SRAM configurations (e.g., CUDA tensor cores).
+- Non-attention Compute: Only accelerates the self-attention layer; MLP feed-forward blocks remain unaffected.

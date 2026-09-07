@@ -8,7 +8,7 @@ import { X, UploadCloud, FileText, AlertCircle, Loader2 } from "lucide-react";
 interface AddSourceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onDocumentUploaded: (doc: DocumentResponse) => void;
+  onDocumentUploaded: (doc: DocumentResponse, file?: File) => void;
 }
 
 export const AddSourceModal: React.FC<AddSourceModalProps> = ({
@@ -66,7 +66,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     setError(null);
     try {
       const uploadedDoc = await uploadDocument(file);
-      onDocumentUploaded(uploadedDoc);
+      onDocumentUploaded(uploadedDoc, file);
       onClose();
     } catch (err: any) {
       setError(err.message || "Failed to upload and index document.");
