@@ -1263,4 +1263,3 @@ elif st.session_state["active_view"] == "observability":
     with h3:
         st.markdown("**Secret Hygiene**")
         st.code("Scrubbing: Active\nMasking: Bearer / co_* / sk-*\nFast-fail: HTTP 401/403", language="text")
-v
