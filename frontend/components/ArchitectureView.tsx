@@ -88,46 +88,46 @@ export const ArchitectureView: React.FC = () => {
           {pipelineSteps.map((st, idx) => (
             <div
               key={idx}
-              className="p-4 rounded-[12px] border border-cri-border bg-cri-surface hover:bg-cri-surfaceElevated transition-colors relative"
+              className="p-3.5 rounded-lg border border-cri-border bg-cri-surface hover:bg-cri-surfaceHover transition-colors relative"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-xs text-cri-textSecondary font-semibold tracking-wider">
                   STAGE {st.step}
                 </span>
-                <span className={`text-[10px] px-2 py-0.5 rounded-[6px] border uppercase font-mono font-medium ${st.color}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded border uppercase font-mono font-medium ${st.color}`}>
                   {st.type}
                 </span>
               </div>
-              <h3 className="text-sm font-semibold text-cri-textPrimary mb-1.5">{st.title}</h3>
+              <h3 className="text-xs font-semibold text-cri-textPrimary mb-1">{st.title}</h3>
               <p className="text-xs text-cri-textSecondary leading-relaxed">{st.desc}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div className="p-4 rounded-lg border border-cri-border bg-cri-surface space-y-2.5">
           <div className="flex items-center gap-2">
             <Cpu className="w-4 h-4 text-cri-orange" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary">
               Structure-Aware Chunking
             </h3>
           </div>
-          <ul className="text-xs text-cri-textSecondary space-y-2 list-disc pl-4 leading-relaxed">
+          <ul className="text-xs text-cri-textSecondary space-y-1.5 list-disc pl-4 leading-relaxed">
             <li>Target size: 400 tokens (~1,600 chars) with 80-token overlap.</li>
             <li>Section boundary preservation prevents splitting mid-equation or table.</li>
             <li>Context Header Injection: Each chunk prepends document title, section, and page provenance.</li>
           </ul>
         </div>
 
-        <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-3">
+        <div className="p-4 rounded-lg border border-cri-border bg-cri-surface space-y-2.5">
           <div className="flex items-center gap-2">
             <Database className="w-4 h-4 text-cri-blue" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-cri-textPrimary">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary">
               Dual Storage & Scope Isolation
             </h3>
           </div>
-          <ul className="text-xs text-cri-textSecondary space-y-2 list-disc pl-4 leading-relaxed">
+          <ul className="text-xs text-cri-textSecondary space-y-1.5 list-disc pl-4 leading-relaxed">
             <li>Qdrant Vector Database isolates vectors strictly by <code className="font-mono text-cri-orange text-[11px] bg-cri-surfaceElevated px-1.5 py-0.5 rounded">document_id</code> payload filter.</li>
             <li>In-memory BM25 inverted indices partitioned per document.</li>
             <li>Cross-document contamination is mathematically prevented at retrieval time.</li>

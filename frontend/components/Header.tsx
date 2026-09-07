@@ -8,11 +8,15 @@ interface HeaderProps {
   activeDocument?: DocumentResponse | null;
   theme?: "dark" | "light";
   onToggleTheme?: () => void;
+  activeView?: "research" | "evaluation" | "architecture" | "observability";
+  onSelectView?: (view: "research" | "evaluation" | "architecture" | "observability") => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   theme: propTheme,
   onToggleTheme: propToggleTheme,
+  activeView = "research",
+  onSelectView,
 }) => {
   const [currentTheme, setCurrentTheme] = useState<"dark" | "light">("dark");
   const [mounted, setMounted] = useState(false);
@@ -38,22 +42,44 @@ export const Header: React.FC<HeaderProps> = ({
 
   const activeTheme = propTheme || currentTheme;
 
+  const navItems: { id: "research" | "evaluation" | "architecture" | "observability"; label: string }[] = [
+    { id: "research", label: "Research" },
+    { id: "evaluation", label: "Evaluation" },
+    { id: "architecture", label: "Architecture" },
+    { id: "observability", label: "Observability" },
+  ];
+
   return (
     <header
-      className="h-[64px] mx-[10px] mt-2 mb-0 px-5 rounded-[16px] bg-cri-headerBg border border-cri-border flex items-center justify-between shrink-0 select-none z-30 shadow-xs transition-colors duration-200"
+      className="h-12 px-3 sm:px-5 bg-cri-headerBg border-b border-cri-border flex items-center justify-between shrink-0 select-none z-30 transition-colors duration-200"
       aria-label="Workspace Header"
     >
-      <div className="flex items-center min-w-0">
-        <span className="text-[18px] sm:text-[19px] font-bold tracking-tight text-cri-textPrimary font-sans">
+      <div className="flex items-center gap-5 min-w-0">
+        <span className="text-[15px] font-semibold tracking-tight text-cri-textPrimary font-sans">
           CRI Research
         </span>
-      </div>
 
-      <div className="hidden md:flex items-center justify-center">
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-[10px] bg-cri-surfaceElevated border border-cri-border text-[13px] font-semibold text-cri-textPrimary shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-cri-orange shrink-0" />
-          <span>Research</span>
-        </div>
+        {onSelectView && (
+          <nav className="hidden md:flex items-center gap-1 text-xs" aria-label="Main Navigation">
+            {navItems.map((item) => {
+              const isActive = activeView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectView(item.id)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                    isActive
+                      ? "text-cri-textPrimary bg-cri-surfaceElevated"
+                      : "text-cri-textMuted hover:text-cri-textPrimary hover:bg-cri-surfaceHover"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+        )}
       </div>
 
       <div className="flex items-center justify-end">
@@ -61,13 +87,13 @@ export const Header: React.FC<HeaderProps> = ({
           type="button"
           onClick={handleToggle}
           aria-label="Toggle theme"
-          className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[10px] bg-cri-surfaceElevated hover:bg-cri-surface border border-cri-border hover:border-cri-orange flex items-center justify-center text-cri-textPrimary transition-colors cursor-pointer shadow-xs"
+          className="h-8 w-8 rounded-md flex items-center justify-center text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceHover transition-colors cursor-pointer"
           title={mounted && activeTheme === "dark" ? "Switch to Light theme" : "Switch to Dark theme"}
         >
           {mounted && activeTheme === "light" ? (
-            <Sun className="w-4 h-4 text-cri-orange" />
+            <Sun className="w-4 h-4" />
           ) : (
-            <Moon className="w-4 h-4 text-cri-orange" />
+            <Moon className="w-4 h-4" />
           )}
         </button>
       </div>

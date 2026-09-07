@@ -141,16 +141,16 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
   return (
     <aside
-      className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-[14px] select-none overflow-hidden shadow-xs ${className || ""}`}
+      className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-lg select-none overflow-hidden ${className || ""}`}
       aria-label="Sources Library"
     >
-      <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0 relative">
+      <div className="p-3.5 border-b border-cri-border flex items-center justify-between shrink-0 relative">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-cri-textPrimary font-sans">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary font-sans">
             Sources
           </h2>
-          <span className="text-[11px] font-mono px-1.5 py-0.5 bg-cri-surfaceElevated text-cri-textSecondary rounded-[6px] border border-cri-border font-medium">
-            {documents.length}
+          <span className="text-xs font-mono text-cri-textMuted font-medium">
+            ({documents.length})
           </span>
         </div>
 
@@ -159,29 +159,27 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
             <button
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="h-[36px] px-[14px] flex items-center gap-1.5 text-[14px] font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[9px] transition-colors shadow-xs cursor-pointer"
+              className="h-8 px-3 flex items-center gap-1.5 text-xs font-medium text-white bg-cri-orange hover:bg-cri-orange-hover rounded-md transition-colors cursor-pointer"
               title="Add research source"
             >
-              <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+              <Plus className="w-3.5 h-3.5 text-white" />
               <span>Add source</span>
             </button>
 
             {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-[#1A1E22] border border-[#2A2F35] rounded-[10px] shadow-2xl p-1.5 z-40 space-y-1">
+              <div className="absolute right-0 top-full mt-1.5 w-48 bg-cri-surface border border-cri-border rounded-lg shadow-lg p-1 z-40 space-y-0.5">
                 <button
                   type="button"
                   onClick={() => {
                     setIsMenuOpen(false);
                     onOpenUpload("file");
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-cri-textPrimary hover:bg-cri-surfaceHover rounded-md transition-colors text-left cursor-pointer"
                 >
-                  <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0">
-                    <FileUp className="w-3.5 h-3.5" />
-                  </div>
+                  <FileUp className="w-4 h-4 text-cri-orange shrink-0" />
                   <div className="flex flex-col min-w-0">
-                    <span className="font-semibold text-cri-textPrimary">Upload file</span>
-                    <span className="text-[10px] text-cri-textMuted truncate">PDF, TXT, MD files</span>
+                    <span className="font-medium text-cri-textPrimary">Upload file</span>
+                    <span className="text-[10px] text-cri-textMuted truncate">PDF, TXT, MD</span>
                   </div>
                 </button>
 
@@ -192,14 +190,12 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                     setActiveFilter("web");
                     setTimeout(() => urlInputRef.current?.focus(), 100);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-cri-textPrimary hover:bg-[#252A30] rounded-[7px] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-cri-textPrimary hover:bg-cri-surfaceHover rounded-md transition-colors text-left cursor-pointer"
                 >
-                  <div className="w-7 h-7 rounded-[6px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-[#58A6FF] shrink-0">
-                    <Globe className="w-3.5 h-3.5" />
-                  </div>
+                  <Globe className="w-4 h-4 text-cri-info shrink-0" />
                   <div className="flex flex-col min-w-0">
-                    <span className="font-semibold text-cri-textPrimary">Add web URL</span>
-                    <span className="text-[10px] text-cri-textMuted truncate">Articles, docs & pages</span>
+                    <span className="font-medium text-cri-textPrimary">Add web URL</span>
+                    <span className="text-[10px] text-cri-textMuted truncate">Articles & pages</span>
                   </div>
                 </button>
               </div>
@@ -208,32 +204,31 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         )}
       </div>
 
-      <div className="p-3 border-b border-[#2A2F35] space-y-2.5 shrink-0">
+      <div className="p-3 border-b border-cri-border space-y-2 shrink-0">
         <div className="relative">
-          <Search className="w-4 h-4 text-cri-textMuted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-cri-textMuted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search sources or documents..."
-            className="w-full h-[42px] bg-[#171A1D] border border-[#2A2E33] text-xs text-cri-textPrimary placeholder-cri-textMuted pl-9 pr-12 rounded-[10px] focus:outline-none focus:border-cri-orange transition-colors"
+            placeholder="Search sources..."
+            className="w-full h-8 bg-cri-surfaceSecondary border border-cri-border text-xs text-cri-textPrimary placeholder-cri-textMuted pl-8 pr-8 rounded-md focus:outline-none focus:border-cri-orange transition-colors"
           />
           {searchQuery ? (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-cri-textMuted hover:text-cri-textPrimary cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-cri-textMuted hover:text-cri-textPrimary cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           ) : (
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-mono text-cri-textMuted bg-[#1C2024] border border-[#2A2F35] rounded-[4px] pointer-events-none">
-              <span>⌘</span>
-              <span>F</span>
-            </kbd>
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-cri-textMuted pointer-events-none">
+              ⌘F
+            </span>
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-1 p-0.5 bg-[#1C2024] rounded-[8px] border border-[#2A2F35] text-[11px]">
+        <div className="grid grid-cols-3 gap-1 p-0.5 bg-cri-surfaceSecondary rounded-md border border-cri-border text-xs">
           {(["all", "papers", "web"] as const).map((filter) => {
             const isActive = activeFilter === filter;
             return (
@@ -241,9 +236,9 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 key={filter}
                 type="button"
                 onClick={() => setActiveFilter(filter)}
-                className={`py-1 text-center font-medium capitalize rounded-[6px] transition-all cursor-pointer ${
+                className={`py-1 text-center capitalize rounded text-xs transition-colors cursor-pointer ${
                   isActive
-                    ? "bg-[#171A1D] text-cri-textPrimary shadow-xs font-semibold border border-[#2A2F35]"
+                    ? "bg-cri-surface text-cri-textPrimary font-medium border border-cri-border"
                     : "text-cri-textMuted hover:text-cri-textSecondary"
                 }`}
               >
@@ -254,21 +249,21 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 flex flex-col">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 flex flex-col">
         {activeFilter === "web" ? (
           <div className="space-y-3 flex-1 flex flex-col">
-            <div className="bg-[#1C2024] border border-[#2A2F35] rounded-[12px] p-3.5 space-y-3 shrink-0">
-              <div className="flex items-center justify-between border-b border-[#2A2F35] pb-2">
+            <div className="bg-cri-surfaceSecondary border border-cri-border rounded-lg p-3 space-y-2.5 shrink-0">
+              <div className="flex items-center justify-between border-b border-cri-border pb-2">
                 <div className="flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5 text-[#58A6FF]" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-sans">
+                  <Globe className="w-3.5 h-3.5 text-cri-info" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted font-sans">
                     WEB SOURCES
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <h3 className="text-xs font-semibold text-cri-textPrimary">
+              <div className="space-y-0.5">
+                <h3 className="text-xs font-medium text-cri-textPrimary">
                   Add a web source
                 </h3>
                 <p className="text-[11px] text-cri-textSecondary leading-relaxed">
@@ -288,10 +283,10 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                       if (webBackendMessage) setWebBackendMessage(null);
                     }}
                     placeholder="https://example.com/article"
-                    className={`w-full h-[36px] bg-[#171A1D] border text-xs text-cri-textPrimary placeholder-cri-textMuted px-3 rounded-[8px] focus:outline-none transition-colors ${
+                    className={`w-full h-8 bg-cri-surface border text-xs text-cri-textPrimary placeholder-cri-textMuted px-2.5 rounded-md focus:outline-none transition-colors ${
                       webUrlError
                         ? "border-cri-error focus:border-cri-error"
-                        : "border-[#2A2F35] focus:border-cri-orange"
+                        : "border-cri-border focus:border-cri-orange"
                     }`}
                   />
                 </div>
@@ -304,7 +299,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 )}
 
                 {webBackendMessage && (
-                  <div className="p-2.5 rounded-[8px] bg-[#221815] border border-cri-orange/40 text-[11px] text-cri-textSecondary leading-relaxed flex items-start gap-2">
+                  <div className="p-2 rounded-md bg-cri-surfaceElevated border border-cri-orange/40 text-[11px] text-cri-textSecondary leading-relaxed flex items-start gap-2">
                     <AlertCircle className="w-3.5 h-3.5 text-cri-orange shrink-0 mt-0.5" />
                     <span>{webBackendMessage}</span>
                   </div>
@@ -314,21 +309,21 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                   <button
                     type="submit"
                     disabled={isAddingWeb || !webUrl.trim()}
-                    className={`h-[32px] px-3 rounded-[8px] text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    className={`h-7 px-3 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                       isAddingWeb || !webUrl.trim()
-                        ? "bg-[#252A30] text-cri-textMuted cursor-not-allowed border border-[#2A2F35]"
-                        : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer shadow-xs"
+                        ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
+                        : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer"
                     }`}
                   >
                     {isAddingWeb ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Adding source...</span>
+                        <span>Adding...</span>
                       </>
                     ) : (
                       <>
                         <span>Add URL</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-3 h-3" />
                       </>
                     )}
                   </button>
@@ -352,18 +347,16 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                           onSelectDocument(isActive ? null : doc.document_id);
                         }
                       }}
-                      className={`group relative text-left min-h-[84px] p-3 rounded-[12px] border cursor-pointer transition-all flex flex-col justify-between ${
+                      className={`group relative text-left p-3 rounded-lg border cursor-pointer transition-colors flex flex-col justify-between ${
                         isActive
-                          ? "bg-[#1A1E22] border-[#2A2F35] border-l-[3px] border-l-cri-orange shadow-xs"
-                          : "bg-[#171A1D] border-[#2A2F35] hover:bg-[#1A1E22] border-l-[3px] border-l-transparent"
+                          ? "bg-cri-surfaceElevated border-cri-border border-l-[3px] border-l-cri-orange"
+                          : "bg-cri-surface border-cri-border hover:bg-cri-surfaceHover border-l-[3px] border-l-transparent"
                       }`}
                     >
                       <div className="flex items-start gap-2.5">
-                        <div className="w-[30px] h-[30px] rounded-[8px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-[#58A6FF] shrink-0 mt-0.5">
-                          <Globe className="w-4 h-4" />
-                        </div>
+                        <Globe className="w-4 h-4 text-cri-info shrink-0 mt-0.5" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-[13px] font-semibold text-cri-textPrimary leading-snug line-clamp-1">
+                          <div className="text-xs font-semibold text-cri-textPrimary leading-snug line-clamp-1">
                             {doc.title || doc.filename}
                           </div>
                           <div className="text-[11px] text-cri-textSecondary truncate mt-0.5">
@@ -372,8 +365,8 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                         </div>
                       </div>
 
-                      <div className="mt-2 pt-1.5 border-t border-[#2A2F35]/50 flex items-center justify-between text-[11px] text-cri-textMuted">
-                        <span>Web page</span>
+                      <div className="mt-2 pt-1.5 border-t border-cri-border flex items-center justify-between text-[11px] text-cri-textMuted">
+                        <span>Web source</span>
                         <span className="flex items-center gap-1.5 text-cri-success font-medium">
                           <span className="w-1.5 h-1.5 rounded-full bg-cri-success inline-block" />
                           Indexed
@@ -384,7 +377,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 })
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-2 text-cri-textMuted">
-                  <Globe className="w-5 h-5 opacity-40 text-[#58A6FF]" />
+                  <Globe className="w-5 h-5 opacity-40 text-cri-info" />
                   <p className="text-xs font-medium text-cri-textSecondary">
                     No web sources added yet.
                   </p>
@@ -394,11 +387,9 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
           </div>
         ) : filteredDocs.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 select-none">
-            <div className="w-12 h-12 rounded-[12px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center mx-auto text-cri-orange mb-4 shadow-xs">
-              <FileText className="w-6 h-6 text-cri-orange stroke-[1.75]" />
-            </div>
+            <FileText className="w-8 h-8 text-cri-textMuted mx-auto mb-3 opacity-60" />
 
-            <h3 className="text-sm font-semibold text-cri-textPrimary leading-tight mb-2">
+            <h3 className="text-xs font-semibold text-cri-textPrimary leading-tight mb-1.5">
               {searchQuery
                 ? "No matching sources"
                 : activeFilter === "papers"
@@ -406,7 +397,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 : "No sources yet"}
             </h3>
 
-            <p className="text-xs text-cri-textSecondary leading-relaxed max-w-[220px] mx-auto mb-[18px]">
+            <p className="text-xs text-cri-textSecondary leading-relaxed max-w-[200px] mx-auto mb-4">
               {searchQuery
                 ? "Try refining your search query."
                 : activeFilter === "papers"
@@ -418,9 +409,9 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenUpload("file")}
-                className="h-[40px] px-[18px] inline-flex items-center justify-center gap-2 text-[14px] font-semibold text-white bg-cri-orange hover:bg-cri-orange-hover rounded-[10px] transition-colors shadow-xs cursor-pointer"
+                className="h-8 px-3.5 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-cri-orange hover:bg-cri-orange-hover rounded-md transition-colors cursor-pointer"
               >
-                <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+                <Plus className="w-3.5 h-3.5 text-white" />
                 <span>Add source</span>
               </button>
             )}
@@ -442,32 +433,30 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                     onSelectDocument(isActive ? null : doc.document_id);
                   }
                 }}
-                className={`group relative text-left min-h-[92px] p-[14px] rounded-[12px] border cursor-pointer transition-all flex flex-col justify-between ${
+                className={`group relative text-left p-3 rounded-lg border cursor-pointer transition-colors flex flex-col justify-between ${
                   isActive
-                    ? "bg-[#1A1E22] border-[#2A2F35] border-l-[3px] border-l-cri-orange shadow-xs"
-                    : "bg-[#171A1D] border-[#2A2F35] hover:bg-[#1A1E22] border-l-[3px] border-l-transparent"
+                    ? "bg-cri-surfaceElevated border-cri-border border-l-[3px] border-l-cri-orange"
+                    : "bg-cri-surface border-cri-border hover:bg-cri-surfaceHover border-l-[3px] border-l-transparent"
                 }`}
               >
                 <div className="flex items-start gap-2.5">
-                  <div className="w-[32px] h-[32px] rounded-[8px] bg-[#1C2024] border border-[#2A2F35] flex items-center justify-center text-cri-orange shrink-0 mt-0.5">
-                    <FileText className="w-4 h-4" />
-                  </div>
+                  <FileText className={`w-4 h-4 shrink-0 mt-0.5 ${isActive ? "text-cri-orange" : "text-cri-textSecondary"}`} />
 
                   <div className="min-w-0 flex-1">
                     <div
-                      className="text-[14px] font-semibold text-cri-textPrimary leading-snug line-clamp-2"
+                      className="text-xs font-semibold text-cri-textPrimary leading-snug line-clamp-2"
                       title={doc.title || doc.filename}
                     >
                       {doc.title || doc.filename}
                     </div>
 
-                    <div className="text-[12px] text-cri-textSecondary truncate mt-1">
+                    <div className="text-[11px] text-cri-textSecondary truncate mt-0.5">
                       {authorYear}
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-2.5 pt-2 border-t border-[#2A2F35]/50 flex items-center justify-between text-[11px] text-cri-textMuted">
+                <div className="mt-2 pt-1.5 border-t border-cri-border flex items-center justify-between text-[11px] text-cri-textMuted">
                   <span>{doc.page_count} {doc.page_count === 1 ? "page" : "pages"}</span>
                   <span className="flex items-center gap-1.5 text-cri-success font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-cri-success inline-block" />

@@ -36,12 +36,6 @@ const config: Config = {
           surfaceHover: "var(--surface-hover)",
         },
       },
-      borderRadius: {
-        control: "8px",
-        input: "10px",
-        card: "12px",
-        container: "16px",
-      },
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
         mono: ["'JetBrains Mono'", "monospace"],

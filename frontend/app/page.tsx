@@ -7,11 +7,15 @@ import { ResearchPanel } from "@/components/ResearchPanel";
 import { EvidencePanel } from "@/components/EvidencePanel";
 import { AddSourceModal } from "@/components/AddSourceModal";
 import { DocumentViewer } from "@/components/DocumentViewer";
+import { ArchitectureView } from "@/components/ArchitectureView";
+import { EvaluationView } from "@/components/EvaluationView";
+import { ObservabilityView } from "@/components/ObservabilityView";
 import { fetchDocuments, executeQuery, getApiBaseUrl } from "@/lib/api";
 import { DocumentResponse, QueryResponse } from "@/lib/types";
 import { AlertTriangle, FolderOpen, ShieldCheck, X, BookOpen } from "lucide-react";
 
 export default function WorkspacePage() {
+  const [activeView, setActiveView] = useState<"research" | "evaluation" | "architecture" | "observability">("research");
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
   const [queryResponse, setQueryResponse] = useState<QueryResponse | null>(null);
@@ -117,7 +121,11 @@ export default function WorkspacePage() {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-cri-bg text-cri-textPrimary font-sans">
-      <Header activeDocument={activeDoc} />
+      <Header
+        activeDocument={activeDoc}
+        activeView={activeView}
+        onSelectView={setActiveView}
+      />
 
       {apiError && (
         <div className="px-4 py-2 bg-cri-surface border-b border-cri-orange/30 flex items-center justify-between text-xs text-cri-orange">
@@ -135,112 +143,122 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      <div className="flex-1 overflow-hidden p-2 sm:p-2.5 pt-2 bg-cri-bg flex flex-col">
-        <div className="min-[1100px]:hidden flex items-center justify-between gap-2 pb-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => setIsMobileSourcesOpen(true)}
-            aria-label="Open Sources drawer"
-            className="h-[44px] min-h-[44px] px-3.5 rounded-[10px] bg-cri-surface border border-cri-border hover:border-cri-orange flex items-center gap-2 text-xs font-semibold text-cri-textPrimary shadow-xs transition-colors cursor-pointer"
-          >
-            <FolderOpen className="w-4 h-4 text-cri-orange shrink-0" />
-            <span>Sources</span>
-            {documents.length > 0 && (
-              <span className="px-1.5 py-0.5 rounded-[6px] bg-cri-surfaceElevated text-[11px] font-mono text-cri-textSecondary border border-cri-border">
-                {documents.length}
-              </span>
-            )}
-          </button>
-
-          <div className="flex items-center gap-2">
-            {activeDoc && (
+      <div className="flex-1 overflow-hidden bg-cri-bg flex flex-col">
+        {activeView === "research" ? (
+          <div className="flex-1 overflow-hidden p-2 sm:p-2.5 pt-2 flex flex-col">
+            <div className="min-[1100px]:hidden flex items-center justify-between gap-2 pb-2 shrink-0">
               <button
                 type="button"
-                onClick={handleViewDocument}
-                className="h-[44px] min-h-[44px] px-3 rounded-[10px] bg-cri-surface border border-cri-border hover:border-cri-orange flex items-center gap-1.5 text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
-                title="View document"
+                onClick={() => setIsMobileSourcesOpen(true)}
+                aria-label="Open Sources drawer"
+                className="h-8 px-3 rounded-md bg-cri-surface border border-cri-border hover:border-cri-orange flex items-center gap-2 text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
               >
-                <BookOpen className="w-3.5 h-3.5 text-cri-orange shrink-0" />
-                <span className="max-w-[110px] xs:max-w-[150px] truncate text-[11px]">
-                  {activeDoc.title || activeDoc.filename}
-                </span>
+                <FolderOpen className="w-4 h-4 text-cri-orange shrink-0" />
+                <span>Sources</span>
+                {documents.length > 0 && (
+                  <span className="px-1.5 py-0.5 rounded bg-cri-surfaceElevated text-[11px] font-mono text-cri-textSecondary border border-cri-border">
+                    {documents.length}
+                  </span>
+                )}
               </button>
-            )}
 
-            <button
-              type="button"
-              onClick={() => setIsMobileEvidenceOpen(true)}
-              aria-label="Open Evidence drawer"
-              className="h-[44px] min-h-[44px] px-3.5 rounded-[10px] bg-cri-surface border border-cri-border hover:border-cri-orange flex items-center gap-2 text-xs font-semibold text-cri-textPrimary shadow-xs transition-colors cursor-pointer"
-            >
-              <ShieldCheck className="w-4 h-4 text-cri-success shrink-0" />
-              <span>Evidence</span>
-              {queryResponse?.citations && queryResponse.citations.length > 0 && (
-                <span className="px-1.5 py-0.5 rounded-[6px] bg-cri-orange/15 text-cri-orange text-[11px] font-mono font-bold">
-                  {queryResponse.citations.length}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
+              <div className="flex items-center gap-2">
+                {activeDoc && (
+                  <button
+                    type="button"
+                    onClick={handleViewDocument}
+                    className="h-8 px-3 rounded-md bg-cri-surface border border-cri-border hover:border-cri-orange flex items-center gap-1.5 text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
+                    title="View document"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-cri-orange shrink-0" />
+                    <span className="max-w-[110px] xs:max-w-[150px] truncate text-[11px]">
+                      {activeDoc.title || activeDoc.filename}
+                    </span>
+                  </button>
+                )}
 
-        <div className="h-full w-full overflow-hidden flex flex-col min-[1100px]:grid min-[1100px]:grid-cols-[22%_minmax(0,1fr)_24%] gap-3">
-          <div className="hidden min-[1100px]:block h-full min-w-0 overflow-hidden">
-            <SourcesPanel
-              documents={documents}
-              activeDocumentId={activeDocumentId}
-              onSelectDocument={(id) => {
-                setActiveDocumentId(id);
-                setQueryResponse(null);
-                setSelectedCitationIndex(null);
-              }}
-              onOpenUpload={(tab = "file") => {
-                setUploadTab(tab);
-                setIsUploadOpen(true);
-              }}
-              isDemoMode={Boolean(activeDoc?.filename.includes("1810.04805"))}
-            />
-          </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileEvidenceOpen(true)}
+                  aria-label="Open Evidence drawer"
+                  className="h-8 px-3 rounded-md bg-cri-surface border border-cri-border hover:border-cri-orange flex items-center gap-2 text-xs font-semibold text-cri-textPrimary transition-colors cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4 text-cri-success shrink-0" />
+                  <span>Evidence</span>
+                  {queryResponse?.citations && queryResponse.citations.length > 0 && (
+                    <span className="px-1.5 py-0.5 rounded bg-cri-orange/15 text-cri-orange text-[11px] font-mono font-bold">
+                      {queryResponse.citations.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
 
-          <div className="h-full min-w-0 overflow-hidden">
-            <ResearchPanel
-              activeDocument={activeDoc}
-              queryResponse={queryResponse}
-              isLoading={isLoading}
-              onRunQuery={handleRunQuery}
-              onCitationClick={handleCitationClick}
-              selectedCitationIndex={selectedCitationIndex}
-              onViewDocument={handleViewDocument}
-              onOpenCitationDocument={handleOpenCitationDocument}
-            />
-          </div>
+            <div className="h-full w-full overflow-hidden flex flex-col min-[1100px]:grid min-[1100px]:grid-cols-[22%_minmax(0,1fr)_24%] gap-3">
+              <div className="hidden min-[1100px]:block h-full min-w-0 overflow-hidden">
+                <SourcesPanel
+                  documents={documents}
+                  activeDocumentId={activeDocumentId}
+                  onSelectDocument={(id) => {
+                    setActiveDocumentId(id);
+                    setQueryResponse(null);
+                    setSelectedCitationIndex(null);
+                  }}
+                  onOpenUpload={(tab = "file") => {
+                    setUploadTab(tab);
+                    setIsUploadOpen(true);
+                  }}
+                  isDemoMode={Boolean(activeDoc?.filename.includes("1810.04805"))}
+                />
+              </div>
 
-          <div className="hidden min-[1100px]:block h-full min-w-0 overflow-hidden">
-            <EvidencePanel
-              queryResponse={queryResponse}
-              selectedCitationIndex={selectedCitationIndex}
-              onSelectCitation={setSelectedCitationIndex}
-              activeDocumentFilename={activeDoc?.filename}
-              onOpenCitationDocument={handleOpenCitationDocument}
-            />
+              <div className="h-full min-w-0 overflow-hidden">
+                <ResearchPanel
+                  activeDocument={activeDoc}
+                  queryResponse={queryResponse}
+                  isLoading={isLoading}
+                  onRunQuery={handleRunQuery}
+                  onCitationClick={handleCitationClick}
+                  selectedCitationIndex={selectedCitationIndex}
+                  onViewDocument={handleViewDocument}
+                  onOpenCitationDocument={handleOpenCitationDocument}
+                />
+              </div>
+
+              <div className="hidden min-[1100px]:block h-full min-w-0 overflow-hidden">
+                <EvidencePanel
+                  queryResponse={queryResponse}
+                  selectedCitationIndex={selectedCitationIndex}
+                  onSelectCitation={setSelectedCitationIndex}
+                  activeDocumentFilename={activeDoc?.filename}
+                  onOpenCitationDocument={handleOpenCitationDocument}
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        ) : activeView === "evaluation" ? (
+          <EvaluationView />
+        ) : activeView === "architecture" ? (
+          <ArchitectureView />
+        ) : (
+          <ObservabilityView />
+        )}
       </div>
 
       {isMobileSourcesOpen && (
         <div
-          className="fixed inset-0 z-50 flex bg-black/65 backdrop-blur-[2px] animate-in fade-in duration-200 min-[1100px]:hidden"
+          className="fixed inset-0 z-50 flex bg-black/60 animate-in fade-in duration-200 min-[1100px]:hidden"
           onClick={() => setIsMobileSourcesOpen(false)}
         >
           <div
-            className="w-[min(88vw,380px)] h-full bg-cri-surface border-r border-cri-border flex flex-col shadow-2xl animate-in slide-in-from-left duration-250"
+            className="w-[min(88vw,380px)] h-full bg-cri-surface border-r border-cri-border flex flex-col animate-in slide-in-from-left duration-250"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="h-[56px] px-4 border-b border-cri-border flex items-center justify-between shrink-0 bg-cri-surface">
+            <div className="h-12 px-4 border-b border-cri-border flex items-center justify-between shrink-0 bg-cri-surface">
               <div className="flex items-center gap-2">
                 <FolderOpen className="w-4 h-4 text-cri-orange" />
-                <span className="text-sm font-bold text-cri-textPrimary font-sans">Research Sources</span>
-                <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-[6px] bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary">
+                <span className="text-sm font-semibold text-cri-textPrimary font-sans">Research Sources</span>
+                <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary">
                   {documents.length}
                 </span>
               </div>
@@ -248,7 +266,7 @@ export default function WorkspacePage() {
                 type="button"
                 onClick={() => setIsMobileSourcesOpen(false)}
                 aria-label="Close"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surfaceSecondary border border-cri-border flex items-center justify-center text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md hover:bg-cri-surfaceHover flex items-center justify-center text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -279,19 +297,19 @@ export default function WorkspacePage() {
 
       {isMobileEvidenceOpen && (
         <div
-          className="fixed inset-0 z-50 flex justify-end bg-black/65 backdrop-blur-[2px] animate-in fade-in duration-200 min-[1100px]:hidden"
+          className="fixed inset-0 z-50 flex justify-end bg-black/60 animate-in fade-in duration-200 min-[1100px]:hidden"
           onClick={() => setIsMobileEvidenceOpen(false)}
         >
           <div
-            className="w-[min(88vw,420px)] h-full bg-cri-surface border-l border-cri-border flex flex-col shadow-2xl animate-in slide-in-from-right duration-250"
+            className="w-[min(88vw,420px)] h-full bg-cri-surface border-l border-cri-border flex flex-col animate-in slide-in-from-right duration-250"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="h-[56px] px-4 border-b border-cri-border flex items-center justify-between shrink-0 bg-cri-surface">
+            <div className="h-12 px-4 border-b border-cri-border flex items-center justify-between shrink-0 bg-cri-surface">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-cri-success" />
-                <span className="text-sm font-bold text-cri-textPrimary font-sans">Evidence & Citations</span>
+                <span className="text-sm font-semibold text-cri-textPrimary font-sans">Evidence & Citations</span>
                 {queryResponse?.citations && queryResponse.citations.length > 0 && (
-                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-[6px] bg-cri-orange/15 text-cri-orange font-bold">
+                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-cri-orange/15 text-cri-orange font-bold">
                     {queryResponse.citations.length}
                   </span>
                 )}
@@ -300,7 +318,7 @@ export default function WorkspacePage() {
                 type="button"
                 onClick={() => setIsMobileEvidenceOpen(false)}
                 aria-label="Close"
-                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surfaceSecondary border border-cri-border flex items-center justify-center text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md hover:bg-cri-surfaceHover flex items-center justify-center text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>

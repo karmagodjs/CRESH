@@ -55,7 +55,7 @@ export const ObservabilityView: React.FC = () => {
           type="button"
           onClick={loadData}
           disabled={isLoading}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-[10px] border border-cri-border bg-cri-surface hover:bg-cri-surfaceElevated text-xs font-mono font-medium text-cri-textPrimary transition-colors"
+          className="flex items-center gap-1.5 h-8 px-3 rounded-md border border-cri-border bg-cri-surface hover:bg-cri-surfaceHover text-xs font-medium text-cri-textPrimary transition-colors cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-cri-orange ${isLoading ? "animate-spin" : ""}`} />
           <span>Refresh</span>
@@ -63,14 +63,14 @@ export const ObservabilityView: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-[10px] border border-cri-orange/40 bg-cri-orange/10 text-xs text-cri-orange flex items-center gap-2">
+        <div className="p-3 rounded-md border border-cri-orange/40 bg-cri-orange/10 text-xs text-cri-orange flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 shrink-0 text-cri-orange" />
           <span>Notice: Could not fetch real-time telemetry from backend ({error}). Live FastAPI server recommended.</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
-        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-3.5 rounded-lg border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>API Health</span>
             <span
@@ -85,7 +85,7 @@ export const ObservabilityView: React.FC = () => {
           <div className="text-[10px] font-mono text-cri-textMuted">Version: {health?.version || "1.0.0"}</div>
         </div>
 
-        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+        <div className="p-3.5 rounded-lg border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Cohere Provider</span>
             <Cpu className="w-3.5 h-3.5 text-cri-orange" />
@@ -96,7 +96,7 @@ export const ObservabilityView: React.FC = () => {
           <div className="text-[10px] font-mono text-cri-textMuted">Rerank v3.5 & Embed v3</div>
         </div>
 
-        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+        <div className="p-3.5 rounded-lg border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Vector Store</span>
             <Database className="w-3.5 h-3.5 text-cri-blue" />
@@ -107,7 +107,7 @@ export const ObservabilityView: React.FC = () => {
           <div className="text-[10px] font-mono text-cri-textMuted">Qdrant In-Memory Payload</div>
         </div>
 
-        <div className="p-4 rounded-[12px] border border-cri-border bg-cri-surface space-y-1.5">
+        <div className="p-3.5 rounded-lg border border-cri-border bg-cri-surface space-y-1.5">
           <div className="text-[10px] font-mono font-semibold uppercase text-cri-textSecondary flex items-center justify-between">
             <span>Total Queries</span>
             <Activity className="w-3.5 h-3.5 text-cri-green" />
@@ -127,26 +127,26 @@ export const ObservabilityView: React.FC = () => {
           <span>Latency Distribution (Global Profile)</span>
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 font-mono text-xs">
-          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+          <div className="p-3 rounded-lg border border-cri-border bg-cri-surface">
             <div className="text-[10px] text-cri-textSecondary uppercase">p50 Latency</div>
             <div className="text-base font-mono font-semibold text-cri-textPrimary mt-1">
               {formatMs(metrics?.latency_percentiles?.p50_ms ?? 41.32)}
             </div>
           </div>
-          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+          <div className="p-3 rounded-lg border border-cri-border bg-cri-surface">
             <div className="text-[10px] text-cri-textSecondary uppercase">p90 Latency</div>
             <div className="text-base font-mono font-semibold text-cri-textPrimary mt-1">
               {formatMs(metrics?.latency_percentiles?.p90_ms ?? 53.21)}
             </div>
           </div>
-          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+          <div className="p-3 rounded-lg border border-cri-border bg-cri-surface">
             <div className="text-[10px] text-cri-textSecondary uppercase">p95 Latency</div>
             <div className="text-base font-mono font-semibold text-cri-orange mt-1">
               {formatMs(metrics?.latency_percentiles?.p95_ms ?? 61.43)}
             </div>
           </div>
-          <div className="p-3.5 rounded-[12px] border border-cri-border bg-cri-surface">
+          <div className="p-3 rounded-lg border border-cri-border bg-cri-surface">
             <div className="text-[10px] text-cri-textSecondary uppercase">p99 Latency</div>
             <div className="text-base font-mono font-semibold text-cri-orange mt-1">
               {formatMs(metrics?.latency_percentiles?.p99_ms ?? 75.8)}
@@ -155,8 +155,8 @@ export const ObservabilityView: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div className="p-4 rounded-lg border border-cri-border bg-cri-surface space-y-2">
           <div className="text-xs font-semibold uppercase text-cri-textPrimary flex items-center gap-2">
             <Cpu className="w-4 h-4 text-cri-blue" />
             <span>Tokens Processed</span>
@@ -169,7 +169,7 @@ export const ObservabilityView: React.FC = () => {
           </p>
         </div>
 
-        <div className="p-5 rounded-[12px] border border-cri-border bg-cri-surface space-y-2">
+        <div className="p-4 rounded-lg border border-cri-border bg-cri-surface space-y-2">
           <div className="text-xs font-semibold uppercase text-cri-textPrimary flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-cri-green" />
             <span>Estimated Spend (USD)</span>

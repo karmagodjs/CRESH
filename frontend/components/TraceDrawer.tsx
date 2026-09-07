@@ -35,24 +35,24 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-[2px] transition-opacity select-none"
+      className="fixed inset-0 z-50 flex justify-end bg-black/60 transition-opacity select-none"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-cri-surface border-l border-cri-border h-full flex flex-col shadow-2xl transition-transform"
+        className="w-full max-w-md bg-cri-surface border-l border-cri-border h-full flex flex-col transition-transform"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-4 border-b border-cri-border flex items-center justify-between shrink-0">
+        <div className="h-12 px-4 border-b border-cri-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-cri-orange" />
-            <h2 className="text-sm font-bold tracking-tight text-cri-textPrimary font-sans">
+            <h2 className="text-xs font-semibold tracking-tight text-cri-textPrimary font-sans">
               Research Trace & Latency Audit
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-[8px] text-cri-textMuted hover:text-cri-textPrimary hover:bg-cri-surfaceSecondary transition-colors"
+            className="w-8 h-8 rounded-md flex items-center justify-center text-cri-textMuted hover:text-cri-textPrimary hover:bg-cri-surfaceHover transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -65,7 +65,7 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
             </div>
           ) : (
             <>
-              <div className="p-3.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2 text-xs">
+              <div className="p-3.5 rounded-lg bg-cri-surfaceSecondary border border-cri-border space-y-2 text-xs">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   Trace Identifiers
                 </div>
@@ -97,7 +97,7 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                   <span>Duration</span>
                 </div>
 
-                <div className="rounded-[12px] border border-cri-border bg-cri-surfaceSecondary divide-y divide-cri-border/60 text-xs overflow-hidden">
+                <div className="rounded-lg border border-cri-border bg-cri-surfaceSecondary divide-y divide-cri-border/60 text-xs overflow-hidden">
                   {stages.map((st) => {
                     const rawMs = timings[st.key] || 0;
                     const pct = totalLatency > 0 ? Math.min(100, (rawMs / totalLatency) * 100) : 0;
@@ -129,30 +129,30 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-[12px] bg-cri-surfaceSecondary border border-cri-border space-y-2.5 text-xs">
+              <div className="p-3.5 rounded-lg bg-cri-surfaceSecondary border border-cri-border space-y-2.5 text-xs">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                   Token Accounting & Cost
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                  <div className="p-2.5 rounded-md bg-cri-surface border border-cri-border">
                     <div className="text-cri-textMuted text-[9px] uppercase">Prompt Tokens</div>
                     <div className="font-bold text-cri-textPrimary mt-0.5">
                       {queryResponse.token_usage?.prompt_tokens ?? 0}
                     </div>
                   </div>
-                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                  <div className="p-2.5 rounded-md bg-cri-surface border border-cri-border">
                     <div className="text-cri-textMuted text-[9px] uppercase">Completion Tokens</div>
                     <div className="font-bold text-cri-textPrimary mt-0.5">
                       {queryResponse.token_usage?.completion_tokens ?? 0}
                     </div>
                   </div>
-                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                  <div className="p-2.5 rounded-md bg-cri-surface border border-cri-border">
                     <div className="text-cri-textMuted text-[9px] uppercase">Total Tokens</div>
                     <div className="font-bold text-cri-textPrimary mt-0.5">
                       {queryResponse.token_usage?.total_tokens ?? 0}
                     </div>
                   </div>
-                  <div className="p-2.5 rounded-[8px] bg-cri-surface border border-cri-border">
+                  <div className="p-2.5 rounded-md bg-cri-surface border border-cri-border">
                     <div className="text-cri-textMuted text-[9px] uppercase">Estimated Cost</div>
                     <div className="font-bold text-cri-success mt-0.5">
                       ${(queryResponse.estimated_cost_usd || 0).toFixed(6)}
@@ -166,7 +166,7 @@ export const TraceDrawer: React.FC<TraceDrawerProps> = ({
                   <div className="text-[10px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
                     Graph Execution Steps ({queryResponse.execution_trace.length})
                   </div>
-                  <div className="rounded-[12px] border border-cri-border bg-cri-surfaceSecondary p-3 space-y-1 font-mono text-[10px] text-cri-textSecondary max-h-40 overflow-y-auto">
+                  <div className="rounded-lg border border-cri-border bg-cri-surfaceSecondary p-3 space-y-1 font-mono text-[10px] text-cri-textSecondary max-h-40 overflow-y-auto">
                     {queryResponse.execution_trace.map((step, sIdx) => (
                       <div key={sIdx} className="flex items-center gap-2 py-0.5 border-b border-cri-border/40 last:border-0">
                         <span className="text-cri-orange font-bold">{sIdx + 1}.</span>
