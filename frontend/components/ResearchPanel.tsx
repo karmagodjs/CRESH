@@ -6,12 +6,8 @@ import {
   FileText,
   ArrowRight,
   AlertTriangle,
-  ExternalLink,
   Loader2,
   CheckCircle2,
-  ChevronDown,
-  MoreHorizontal,
-  Paperclip,
   Check,
   BookOpen,
 } from "lucide-react";
@@ -60,11 +56,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       e.preventDefault();
       handleSubmit();
     }
-  };
-
-  const handleSelectSuggested = (q: string) => {
-    setQuestionInput(q);
-    onRunQuery(q);
   };
 
   // Extract metadata string for the active document
@@ -308,43 +299,21 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               </p>
             </div>
 
-            {/* Disabled research input (14px radius, rounded-[14px], border border-cri-border) */}
-            <div className="rounded-[14px] border border-cri-border bg-cri-surfaceSecondary p-4 sm:p-5 space-y-4 opacity-60 text-left shadow-sm min-h-[140px] flex flex-col justify-between">
+            {/* Disabled research input */}
+            <div className="rounded-[14px] border border-cri-border bg-cri-surfaceSecondary p-4 sm:p-5 opacity-60 text-left shadow-sm min-h-[125px] flex flex-col justify-between space-y-4">
               <textarea
                 disabled
-                rows={2}
+                rows={3}
                 placeholder="Select a source to ask research questions..."
                 className="w-full bg-transparent text-[15px] text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed cursor-not-allowed"
               />
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-cri-border opacity-70 pointer-events-none">
-                {[
-                  "What are the main findings?",
-                  "How does this compare to previous work?",
-                  "What are the limitations?",
-                ].map((chip, cIdx) => (
-                  <span
-                    key={cIdx}
-                    className="text-[11.5px] px-3 py-1 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-cri-textMuted"
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-cri-border text-xs text-cri-textMuted">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex items-center gap-1.5 text-[11.5px]">
-                    <Paperclip className="w-3.5 h-3.5" />
-                    <span>Add context</span>
-                  </span>
-                  <span className="px-2.5 py-1 rounded-[7px] bg-cri-surfaceElevated border border-cri-border text-[11px]">
-                    Focus: No source
-                  </span>
-                </div>
+              <div className="flex items-center justify-end">
                 <button
                   disabled
-                  className="h-[40px] px-5 rounded-[10px] bg-cri-surfaceElevated text-cri-textMuted text-xs font-semibold cursor-not-allowed border border-cri-border"
+                  className="h-[40px] px-5 rounded-[10px] bg-cri-surfaceElevated text-cri-textMuted text-xs font-semibold cursor-not-allowed border border-cri-border flex items-center gap-2"
                 >
-                  Run analysis →
+                  <span>Run analysis</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -353,9 +322,9 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
           /* TAB 1: ASK (Primary Q&A Workspace) */
           activeTab === "ask" && (
             <div className="space-y-7 max-w-4xl mx-auto">
-              {/* SECTION 14: RESEARCH INPUT — REBUILD (Height: 130-160px, rounded 14px, semantic tokens) */}
+              {/* Core Research Question Input: ONLY textarea and Run analysis */}
               <form onSubmit={handleSubmit} className="relative">
-                <div className="min-h-[145px] rounded-[14px] border border-cri-border bg-cri-surfaceSecondary shadow-sm focus-within:border-cri-orange transition-all p-3.5 sm:p-5 flex flex-col justify-between space-y-3.5">
+                <div className="min-h-[140px] rounded-[14px] border border-cri-border bg-cri-surfaceSecondary shadow-sm focus-within:border-cri-orange transition-all p-4 sm:p-5 flex flex-col justify-between space-y-3.5">
                   {/* Textarea: comfortable 15px font */}
                   <textarea
                     ref={inputRef}
@@ -363,77 +332,40 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     onChange={(e) => setQuestionInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     disabled={isLoading}
-                    rows={2}
+                    rows={3}
                     placeholder="Ask a research question about this document..."
                     className="w-full bg-transparent text-[15px] text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed"
                   />
 
-                  {/* Example questions: subtle rounded chips (Section 14) */}
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1 border-t border-cri-border/60">
-                    {[
-                      "What are the main findings?",
-                      "How does this compare to previous work?",
-                      "What are the limitations?",
-                    ].map((chip, cIdx) => (
-                      <button
-                        key={cIdx}
-                        type="button"
-                        onClick={() => handleSelectSuggested(chip)}
-                        className="text-[11.5px] px-2.5 sm:px-3 py-1.5 min-h-[36px] flex items-center rounded-[8px] bg-cri-surfaceElevated hover:bg-cri-surface border border-cri-border text-cri-textSecondary hover:text-cri-textPrimary transition-colors truncate max-w-full cursor-pointer"
-                      >
-                        {chip}
-                      </button>
-                    ))}
-                  </div>
+                  {/* Bottom Action: Run analysis aligned naturally to bottom-right */}
+                  <div className="flex items-center justify-end gap-3 pt-1 text-xs">
+                    <kbd className="hidden sm:flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px]">
+                      <span>⌘</span>
+                      <span>Enter</span>
+                    </kbd>
 
-                  {/* Bottom Controls: Add context, Focus: This document, Run analysis button */}
-                  <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-cri-border/60 text-xs">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => inputRef.current?.focus()}
-                        className="h-[38px] min-h-[38px] flex items-center gap-1.5 text-[12px] font-medium text-cri-textMuted hover:text-cri-textPrimary px-2.5 py-1.5 rounded-[8px] hover:bg-cri-surfaceElevated transition-colors cursor-pointer"
-                        title="Attach additional context"
-                      >
-                        <Paperclip className="w-3.5 h-3.5 text-cri-orange" />
-                        <span>Add context</span>
-                      </button>
-
-                      <div className="h-[38px] min-h-[38px] flex items-center gap-1.5 px-2.5 py-1.5 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-[12px] text-cri-textSecondary">
-                        <span>Focus: This document</span>
-                        <ChevronDown className="w-3 h-3 text-cri-textMuted" />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                      <kbd className="hidden sm:flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px]">
-                        <span>⌘</span>
-                        <span>Enter</span>
-                      </kbd>
-
-                      {/* Run analysis button: min 44px height, responsive full-width on phone */}
-                      <button
-                        type="submit"
-                        disabled={isLoading || !questionInput.trim()}
-                        className={`w-full sm:w-auto h-[44px] min-h-[44px] sm:h-[40px] px-5 rounded-[10px] text-[13px] font-semibold tracking-tight transition-all shadow-xs flex items-center justify-center gap-2 ${
-                          isLoading || !questionInput.trim()
-                            ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
-                            : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer active:scale-98"
-                        }`}
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Analyzing...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Run analysis</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-                    </div>
+                    {/* Run analysis button */}
+                    <button
+                      type="submit"
+                      disabled={isLoading || !questionInput.trim()}
+                      className={`w-full sm:w-auto h-[44px] min-h-[44px] sm:h-[40px] px-5 rounded-[10px] text-[13px] font-semibold tracking-tight transition-all shadow-xs flex items-center justify-center gap-2 ${
+                        isLoading || !questionInput.trim()
+                          ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
+                          : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer active:scale-98"
+                      }`}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Analyzing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Run analysis</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </form>
