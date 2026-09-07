@@ -184,7 +184,7 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
       aria-label="Research Workspace"
     >
       {/* Breadcrumb & Document Header */}
-      <div className="px-6 pt-4 pb-3 border-b border-cri-border bg-cri-surface shrink-0 space-y-2">
+      <div className="px-6 pt-4 pb-0 border-b border-cri-border bg-cri-surface shrink-0 space-y-2.5">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-[11px] text-cri-textMuted font-mono">
           <span className="hover:text-cri-textSecondary cursor-pointer">Research</span>
@@ -199,29 +199,25 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
         </div>
 
         {/* Document Header Row */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-cri-orange shrink-0">
-                <FileText className="w-4 h-4" />
+        {activeDocument ? (
+          <div className="flex items-center justify-between gap-4 pb-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-[8px] bg-cri-surfaceElevated border border-cri-border text-cri-orange shrink-0">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <h1 className="text-lg sm:text-xl font-bold text-cri-textPrimary tracking-tight truncate" title={activeDocument.title || activeDocument.filename}>
+                  {activeDocument.title || activeDocument.filename}
+                </h1>
               </div>
-              <h1 className="text-lg sm:text-xl font-bold text-cri-textPrimary tracking-tight truncate" title={activeDocument?.title || activeDocument?.filename || "Select a source"}>
-                {activeDocument ? (activeDocument.title || activeDocument.filename) : "Select a source"}
-              </h1>
-            </div>
 
-            {/* Metadata row */}
-            <div className="mt-1 flex items-center gap-2 text-xs text-cri-textSecondary truncate pl-9">
-              {activeDocument ? (
+              {/* Metadata row */}
+              <div className="mt-1 flex items-center gap-2 text-xs text-cri-textSecondary truncate pl-9 font-sans">
                 <span>{getDocMetadataString()}</span>
-              ) : (
-                <span>Choose a document from Sources to begin research.</span>
-              )}
+              </div>
             </div>
-          </div>
 
-          {/* Right Header Actions: View Document, More Menu (only when active document) */}
-          {activeDocument && (
+            {/* Right Header Actions: View Document */}
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
@@ -234,20 +230,22 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                 <BookOpen className="w-3.5 h-3.5 text-cri-orange" />
                 <span>View document</span>
               </button>
-              <button
-                type="button"
-                className="p-1.5 rounded-[8px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textMuted hover:text-cri-textPrimary transition-colors cursor-pointer"
-                title="Document actions"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="pb-3">
+            <h1 className="text-lg font-bold text-cri-textPrimary tracking-tight">
+              Research Workspace
+            </h1>
+            <p className="text-xs text-cri-textSecondary mt-0.5">
+              Select a source from the Sources panel to begin research.
+            </p>
+          </div>
+        )}
 
         {/* Document Tabs (visible only when active document is selected) */}
         {activeDocument && (
-          <div className="flex items-center gap-1 pt-2 border-t border-cri-border/60 text-xs">
+          <div className="flex items-center gap-6 pt-2 border-t border-cri-border/60 text-xs">
             {(
               [
                 { id: "ask", label: "Ask" },
@@ -263,15 +261,15 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3 py-1.5 font-medium rounded-[7px] transition-all relative ${
+                  className={`pb-2.5 font-medium transition-colors relative cursor-pointer ${
                     isActive
-                      ? "text-cri-textPrimary font-semibold bg-cri-surfaceElevated"
-                      : "text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceElevated/50"
+                      ? "text-cri-textPrimary font-semibold"
+                      : "text-cri-textSecondary hover:text-cri-textPrimary"
                   }`}
                 >
                   {tab.label}
                   {isActive && (
-                    <span className="absolute -bottom-2.5 left-2 right-2 h-[2px] bg-cri-orange rounded-full" />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-cri-orange rounded-full" />
                   )}
                 </button>
               );
@@ -282,340 +280,368 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
 
       {/* Scrollable Center Body */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-        {/* TAB 1: ASK (Primary Q&A Workspace) */}
-        {activeTab === "ask" && (
-          <div className="space-y-6 max-w-4xl mx-auto">
-            {/* Research Question Input Container */}
-            <form onSubmit={handleSubmit} className="relative">
-              <div
-                className={`rounded-[14px] border transition-all p-3.5 space-y-3 ${
-                  activeDocument
-                    ? "border-cri-border bg-cri-surface shadow-xs focus-within:border-cri-orange focus-within:ring-1 focus-within:ring-cri-orange"
-                    : "border-cri-border/60 bg-cri-surface/60 opacity-60"
-                }`}
-              >
-                {/* Textarea */}
-                <textarea
-                  ref={inputRef}
-                  value={questionInput}
-                  onChange={(e) => setQuestionInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={isLoading || !activeDocument}
-                  rows={2}
-                  placeholder="Ask a research question about this document..."
-                  className="w-full bg-transparent text-sm text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed disabled:cursor-not-allowed"
-                />
+        {/* EMPTY STATE WHEN NO DOCUMENT IS SELECTED (Section 10) */}
+        {!activeDocument ? (
+          <div className="max-w-2xl mx-auto pt-8 pb-4 space-y-6 text-center">
+            <div className="space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-cri-textPrimary font-sans">
+                Start your research
+              </h2>
+              <p className="text-sm text-cri-textSecondary leading-relaxed max-w-md mx-auto">
+                Select a source from the Sources panel to begin.
+              </p>
+            </div>
 
-                {/* Example Suggestion Chips */}
-                <div className={`flex flex-wrap items-center gap-1.5 pt-1 border-t border-cri-border/50 ${!activeDocument ? "opacity-60 pointer-events-none" : ""}`}>
-                  {[
-                    "What are the main findings?",
-                    "How does this compare to previous work?",
-                    "What are the limitations?",
-                    "What is Masked Language Modeling in BERT?",
-                  ].map((chip, cIdx) => (
-                    <button
-                      key={cIdx}
-                      type="button"
-                      onClick={() => handleSelectSuggested(chip)}
-                      disabled={!activeDocument}
-                      className="text-[11px] px-2.5 py-1 rounded-[7px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary hover:text-cri-textPrimary transition-colors truncate max-w-xs cursor-pointer"
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Bottom Controls: Add Context, Focus, ⌘ Enter, Run Analysis */}
-                <div className="flex items-center justify-between pt-2 border-t border-cri-border/50 text-xs">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => inputRef.current?.focus()}
-                      disabled={!activeDocument}
-                      className="flex items-center gap-1 text-[11px] font-medium text-cri-textMuted hover:text-cri-textPrimary px-2 py-1 rounded-[7px] hover:bg-cri-surfaceSecondary transition-colors disabled:cursor-not-allowed"
-                      title="Attach additional context"
-                    >
-                      <Paperclip className="w-3.5 h-3.5 text-cri-orange" />
-                      <span>Add context</span>
-                    </button>
-
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-[7px] bg-cri-surfaceSecondary border border-cri-border text-[11px] text-cri-textSecondary">
-                      <span>Focus: This document</span>
-                      <ChevronDown className="w-3 h-3 text-cri-textMuted" />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <kbd className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px]">
-                      <span>⌘</span>
-                      <span>Enter</span>
-                    </kbd>
-
-                    <button
-                      type="submit"
-                      disabled={isLoading || !questionInput.trim() || !activeDocument}
-                      className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold tracking-tight transition-all shadow-xs ${
-                        isLoading || !questionInput.trim() || !activeDocument
-                          ? "bg-cri-surfaceSecondary text-cri-textMuted cursor-not-allowed border border-cri-border"
-                          : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer active:scale-98"
-                      }`}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Analyzing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Run analysis</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
+            {/* Disabled question input box (Section 10) */}
+            <div className="rounded-[14px] border border-cri-border/60 bg-cri-surface/60 p-4 space-y-3 opacity-60 text-left shadow-xs">
+              <textarea
+                disabled
+                rows={2}
+                placeholder="Select a source to ask research questions..."
+                className="w-full bg-transparent text-sm text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed cursor-not-allowed"
+              />
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-cri-border/40 opacity-70 pointer-events-none">
+                {[
+                  "What are the main findings?",
+                  "How does this compare to previous work?",
+                  "What are the limitations?",
+                ].map((chip, cIdx) => (
+                  <span
+                    key={cIdx}
+                    className="text-[11px] px-2.5 py-1 rounded-[7px] bg-cri-surfaceSecondary border border-cri-border text-cri-textMuted"
+                  >
+                    {chip}
+                  </span>
+                ))}
               </div>
-            </form>
-
-            {/* Loading Skeleton & Progress */}
-            {isLoading && (
-              <div className="p-6 rounded-[14px] bg-cri-surface border border-cri-border flex flex-col items-center justify-center space-y-3 text-center">
-                <Loader2 className="w-6 h-6 text-cri-orange animate-spin" />
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-cri-textPrimary">Analyzing Research Document</p>
-                  <p className="text-xs text-cri-textSecondary">
-                    Retrieving evidence passages, reranking context, and synthesizing grounded answer...
-                  </p>
+              <div className="flex items-center justify-between pt-2 border-t border-cri-border/40 text-xs text-cri-textMuted">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 text-[11px]">
+                    <Paperclip className="w-3.5 h-3.5" />
+                    <span>Add context</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-[6px] bg-cri-surfaceSecondary border border-cri-border text-[11px]">
+                    Focus: No source
+                  </span>
                 </div>
+                <button
+                  disabled
+                  className="px-3.5 py-1.5 rounded-[8px] bg-cri-surfaceSecondary text-cri-textMuted text-xs font-semibold cursor-not-allowed border border-cri-border"
+                >
+                  Run analysis →
+                </button>
               </div>
-            )}
+            </div>
+          </div>
+        ) : (
+          /* TAB 1: ASK (Primary Q&A Workspace) */
+          activeTab === "ask" && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              {/* Research Question Input Container (Section 11) */}
+              <form onSubmit={handleSubmit} className="relative">
+                <div className="rounded-[14px] border border-cri-border bg-cri-surface shadow-xs focus-within:border-cri-orange focus-within:ring-1 focus-within:ring-cri-orange transition-all p-3.5 space-y-3">
+                  {/* Textarea */}
+                  <textarea
+                    ref={inputRef}
+                    value={questionInput}
+                    onChange={(e) => setQuestionInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isLoading}
+                    rows={2}
+                    placeholder="Ask a research question about this document..."
+                    className="w-full bg-transparent text-sm text-cri-textPrimary placeholder-cri-textMuted resize-none focus:outline-none leading-relaxed"
+                  />
 
-            {/* Curated Suggested Questions (only shown when document is selected and no query executed) */}
-            {!queryResponse && !isLoading && activeDocument && (
-              <div className="space-y-2.5 pt-1">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
-                  Curated Research Questions
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {SUGGESTED_QUESTIONS.map((q, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSelectSuggested(q)}
-                      className="text-left p-3 rounded-[10px] bg-cri-surface hover:bg-cri-surfaceSecondary border border-cri-border hover:border-cri-borderLight text-xs text-cri-textPrimary flex items-center justify-between group transition-colors cursor-pointer"
-                    >
-                      <span className="group-hover:text-cri-orange transition-colors truncate pr-2 font-medium">
-                        {q}
-                      </span>
-                      <ArrowRight className="w-3.5 h-3.5 text-cri-textMuted group-hover:text-cri-orange shrink-0" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SECTION 14: Analysis Result */}
-            {queryResponse && !isLoading && (
-              <div className="space-y-6">
-                {/* Status Bar: ✓ Analysis complete */}
-                <div className="flex items-center justify-between px-4 py-2.5 rounded-[10px] bg-cri-surface border border-cri-border text-xs">
-                  <div className="flex items-center gap-2 text-cri-success font-semibold">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Analysis complete</span>
+                  {/* Example Suggestion Chips (Subtle) */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-cri-border/50">
+                    {[
+                      "What are the main findings?",
+                      "How does this compare to previous work?",
+                      "What are the limitations?",
+                    ].map((chip, cIdx) => (
+                      <button
+                        key={cIdx}
+                        type="button"
+                        onClick={() => handleSelectSuggested(chip)}
+                        className="text-[11px] px-2.5 py-1 rounded-[7px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary hover:text-cri-textPrimary transition-colors truncate max-w-xs cursor-pointer"
+                      >
+                        {chip}
+                      </button>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-cri-textSecondary">
-                    <span>Verified from cited evidence</span>
-                  </div>
-                </div>
 
-                {/* Abstention Experience */}
-                {isAbstention ? (
-                  <div className="p-6 rounded-[14px] border border-cri-orange/80 bg-cri-surface space-y-3">
-                    <div className="flex items-center gap-2 text-cri-orange">
-                      <AlertTriangle className="w-4 h-4 shrink-0" />
-                      <span className="text-xs font-bold uppercase tracking-wider font-sans">
-                        Insufficient Evidence
-                      </span>
-                    </div>
-                    <h2 className="text-base font-semibold text-cri-textPrimary leading-snug">
-                      I don&apos;t have sufficient evidence in the selected document to answer this question.
-                    </h2>
-                    <p className="text-xs text-cri-textSecondary leading-relaxed">
-                      The question cannot be answered using evidence from the selected document. To ensure factual accuracy, an ungrounded answer was not generated.
-                    </p>
-                  </div>
-                ) : (
-                  /* Main Report Surface */
-                  <div className="rounded-[14px] border border-cri-border bg-cri-surface p-6 sm:p-7 space-y-6 shadow-sm">
-                    {/* Research Conclusion Headline */}
-                    <div className="border-b border-cri-border pb-4">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-cri-orange font-mono mb-1.5">
-                        Research Synthesis
-                      </div>
-                      <h2 className="text-base sm:text-lg font-semibold text-cri-textPrimary leading-relaxed">
-                        {queryResponse.query}
-                      </h2>
-                    </div>
-
-                    {/* Supporting Explanation with Provenance Citations */}
-                    <div className="cri-answer-body text-cri-textPrimary">
-                      {renderAnswerWithCitations(queryResponse.answer)}
-                    </div>
-
-                    {/* KEY FINDINGS (Numbered findings 1, 2, 3, 4) */}
-                    <div className="pt-5 border-t border-cri-border space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-cri-textSecondary font-mono">
-                          Key Findings
-                        </span>
-                        <span className="text-[11px] text-cri-textMuted font-mono">
-                          {findings.length} findings
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {visibleFindings.map((finding, fIdx) => (
-                          <div
-                            key={fIdx}
-                            className="flex items-start gap-3 p-2.5 rounded-[9px] bg-cri-surfaceSecondary border border-cri-border text-xs"
-                          >
-                            <div className="w-5 h-5 rounded-full bg-cri-orange/15 text-cri-orange font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                              {fIdx + 1}
-                            </div>
-                            <span className="text-cri-textPrimary leading-relaxed">{finding}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {findings.length > 3 && (
-                        <button
-                          type="button"
-                          onClick={() => setShowAllFindings(!showAllFindings)}
-                          className="flex items-center gap-1 text-xs text-cri-orange hover:underline font-semibold pt-1"
-                        >
-                          <span>{showAllFindings ? "Show less ↑" : "Show more ↓"}</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* SECTION 15, 16, 17: Confidence Panel, Evidence Used, Methodology */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* SECTION 15: Simplified Confidence Panel */}
-                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
-                        Confidence
-                      </span>
+                  {/* Bottom Controls: Add Context, Focus, ⌘ Enter, Run Analysis */}
+                  <div className="flex items-center justify-between pt-2 border-t border-cri-border/50 text-xs">
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setShowConfidenceWhy(!showConfidenceWhy)}
-                        className="text-[11px] font-medium text-cri-orange hover:underline cursor-pointer"
-                        title="Explain confidence score calculation"
+                        onClick={() => inputRef.current?.focus()}
+                        className="flex items-center gap-1 text-[11px] font-medium text-cri-textMuted hover:text-cri-textPrimary px-2 py-1 rounded-[7px] hover:bg-cri-surfaceSecondary transition-colors cursor-pointer"
+                        title="Attach additional context"
                       >
-                        {showConfidenceWhy ? "Hide details" : "View details →"}
+                        <Paperclip className="w-3.5 h-3.5 text-cri-orange" />
+                        <span>Add context</span>
                       </button>
+
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-[7px] bg-cri-surfaceSecondary border border-cri-border text-[11px] text-cri-textSecondary">
+                        <span>Focus: This document</span>
+                        <ChevronDown className="w-3 h-3 text-cri-textMuted" />
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3.5">
-                      {/* Circular Gauge */}
-                      <div className="relative w-12 h-12 shrink-0">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                          <path
-                            className="text-cri-surfaceSecondary stroke-current"
-                            strokeWidth="3.5"
-                            fill="none"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          />
-                          <path
-                            className="text-cri-success stroke-current transition-all duration-700"
-                            strokeDasharray={`${confidencePct}, 100`}
-                            strokeWidth="3.5"
-                            strokeLinecap="round"
-                            fill="none"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                          />
-                        </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-cri-textPrimary font-mono">
-                          {confidencePct}%
+                    <div className="flex items-center gap-2.5">
+                      <kbd className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono text-cri-textMuted bg-cri-surfaceElevated border border-cri-border rounded-[5px]">
+                        <span>⌘</span>
+                        <span>Enter</span>
+                      </kbd>
+
+                      <button
+                        type="submit"
+                        disabled={isLoading || !questionInput.trim()}
+                        className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[9px] text-xs font-semibold tracking-tight transition-all shadow-xs ${
+                          isLoading || !questionInput.trim()
+                            ? "bg-cri-surfaceSecondary text-cri-textMuted cursor-not-allowed border border-cri-border"
+                            : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer active:scale-98"
+                        }`}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Analyzing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Run analysis</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              {/* Loading Skeleton & Progress */}
+              {isLoading && (
+                <div className="p-6 rounded-[14px] bg-cri-surface border border-cri-border flex flex-col items-center justify-center space-y-3 text-center">
+                  <Loader2 className="w-6 h-6 text-cri-orange animate-spin" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-cri-textPrimary">Analyzing Research Document</p>
+                    <p className="text-xs text-cri-textSecondary">
+                      Retrieving evidence passages, reranking context, and synthesizing grounded answer...
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Curated Suggested Questions (only shown when document is selected and no query executed) */}
+              {!queryResponse && !isLoading && (
+                <div className="space-y-2.5 pt-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-cri-textMuted font-mono">
+                    Curated Research Questions
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {SUGGESTED_QUESTIONS.map((q, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSelectSuggested(q)}
+                        className="text-left p-3 rounded-[10px] bg-cri-surface hover:bg-cri-surfaceSecondary border border-cri-border hover:border-cri-borderLight text-xs text-cri-textPrimary flex items-center justify-between group transition-colors cursor-pointer"
+                      >
+                        <span className="group-hover:text-cri-orange transition-colors truncate pr-2 font-medium">
+                          {q}
+                        </span>
+                        <ArrowRight className="w-3.5 h-3.5 text-cri-textMuted group-hover:text-cri-orange shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 12: Analysis Result */}
+              {queryResponse && !isLoading && (
+                <div className="space-y-6">
+                  {/* Status Bar: ✓ Analysis complete */}
+                  <div className="flex items-center justify-between px-4 py-2.5 rounded-[10px] bg-cri-surface border border-cri-border text-xs">
+                    <div className="flex items-center gap-2 text-cri-success font-semibold">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Analysis complete</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-cri-textSecondary">
+                      <span>Verified from cited evidence</span>
+                    </div>
+                  </div>
+
+                  {/* Abstention Experience */}
+                  {isAbstention ? (
+                    <div className="p-6 rounded-[14px] border border-cri-orange/80 bg-cri-surface space-y-3">
+                      <div className="flex items-center gap-2 text-cri-orange">
+                        <AlertTriangle className="w-4 h-4 shrink-0" />
+                        <span className="text-xs font-bold uppercase tracking-wider font-sans">
+                          Insufficient Evidence
                         </span>
                       </div>
-
-                      <div className="space-y-0.5">
-                        <div className="text-base font-bold text-cri-textPrimary font-mono">
-                          {confidencePct}%
+                      <h2 className="text-base font-semibold text-cri-textPrimary leading-snug">
+                        I don&apos;t have sufficient evidence in the selected document to answer this question.
+                      </h2>
+                      <p className="text-xs text-cri-textSecondary leading-relaxed">
+                        The question cannot be answered using evidence from the selected document. To ensure factual accuracy, an ungrounded answer was not generated.
+                      </p>
+                    </div>
+                  ) : (
+                    /* Main Report Surface - Visually Dominant Document Experience (Section 12) */
+                    <div className="rounded-[14px] border border-cri-border bg-cri-surface p-6 sm:p-7 space-y-6 shadow-sm">
+                      {/* Research Conclusion Headline */}
+                      <div className="border-b border-cri-border pb-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-cri-orange font-mono mb-1.5">
+                          Research Synthesis
                         </div>
+                        <h2 className="text-base sm:text-lg font-semibold text-cri-textPrimary leading-relaxed">
+                          {queryResponse.query}
+                        </h2>
+                      </div>
+
+                      {/* Supporting Explanation with Provenance Citations */}
+                      <div className="cri-answer-body text-cri-textPrimary">
+                        {renderAnswerWithCitations(queryResponse.answer)}
+                      </div>
+
+                      {/* KEY FINDINGS (Section 13) */}
+                      <div className="pt-5 border-t border-cri-border space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
+                            KEY FINDINGS
+                          </span>
+                          <span className="text-[11px] text-cri-textMuted font-mono">
+                            {findings.length} findings
+                          </span>
+                        </div>
+
+                        <div className="space-y-2">
+                          {visibleFindings.map((finding, fIdx) => (
+                            <div
+                              key={fIdx}
+                              className="flex items-start gap-3 p-2.5 rounded-[9px] bg-cri-surfaceSecondary border border-cri-border text-xs"
+                            >
+                              <div className="w-5 h-5 rounded-full bg-cri-orange/15 text-cri-orange font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5 font-mono">
+                                {fIdx + 1}
+                              </div>
+                              <span className="text-cri-textPrimary leading-relaxed">{finding}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {findings.length > 3 && (
+                          <button
+                            type="button"
+                            onClick={() => setShowAllFindings(!showAllFindings)}
+                            className="flex items-center gap-1 text-xs text-cri-orange hover:underline font-semibold pt-1 cursor-pointer"
+                          >
+                            <span>{showAllFindings ? "Show less ↑" : "Show more ↓"}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SECTION 14, 15, 16: Confidence, Evidence Used, Methodology Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* SECTION 14: Confidence */}
+                    <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
+                          Confidence
+                        </span>
                         <div className="flex items-center gap-1 text-xs text-cri-success font-medium">
                           <Check className="w-3.5 h-3.5 text-cri-success" />
                           <span>Well supported</span>
                         </div>
                       </div>
+
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-cri-textPrimary font-mono">
+                          {confidencePct}%
+                        </span>
+                        <span className="text-xs text-cri-textSecondary font-medium">Confidence</span>
+                      </div>
+
+                      <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1 border-t border-cri-border/60">
+                        Calculated from verified evidence alignment in the scoped document.
+                      </p>
                     </div>
 
-                    {showConfidenceWhy && (
-                      <p className="text-[11px] text-cri-textSecondary leading-relaxed pt-1.5 border-t border-cri-border/60">
-                        Calculated from citation grounding, evidence relevance scores, and absence of ungrounded assertions.
-                      </p>
-                    )}
-                  </div>
+                    {/* SECTION 15: Evidence Used */}
+                    <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
+                            Evidence Used
+                          </span>
+                          <span className="text-[10px] font-mono text-cri-textMuted">
+                            {queryResponse.citations?.length || 0} citations
+                          </span>
+                        </div>
+                        <p className="text-xs text-cri-textSecondary leading-relaxed mt-1">
+                          {queryResponse.citations?.length || 0} relevant passages from {activeDocument ? activeDocument.filename : "sources"}
+                        </p>
+                      </div>
 
-                  {/* SECTION 16: Evidence Used */}
-                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
-                    <div>
+                      {/* Source Chips */}
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {queryResponse.citations && queryResponse.citations.length > 0 ? (
+                          queryResponse.citations.slice(0, 3).map((cite) => (
+                            <button
+                              key={cite.citation_index}
+                              type="button"
+                              onClick={() => onCitationClick(cite.citation_index)}
+                              className="text-[10px] font-mono px-2 py-1 rounded-[6px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textPrimary flex items-center gap-1 transition-colors cursor-pointer"
+                              title={`Jump to [${cite.citation_index}]`}
+                            >
+                              <span className="text-cri-orange font-bold">[{cite.citation_index}]</span>
+                              <span className="truncate max-w-[90px]">
+                                {cite.filename ? `${cite.filename.slice(0, 8)} · p. ${cite.page_number}` : `p. ${cite.page_number}`}
+                              </span>
+                            </button>
+                          ))
+                        ) : (
+                          <span className="text-[11px] text-cri-textMuted">No citations extracted</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* SECTION 16: Methodology */}
+                    <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
-                          Evidence Used
+                          Methodology
                         </span>
-                        <span className="text-[10px] font-mono text-cri-textMuted">
-                          {queryResponse.citations?.length || 0} citations
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowConfidenceWhy(!showConfidenceWhy)}
+                          className="text-[11px] font-medium text-cri-orange hover:underline cursor-pointer"
+                        >
+                          {showConfidenceWhy ? "Hide details" : "View details →"}
+                        </button>
                       </div>
-                      <p className="text-xs text-cri-textSecondary leading-relaxed mt-1">
-                        {queryResponse.citations?.length || 0} supporting passages from {activeDocument ? "selected document" : "sources"}
+                      <p className="text-xs text-cri-textSecondary leading-relaxed">
+                        Answer synthesized from retrieved evidence and verified citations.
                       </p>
-                    </div>
-
-                    {/* Source Chips */}
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {queryResponse.citations && queryResponse.citations.length > 0 ? (
-                        queryResponse.citations.slice(0, 3).map((cite) => (
-                          <button
-                            key={cite.citation_index}
-                            type="button"
-                            onClick={() => onCitationClick(cite.citation_index)}
-                            className="text-[10px] font-mono px-2 py-1 rounded-[6px] bg-cri-surfaceSecondary hover:bg-cri-surfaceElevated border border-cri-border text-cri-textPrimary flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <span className="text-cri-orange font-bold">[{cite.citation_index}]</span>
-                            <span className="truncate max-w-[90px]">{cite.section_title || `p. ${cite.page_number}`}</span>
-                          </button>
-                        ))
+                      {showConfidenceWhy ? (
+                        <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1.5 border-t border-cri-border/60">
+                          Every statement is grounded against cited passages with strict document isolation.
+                        </p>
                       ) : (
-                        <span className="text-[11px] text-cri-textMuted">No citations extracted</span>
+                        <div className="flex items-center gap-1.5 text-xs text-cri-success font-medium pt-1">
+                          <Check className="w-3.5 h-3.5 text-cri-success" />
+                          <span>Grounded output</span>
+                        </div>
                       )}
                     </div>
                   </div>
-
-                  {/* SECTION 17: Synthesis Note */}
-                  <div className="p-4 rounded-[12px] bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-cri-textSecondary font-sans">
-                        Synthesis
-                      </span>
-                      <p className="text-xs text-cri-textSecondary leading-relaxed mt-2">
-                        Answer synthesized from retrieved evidence and verified citations.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-cri-success font-medium pt-1">
-                      <Check className="w-3.5 h-3.5 text-cri-success" />
-                      <span>Grounded output</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )
         )}
 
         {/* TAB 2: SUMMARY */}

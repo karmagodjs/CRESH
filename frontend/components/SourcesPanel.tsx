@@ -156,7 +156,7 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
                 {searchQuery ? "No matching sources" : "No sources yet"}
               </p>
               <p className="text-[11px] text-cri-textSecondary leading-relaxed max-w-[200px] mx-auto">
-                {searchQuery ? "Try refining your search query." : "Add your first research document to begin."}
+                {searchQuery ? "Try refining your search query." : "Add a research document to begin."}
               </p>
             </div>
             {!searchQuery && (

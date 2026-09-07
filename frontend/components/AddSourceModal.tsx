@@ -92,7 +92,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-bold text-cri-textPrimary font-sans">Add Source Document</h2>
-              <p className="text-[11px] text-cri-textMuted">PDF, TXT, or Markdown for isolated research indexing</p>
+              <p className="text-[11px] text-cri-textMuted">PDF, TXT, or Markdown for research analysis</p>
             </div>
           </div>
           <button
@@ -156,7 +156,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceSecondary border border-cri-border transition-colors"
+            className="px-3.5 py-1.5 rounded-[9px] text-xs font-medium text-cri-textSecondary hover:text-cri-textPrimary hover:bg-cri-surfaceSecondary border border-cri-border transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -173,7 +173,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             {isUploading ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Indexing chunks...</span>
+                <span>Indexing document...</span>
               </>
             ) : (
               <span>Add source</span>

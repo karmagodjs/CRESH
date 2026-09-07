@@ -105,33 +105,36 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab("supporting")}
-              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer ${
+              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer truncate ${
                 activeTab === "supporting"
                   ? "bg-cri-surfaceElevated text-cri-success shadow-xs font-semibold border border-cri-border"
                   : "text-cri-textMuted hover:text-cri-textSecondary"
               }`}
+              title="Supporting evidence"
             >
-              Support {supportingCount}
+              Supporting {supportingCount}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("contradicting")}
-              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer ${
+              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer truncate ${
                 activeTab === "contradicting"
                   ? "bg-cri-surfaceElevated text-cri-error shadow-xs font-semibold border border-cri-border"
                   : "text-cri-textMuted hover:text-cri-textSecondary"
               }`}
+              title="Contradicting evidence"
             >
-              Contra {contradictingCount}
+              Contradicting {contradictingCount}
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("neutral")}
-              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer ${
+              className={`py-1 text-center font-medium rounded-[6px] transition-all cursor-pointer truncate ${
                 activeTab === "neutral"
                   ? "bg-cri-surfaceElevated text-cri-info shadow-xs font-semibold border border-cri-border"
                   : "text-cri-textMuted hover:text-cri-textSecondary"
               }`}
+              title="Neutral evidence"
             >
               Neutral {neutralCount}
             </button>
@@ -146,7 +149,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
           <div className="py-16 px-4 text-center space-y-1.5">
             <p className="text-xs font-semibold text-cri-textPrimary">No evidence yet</p>
             <p className="text-[11px] text-cri-textMuted leading-relaxed">
-              Ask a question to see the passages supporting the answer.
+              Ask a research question to see the passages supporting your answer.
             </p>
           </div>
         )}
