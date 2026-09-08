@@ -145,60 +145,56 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
       aria-label="Sources Library"
     >
       <div className="p-3.5 border-b border-cri-border flex items-center justify-between shrink-0 relative">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary font-sans">
-            Sources
-          </h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary font-sans">
+          Sources
+        </h2>
+
+        <div className="relative" ref={menuRef}>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="h-8 px-3 flex items-center gap-1.5 text-xs font-medium text-white bg-cri-orange hover:bg-cri-orange-hover rounded-md transition-colors cursor-pointer"
+            title="Add research source"
+          >
+            <Plus className="w-3.5 h-3.5 text-white" />
+            <span>Add source</span>
+          </button>
+
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-1.5 w-48 bg-cri-surface border border-cri-border rounded-lg shadow-lg p-1 z-40 space-y-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onOpenUpload("file");
+                }}
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-cri-textPrimary hover:bg-cri-surfaceHover rounded-md transition-colors text-left cursor-pointer"
+              >
+                <FileUp className="w-4 h-4 text-cri-orange shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="font-medium text-cri-textPrimary">Upload file</span>
+                  <span className="text-[10px] text-cri-textMuted truncate">PDF, TXT, MD</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setActiveFilter("web");
+                  setTimeout(() => urlInputRef.current?.focus(), 100);
+                }}
+                className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-cri-textPrimary hover:bg-cri-surfaceHover rounded-md transition-colors text-left cursor-pointer"
+              >
+                <Globe className="w-4 h-4 text-cri-info shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="font-medium text-cri-textPrimary">Add web URL</span>
+                  <span className="text-[10px] text-cri-textMuted truncate">Articles & pages</span>
+                </div>
+              </button>
+            </div>
+          )}
         </div>
-
-        {filteredDocs.length > 0 && (
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="h-8 px-3 flex items-center gap-1.5 text-xs font-medium text-white bg-cri-orange hover:bg-cri-orange-hover rounded-md transition-colors cursor-pointer"
-              title="Add research source"
-            >
-              <Plus className="w-3.5 h-3.5 text-white" />
-              <span>Add source</span>
-            </button>
-
-            {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-48 bg-cri-surface border border-cri-border rounded-lg shadow-lg p-1 z-40 space-y-0.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    onOpenUpload("file");
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-cri-textPrimary hover:bg-cri-surfaceHover rounded-md transition-colors text-left cursor-pointer"
-                >
-                  <FileUp className="w-4 h-4 text-cri-orange shrink-0" />
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-medium text-cri-textPrimary">Upload file</span>
-                    <span className="text-[10px] text-cri-textMuted truncate">PDF, TXT, MD</span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    setActiveFilter("web");
-                    setTimeout(() => urlInputRef.current?.focus(), 100);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-cri-textPrimary hover:bg-cri-surfaceHover rounded-md transition-colors text-left cursor-pointer"
-                >
-                  <Globe className="w-4 h-4 text-cri-info shrink-0" />
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-medium text-cri-textPrimary">Add web URL</span>
-                    <span className="text-[10px] text-cri-textMuted truncate">Articles & pages</span>
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       <div className="p-3 border-b border-cri-border space-y-2 shrink-0">
@@ -364,10 +360,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
                       <div className="mt-2 pt-1.5 border-t border-cri-border flex items-center justify-between text-[11px] text-cri-textMuted">
                         <span>Web source</span>
-                        <span className="flex items-center gap-1.5 text-cri-success font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cri-success inline-block" />
-                          Indexed
-                        </span>
                       </div>
                     </div>
                   );
@@ -455,10 +447,6 @@ export const SourcesPanel: React.FC<SourcesPanelProps> = ({
 
                 <div className="mt-2 pt-1.5 border-t border-cri-border flex items-center justify-between text-[11px] text-cri-textMuted">
                   <span>{doc.page_count} {doc.page_count === 1 ? "page" : "pages"}</span>
-                  <span className="flex items-center gap-1.5 text-cri-success font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cri-success inline-block" />
-                    Indexed
-                  </span>
                 </div>
               </div>
             );

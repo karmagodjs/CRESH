@@ -42,44 +42,40 @@ export const Header: React.FC<HeaderProps> = ({
 
   const activeTheme = propTheme || currentTheme;
 
-  const navItems: { id: "research" | "evaluation" | "architecture" | "observability"; label: string }[] = [
-    { id: "research", label: "Research" },
-    { id: "evaluation", label: "Evaluation" },
-    { id: "architecture", label: "Architecture" },
-    { id: "observability", label: "Observability" },
-  ];
+  const handleGoToResearch = (e: React.MouseEvent) => {
+    if (onSelectView) {
+      e.preventDefault();
+      onSelectView("research");
+    }
+  };
 
   return (
     <header
-      className="h-12 px-3 sm:px-5 bg-cri-headerBg border-b border-cri-border flex items-center justify-between shrink-0 select-none z-30 transition-colors duration-200"
+      className="h-12 px-4 sm:px-6 bg-cri-headerBg border-b border-cri-border flex items-center justify-between shrink-0 select-none z-30 transition-colors duration-200"
       aria-label="Workspace Header"
     >
-      <div className="flex items-center gap-5 min-w-0">
-        <span className="text-[15px] font-semibold tracking-tight text-cri-textPrimary font-sans">
+      <div className="flex items-center gap-6 min-w-0">
+        <button
+          type="button"
+          onClick={handleGoToResearch}
+          className="text-[15px] font-semibold tracking-tight text-cri-textPrimary font-sans hover:opacity-90 transition-opacity cursor-pointer bg-transparent border-none p-0"
+        >
           CRI Research
-        </span>
+        </button>
 
-        {onSelectView && (
-          <nav className="hidden md:flex items-center gap-1 text-xs" aria-label="Main Navigation">
-            {navItems.map((item) => {
-              const isActive = activeView === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => onSelectView(item.id)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                    isActive
-                      ? "text-cri-textPrimary bg-cri-surfaceElevated"
-                      : "text-cri-textMuted hover:text-cri-textPrimary hover:bg-cri-surfaceHover"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-        )}
+        <nav aria-label="Main Navigation">
+          <button
+            type="button"
+            onClick={handleGoToResearch}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+              activeView === "research"
+                ? "text-cri-textPrimary bg-cri-surfaceElevated"
+                : "text-cri-textMuted hover:text-cri-textPrimary hover:bg-cri-surfaceHover"
+            }`}
+          >
+            Research
+          </button>
+        </nav>
       </div>
 
       <div className="flex items-center justify-end">

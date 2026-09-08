@@ -7,7 +7,6 @@ import {
   ArrowRight,
   AlertTriangle,
   Loader2,
-  Check,
   BookOpen,
 } from "lucide-react";
 
@@ -35,9 +34,6 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
   className,
 }) => {
   const [questionInput, setQuestionInput] = useState("");
-  const [activeTab, setActiveTab] = useState<"ask" | "summary" | "takeaways" | "citations" | "related">("ask");
-  const [showAllFindings, setShowAllFindings] = useState(false);
-  const [showConfidenceWhy, setShowConfidenceWhy] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
@@ -65,30 +61,43 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
     return `Research Corpus · 2024 · ${activeDocument.page_count} Pages`;
   };
 
-  const cleanStrayAsterisks = (str: string): string => {
-    return str.replace(/(?<!\d)\*+|\*+(?!\d)/g, "");
-  };
+  const isAbstention =
+    queryResponse &&
+    (!queryResponse.evidence_sufficient ||
+      !queryResponse.answerable ||
+      queryResponse.grounding_status === "INSUFFICIENT" ||
+      queryResponse.answer.includes("don't have sufficient evidence") ||
+      queryResponse.answer.includes("insufficient evidence"));
 
-  const renderFormattedInline = (text: string, keyPrefix: string = "inline"): React.ReactNode => {
+  // Inline markdown formatter ensuring:
+  // - Body text: font-weight 400
+  // - Headings: font-weight 600
+  // - No raw *, **, ***
+  // - No entire answer rendered bold
+  // - Citations remain clickable
+  const renderInlineMarkdown = (text: string, keyPrefix: string): React.ReactNode => {
     if (!text) return null;
 
-    const INLINE_REGEX = /(\[(\d+(?:,\s*\d+)*)\])|(\*\*\*([^*]+)\*\*\*)|(\*\*([^*]+)\*\*)|(\*([^*\n]+)\*)|(`([^`]+)`)|(\$([^$\n]+)\$)/g;
+    const INLINE_REGEX =
+      /(\[(\d+(?:,\s*\d+)*)\])|(\*\*\*([^*]+)\*\*\*)|(\*\*([^*]+)\*\*)|(\*([^*\n]+)\*)|(`([^`]+)`)|(\$([^$\n]+)\$)/g;
 
     const parts: React.ReactNode[] = [];
-    let lastIndex = 0;
+    let lastIdx = 0;
     let match: RegExpExecArray | null;
+
+    // Remove any remaining stray unparsed asterisks from plain text
+    const cleanStray = (str: string) => str.replace(/\*{1,3}/g, "");
 
     while ((match = INLINE_REGEX.exec(text)) !== null) {
       const matchStart = match.index;
       const matchEnd = matchStart + match[0].length;
 
-      if (matchStart > lastIndex) {
-        const plain = cleanStrayAsterisks(text.substring(lastIndex, matchStart));
-        if (plain) {
-          parts.push(plain);
-        }
+      if (matchStart > lastIdx) {
+        const plain = cleanStray(text.substring(lastIdx, matchStart));
+        if (plain) parts.push(plain);
       }
 
+      // [1] or [1, 2] Citations
       if (match[1]) {
         const citeNumbers = match[2]
           .split(",")
@@ -107,12 +116,12 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
                     e.preventDefault();
                     onCitationClick(num);
                   }}
-                  className={`inline-flex items-center justify-center text-[11px] font-mono font-medium px-1.5 py-0.5 rounded transition-colors cursor-pointer relative touch-manipulation before:absolute before:-inset-2 before:content-[''] ${
+                  className={`inline-flex items-center justify-center text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded transition-colors cursor-pointer relative touch-manipulation ${
                     isSelected
-                      ? "bg-cri-orange text-white font-semibold"
-                      : "bg-cri-surfaceElevated text-cri-info border border-cri-border hover:bg-cri-surfaceHover"
+                      ? "bg-cri-orange text-white"
+                      : "bg-cri-surfaceElevated text-cri-info border border-cri-border hover:bg-cri-surfaceHover hover:border-cri-orange/40"
                   }`}
-                  title={`Jump to supporting passage [${num}] in Evidence panel`}
+                  title={`View supporting evidence [${num}]`}
                 >
                   [{num}]
                 </button>
@@ -120,34 +129,33 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
             })}
           </span>
         );
-      } else if (match[3]) {
+      }
+      // ***Bold Italic***
+      else if (match[3]) {
         parts.push(
-          <strong
-            key={`${keyPrefix}-bolditalic-${matchStart}`}
-            className="font-semibold italic text-cri-textPrimary"
-          >
-            {cleanStrayAsterisks(match[4])}
+          <strong key={`${keyPrefix}-bi-${matchStart}`} className="font-semibold italic text-cri-textPrimary">
+            {cleanStray(match[4])}
           </strong>
         );
-      } else if (match[5]) {
+      }
+      // **Bold**
+      else if (match[5]) {
         parts.push(
-          <strong
-            key={`${keyPrefix}-bold-${matchStart}`}
-            className="font-semibold text-cri-textPrimary"
-          >
-            {cleanStrayAsterisks(match[6])}
+          <strong key={`${keyPrefix}-b-${matchStart}`} className="font-semibold text-cri-textPrimary">
+            {cleanStray(match[6])}
           </strong>
         );
-      } else if (match[7]) {
+      }
+      // *Italic*
+      else if (match[7]) {
         parts.push(
-          <em
-            key={`${keyPrefix}-italic-${matchStart}`}
-            className="italic text-cri-textPrimary"
-          >
-            {cleanStrayAsterisks(match[8])}
+          <em key={`${keyPrefix}-i-${matchStart}`} className="italic text-cri-textPrimary font-normal">
+            {cleanStray(match[8])}
           </em>
         );
-      } else if (match[9]) {
+      }
+      // `Code`
+      else if (match[9]) {
         parts.push(
           <code
             key={`${keyPrefix}-code-${matchStart}`}
@@ -156,317 +164,257 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
             {match[10]}
           </code>
         );
-      } else if (match[11]) {
+      }
+      // $Math$
+      else if (match[11]) {
         parts.push(
-          <span
-            key={`${keyPrefix}-math-${matchStart}`}
-            className="font-mono text-[13.5px] italic text-cri-textPrimary"
-          >
+          <span key={`${keyPrefix}-math-${matchStart}`} className="font-mono text-[13.5px] italic text-cri-textPrimary">
             {match[12]}
           </span>
         );
       }
 
-      lastIndex = matchEnd;
+      lastIdx = matchEnd;
     }
 
-    if (lastIndex < text.length) {
-      const plain = cleanStrayAsterisks(text.substring(lastIndex));
-      if (plain) {
-        parts.push(plain);
-      }
+    if (lastIdx < text.length) {
+      const plain = cleanStray(text.substring(lastIdx));
+      if (plain) parts.push(plain);
     }
 
     return parts.length > 0 ? parts : null;
   };
 
-  const renderParagraphWithCitations = (text: string) => renderFormattedInline(text, "para");
+  // Block-level markdown parser
+  const renderAnswerContent = (text: string) => {
+    if (!text) return null;
 
-  type ContentBlock =
-    | { type: "h1"; content: string }
-    | { type: "h2"; content: string }
-    | { type: "h3"; content: string }
-    | { type: "h4"; content: string }
-    | { type: "ul"; items: string[] }
-    | { type: "ol"; items: string[] }
-    | { type: "p"; content: string };
+    const rawBlocks = text.split(/\n\s*\n/);
+    const parsedBlocks: React.ReactNode[] = [];
+    let blockKey = 0;
 
-  const KNOWN_HEADERS = [
-    "Technical Breakdown & Core Architecture",
-    "Technical Breakdown & Mechanism",
-    "Technical Breakdown",
-    "Key Empirical Findings & Contributions",
-    "Key Empirical Findings & Trade-offs",
-    "Key Empirical Findings",
-    "Key Contributions & Empirical Findings",
-    "Technical Elaboration & Mechanisms",
-    "Benchmark & Empirical Context",
-    "Limitations & Open Questions",
-    "High-Level Technical Mechanism",
-    "Direct Factual Answer",
-    "Technical Summary",
-    "Methodology Details",
-    "Problem Addressed",
-    "Proposed Solution",
-    "Mechanism",
-    "Architecture",
-    "Background",
-    "Overview",
-    "Conclusion",
-  ];
+    for (const rawBlock of rawBlocks) {
+      const trimmedBlock = rawBlock.trim();
+      if (!trimmedBlock) continue;
 
-  const renderAnswerWithCitations = (answerText: string) => {
-    if (!answerText) return null;
+      const lines = trimmedBlock.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (lines.length === 0) continue;
 
-    const titleRegexStr = KNOWN_HEADERS.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
-    const splitPattern = new RegExp(
-      `^\\s*(?:\\*{2,3}|#{1,4}\\s*)?\\s*(${titleRegexStr})(?:\\*{2,3})?(?:\\s*[:\\-–—]\\s*|\\s+)(.+)$`,
-      "i"
-    );
-    const standalonePattern = new RegExp(
-      `^\\s*(?:\\*{2,3}|#{1,4}\\s*)?\\s*(${titleRegexStr})(?:\\*{2,3})?\\s*[:\\-–—]?\\s*$`,
-      "i"
-    );
-
-    const rawLines = answerText.split("\n");
-    const preprocessedLines: string[] = [];
-
-    for (const raw of rawLines) {
-      const line = raw.trim();
-      if (!line) {
-        preprocessedLines.push("");
+      // Unordered list
+      const isBulletList = lines.every((l) => /^[-*•+]\s+/.test(l));
+      if (isBulletList) {
+        parsedBlocks.push(
+          <ul
+            key={`list-${blockKey++}`}
+            className="list-disc pl-5 space-y-2 my-3 text-[14.5px] sm:text-[15px] font-normal leading-[1.65] text-cri-textPrimary font-sans"
+          >
+            {lines.map((l, lIdx) => {
+              const itemContent = l.replace(/^[-*•+]\s+/, "");
+              return (
+                <li key={`li-${lIdx}`} className="font-normal pl-1">
+                  {renderInlineMarkdown(itemContent, `li-${blockKey}-${lIdx}`)}
+                </li>
+              );
+            })}
+          </ul>
+        );
         continue;
       }
 
-      if (/^[-*•]\s+/.test(line) || /^\d+\.\s+/.test(line) || /^#{1,6}\s+/.test(line)) {
-        preprocessedLines.push(line);
+      // Ordered list
+      const isNumberList = lines.every((l) => /^\d+[\.)]\s+/.test(l));
+      if (isNumberList) {
+        parsedBlocks.push(
+          <ol
+            key={`ol-${blockKey++}`}
+            className="list-decimal pl-5 space-y-2 my-3 text-[14.5px] sm:text-[15px] font-normal leading-[1.65] text-cri-textPrimary font-sans"
+          >
+            {lines.map((l, lIdx) => {
+              const itemContent = l.replace(/^\d+[\.)]\s+/, "");
+              return (
+                <li key={`oli-${lIdx}`} className="font-normal pl-1">
+                  {renderInlineMarkdown(itemContent, `oli-${blockKey}-${lIdx}`)}
+                </li>
+              );
+            })}
+          </ol>
+        );
         continue;
       }
 
-      let curr = line;
-      while (curr) {
-        const mSplit = curr.match(splitPattern);
-        if (mSplit) {
-          const header = mSplit[1].trim();
-          let remainder = mSplit[2].trim();
-          remainder = remainder.replace(/\*{2,3}\s*$/, "").trim();
-          preprocessedLines.push(`### ${header}`);
-          curr = remainder;
+      // Standalone heading check
+      if (lines.length === 1) {
+        const line = lines[0];
+        const hashMatch = line.match(/^(#{1,6})\s+(.*)$/);
+        if (hashMatch) {
+          const level = hashMatch[1].length;
+          const headingText = hashMatch[2].replace(/\*+/g, "").trim();
+          if (level <= 2) {
+            parsedBlocks.push(
+              <h2
+                key={`h2-${blockKey++}`}
+                className="text-[17px] sm:text-[18px] font-semibold text-cri-textPrimary mt-5 mb-2 tracking-tight font-sans"
+              >
+                {renderInlineMarkdown(headingText, `h2-${blockKey}`)}
+              </h2>
+            );
+          } else {
+            parsedBlocks.push(
+              <h3
+                key={`h3-${blockKey++}`}
+                className="text-[15px] sm:text-[16px] font-semibold text-cri-textPrimary mt-4 mb-2 tracking-tight font-sans"
+              >
+                {renderInlineMarkdown(headingText, `h3-${blockKey}`)}
+              </h3>
+            );
+          }
           continue;
         }
 
-        const mStand = curr.match(standalonePattern);
-        if (mStand) {
-          const header = mStand[1].trim();
-          preprocessedLines.push(`### ${header}`);
-          curr = "";
-          break;
+        const boldHeaderMatch = line.match(/^(\*{2,3})([^*]+)(\*{2,3}):?$/);
+        if (boldHeaderMatch && boldHeaderMatch[2].length <= 70) {
+          parsedBlocks.push(
+            <h3
+              key={`h3-${blockKey++}`}
+              className="text-[15px] sm:text-[16px] font-semibold text-cri-textPrimary mt-4 mb-2 tracking-tight font-sans"
+            >
+              {renderInlineMarkdown(boldHeaderMatch[2].trim(), `bh-${blockKey}`)}
+            </h3>
+          );
+          continue;
+        }
+      }
+
+      // Mixed paragraph / list lines
+      let currentParaLines: string[] = [];
+
+      const flushPara = () => {
+        if (currentParaLines.length > 0) {
+          const paraText = currentParaLines.join(" ");
+          parsedBlocks.push(
+            <p
+              key={`p-${blockKey++}`}
+              className="font-normal text-[15px] sm:text-[15.5px] leading-[1.7] text-cri-textPrimary my-3 font-sans"
+            >
+              {renderInlineMarkdown(paraText, `para-${blockKey}`)}
+            </p>
+          );
+          currentParaLines = [];
+        }
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        // Heading within block
+        const hashMatch = line.match(/^(#{1,6})\s+(.*)$/);
+        if (hashMatch) {
+          flushPara();
+          const level = hashMatch[1].length;
+          const headingText = hashMatch[2].replace(/\*+/g, "").trim();
+          if (level <= 2) {
+            parsedBlocks.push(
+              <h2
+                key={`h2-${blockKey++}`}
+                className="text-[17px] sm:text-[18px] font-semibold text-cri-textPrimary mt-5 mb-2 tracking-tight font-sans"
+              >
+                {renderInlineMarkdown(headingText, `h2-${blockKey}`)}
+              </h2>
+            );
+          } else {
+            parsedBlocks.push(
+              <h3
+                key={`h3-${blockKey++}`}
+                className="text-[15px] sm:text-[16px] font-semibold text-cri-textPrimary mt-4 mb-2 tracking-tight font-sans"
+              >
+                {renderInlineMarkdown(headingText, `h3-${blockKey}`)}
+              </h3>
+            );
+          }
+          continue;
         }
 
+        // Bold heading line within block
+        const boldHeaderMatch = line.match(/^(\*{2,3})([^*:]+)(\*{2,3}):?\s*$/);
+        if (boldHeaderMatch && boldHeaderMatch[2].length <= 70) {
+          flushPara();
+          parsedBlocks.push(
+            <h3
+              key={`h3-${blockKey++}`}
+              className="text-[15px] sm:text-[16px] font-semibold text-cri-textPrimary mt-4 mb-2 tracking-tight font-sans"
+            >
+              {renderInlineMarkdown(boldHeaderMatch[2].trim(), `bh-${blockKey}`)}
+            </h3>
+          );
+          continue;
+        }
+
+        // Bullet line
+        const bMatch = line.match(/^[-*•+]\s+(.*)$/);
+        if (bMatch) {
+          flushPara();
+          parsedBlocks.push(
+            <ul
+              key={`inline-ul-${blockKey++}`}
+              className="list-disc pl-5 my-1.5 text-[14.5px] font-normal leading-[1.65] text-cri-textPrimary font-sans"
+            >
+              <li className="font-normal pl-1">
+                {renderInlineMarkdown(bMatch[1], `li-${blockKey}-${i}`)}
+              </li>
+            </ul>
+          );
+          continue;
+        }
+
+        // Numbered line
+        const nMatch = line.match(/^\d+[\.)]\s+(.*)$/);
+        if (nMatch) {
+          flushPara();
+          parsedBlocks.push(
+            <ol
+              key={`inline-ol-${blockKey++}`}
+              className="list-decimal pl-5 my-1.5 text-[14.5px] font-normal leading-[1.65] text-cri-textPrimary font-sans"
+            >
+              <li className="font-normal pl-1">
+                {renderInlineMarkdown(nMatch[1], `oli-${blockKey}-${i}`)}
+              </li>
+            </ol>
+          );
+          continue;
+        }
+
+        // If entire line is wrapped in **bold**, strip outer asterisks to prevent whole line bolding
+        let cleanLine = line;
         if (
-          ((curr.startsWith("**") && curr.endsWith("**")) ||
-            (curr.startsWith("***") && curr.endsWith("***"))) &&
-          curr.length > 50
+          ((cleanLine.startsWith("**") && cleanLine.endsWith("**")) ||
+            (cleanLine.startsWith("***") && cleanLine.endsWith("***"))) &&
+          cleanLine.length > 60
         ) {
-          curr = curr.replace(/^\*{2,3}\s*/, "").replace(/\s*\*{2,3}$/, "");
-          continue;
+          cleanLine = cleanLine.replace(/^\*{2,3}\s*/, "").replace(/\s*\*{2,3}$/, "");
         }
 
-        const mShortBold = curr.match(/^\*{2,3}([^*:]+)\*{2,3}:?\s*$/);
-        if (mShortBold && mShortBold[1].length <= 50 && !mShortBold[1].endsWith(".")) {
-          preprocessedLines.push(`### ${mShortBold[1].trim()}`);
-          curr = "";
-          break;
-        }
-
-        preprocessedLines.push(curr);
-        break;
+        currentParaLines.push(cleanLine);
       }
+
+      flushPara();
     }
-
-    const blocks: ContentBlock[] = [];
-    let currentParagraph: string[] = [];
-
-    const flushParagraph = () => {
-      if (currentParagraph.length > 0) {
-        const text = currentParagraph.join(" ").trim();
-        if (text) {
-          blocks.push({ type: "p", content: text });
-        }
-        currentParagraph = [];
-      }
-    };
-
-    for (const line of preprocessedLines) {
-      if (!line) {
-        flushParagraph();
-        continue;
-      }
-
-      if (line.startsWith("# ")) {
-        flushParagraph();
-        blocks.push({ type: "h1", content: line.replace(/^#\s+/, "") });
-        continue;
-      }
-      if (line.startsWith("## ")) {
-        flushParagraph();
-        blocks.push({ type: "h2", content: line.replace(/^##\s+/, "") });
-        continue;
-      }
-      if (line.startsWith("### ")) {
-        flushParagraph();
-        blocks.push({ type: "h3", content: line.replace(/^###\s+/, "") });
-        continue;
-      }
-      if (line.startsWith("#### ")) {
-        flushParagraph();
-        blocks.push({ type: "h4", content: line.replace(/^####\s+/, "") });
-        continue;
-      }
-
-      const bulletMatch = line.match(/^[-*•]\s+(.*)$/);
-      if (bulletMatch) {
-        flushParagraph();
-        const lastBlock = blocks[blocks.length - 1];
-        if (lastBlock && lastBlock.type === "ul") {
-          lastBlock.items.push(bulletMatch[1]);
-        } else {
-          blocks.push({ type: "ul", items: [bulletMatch[1]] });
-        }
-        continue;
-      }
-
-      const numMatch = line.match(/^\d+\.\s+(.*)$/);
-      if (numMatch) {
-        flushParagraph();
-        const lastBlock = blocks[blocks.length - 1];
-        if (lastBlock && lastBlock.type === "ol") {
-          lastBlock.items.push(numMatch[1]);
-        } else {
-          blocks.push({ type: "ol", items: [numMatch[1]] });
-        }
-        continue;
-      }
-
-      currentParagraph.push(line);
-    }
-
-    flushParagraph();
 
     return (
-      <div className="space-y-4 text-cri-textPrimary font-normal font-sans">
-        {blocks.map((block, bIdx) => {
-          switch (block.type) {
-            case "h1":
-            case "h2":
-              return (
-                <h2
-                  key={`block-h2-${bIdx}`}
-                  className="text-[17px] sm:text-[18px] font-semibold text-cri-textPrimary mt-5 mb-2.5 tracking-tight font-sans"
-                >
-                  {renderFormattedInline(block.content, `h2-${bIdx}`)}
-                </h2>
-              );
-            case "h3":
-              return (
-                <h3
-                  key={`block-h3-${bIdx}`}
-                  className="text-[15.5px] sm:text-[16px] font-semibold text-cri-textPrimary mt-4 mb-2 tracking-tight font-sans"
-                >
-                  {renderFormattedInline(block.content, `h3-${bIdx}`)}
-                </h3>
-              );
-            case "h4":
-              return (
-                <h4
-                  key={`block-h4-${bIdx}`}
-                  className="text-[14.5px] font-semibold text-cri-textPrimary mt-3 mb-1.5 tracking-tight font-sans"
-                >
-                  {renderFormattedInline(block.content, `h4-${bIdx}`)}
-                </h4>
-              );
-            case "ul":
-              return (
-                <ul
-                  key={`block-ul-${bIdx}`}
-                  className="list-disc pl-5 space-y-2 my-3 text-[14.5px] sm:text-[15px] font-normal leading-[1.65] text-cri-textPrimary"
-                >
-                  {block.items.map((item, iIdx) => (
-                    <li key={`ul-${bIdx}-${iIdx}`} className="font-normal pl-1">
-                      {renderFormattedInline(item, `ul-${bIdx}-${iIdx}`)}
-                    </li>
-                  ))}
-                </ul>
-              );
-            case "ol":
-              return (
-                <ol
-                  key={`block-ol-${bIdx}`}
-                  className="list-decimal pl-5 space-y-2 my-3 text-[14.5px] sm:text-[15px] font-normal leading-[1.65] text-cri-textPrimary"
-                >
-                  {block.items.map((item, iIdx) => (
-                    <li key={`ol-${bIdx}-${iIdx}`} className="font-normal pl-1">
-                      {renderFormattedInline(item, `ol-${bIdx}-${iIdx}`)}
-                    </li>
-                  ))}
-                </ol>
-              );
-            case "p":
-            default:
-              return (
-                <p
-                  key={`block-p-${bIdx}`}
-                  className="font-normal text-[15px] sm:text-[15.5px] leading-[1.7] text-cri-textPrimary my-2.5 font-sans"
-                >
-                  {renderFormattedInline(block.content, `p-${bIdx}`)}
-                </p>
-              );
-          }
-        })}
+      <div className="cri-answer-body space-y-3 text-cri-textPrimary font-normal font-sans">
+        {parsedBlocks}
       </div>
     );
   };
-
-  const isAbstention =
-    queryResponse &&
-    (!queryResponse.evidence_sufficient ||
-      !queryResponse.answerable ||
-      queryResponse.grounding_status === "INSUFFICIENT" ||
-      queryResponse.answer.includes("don't have sufficient evidence") ||
-      queryResponse.answer.includes("insufficient evidence"));
-
-  const findings = queryResponse?.key_points && queryResponse.key_points.length > 0
-    ? queryResponse.key_points
-    : [
-        "Deep bidirectional pre-training eliminates unidirectional constraint of left-to-right architectures.",
-        "Masked Language Model (MLM) allows representations to fuse both left and right context simultaneously.",
-        "Next Sentence Prediction (NSP) captures cross-sentence semantic relationships essential for QA and NLI.",
-        "Pre-trained representations advance state-of-the-art results across 11 sentence and sentence-pair tasks.",
-      ];
-
-  const visibleFindings = showAllFindings ? findings : findings.slice(0, 3);
-  const confidencePct = Math.min(100, Math.max(0, Math.round((queryResponse?.confidence || 0.87) * 100)));
 
   return (
     <main
       className={`h-full flex flex-col bg-cri-surface border border-cri-border rounded-lg overflow-hidden transition-colors ${className || ""}`}
       aria-label="Research Workspace"
     >
-      <div className="px-4 sm:px-6 pt-3.5 pb-0 border-b border-cri-border bg-cri-surface shrink-0 space-y-2.5">
-        <div className="flex items-center gap-1.5 text-[11px] text-cri-textMuted font-mono">
-          <span className="hover:text-cri-textSecondary cursor-pointer">Research</span>
-          {activeDocument && (
-            <>
-              <span>&gt;</span>
-              <span className="text-cri-textSecondary truncate max-w-sm font-sans">
-                {activeDocument.title || activeDocument.filename}
-              </span>
-            </>
-          )}
-        </div>
-
+      {/* Header bar */}
+      <div className="px-4 sm:px-6 py-3.5 border-b border-cri-border bg-cri-surface shrink-0">
         {activeDocument ? (
-          <div className="flex items-center justify-between gap-4 pb-2">
+          <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-cri-orange shrink-0" />
@@ -483,448 +431,184 @@ export const ResearchPanel: React.FC<ResearchPanelProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            {onViewDocument && (
               <button
                 type="button"
-                onClick={() => {
-                  if (onViewDocument) {
-                    onViewDocument();
-                  }
-                }}
-                className="hidden sm:flex items-center gap-1.5 h-8 px-3 rounded-md bg-cri-surface hover:bg-cri-surfaceHover border border-cri-border text-xs font-medium text-cri-textPrimary transition-colors cursor-pointer"
+                onClick={onViewDocument}
+                className="hidden sm:flex items-center gap-1.5 h-8 px-3 rounded-md bg-cri-surface hover:bg-cri-surfaceHover border border-cri-border text-xs font-medium text-cri-textPrimary transition-colors cursor-pointer shrink-0"
                 title="View original research document"
               >
                 <BookOpen className="w-3.5 h-3.5 text-cri-orange" />
                 <span>View document</span>
               </button>
-            </div>
+            )}
           </div>
         ) : (
-          <div className="pb-2.5">
+          <div>
             <h1 className="text-base sm:text-lg font-semibold text-cri-textPrimary tracking-tight font-sans">
-              Research
+              Research Workspace
             </h1>
             <p className="text-xs text-cri-textSecondary mt-0.5">
-              Select a source from the left to begin.
+              Select a source from the left to begin your research.
             </p>
-          </div>
-        )}
-
-        {activeDocument && (
-          <div className="flex items-center gap-4 sm:gap-7 pt-2 border-t border-cri-border text-xs overflow-x-auto no-scrollbar scroll-smooth">
-            {(
-              [
-                { id: "ask", label: "Ask" },
-                { id: "summary", label: "Summary" },
-                { id: "takeaways", label: "Key Takeaways" },
-                { id: "citations", label: "Citations" },
-                { id: "related", label: "Related Work" },
-              ] as const
-            ).map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`pb-2.5 pt-1 text-[13px] font-medium transition-colors relative cursor-pointer whitespace-nowrap min-h-[40px] flex items-center ${
-                    isActive
-                      ? "text-cri-textPrimary font-semibold"
-                      : "text-cri-textSecondary hover:text-cri-textPrimary"
-                  }`}
-                >
-                  {tab.label}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-cri-orange rounded-full" />
-                  )}
-                </button>
-              );
-            })}
           </div>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-7">
-        {!activeDocument ? (
-          <div className="max-w-2xl mx-auto pt-14 pb-8 space-y-8 text-center">
-            <div className="space-y-2.5">
-              <h2 className="text-[26px] sm:text-[30px] font-bold tracking-tight text-cri-textPrimary font-sans">
-                Start your research
-              </h2>
-              <p className="text-[14px] text-cri-textSecondary leading-relaxed max-w-md mx-auto">
-                Select a source from the left to begin.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-cri-border bg-cri-surfaceSecondary p-3.5 sm:p-4 opacity-60 text-left min-h-[120px] flex flex-col justify-between">
+      {/* Main content scroll area */}
+      <div className="flex-1 overflow-y-auto p-5 sm:p-6 lg:p-8 space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Question input */}
+          <form onSubmit={handleSubmit} className="relative">
+            <div className="min-h-[120px] sm:min-h-[135px] rounded-lg border border-cri-border bg-cri-surfaceSecondary focus-within:border-cri-orange transition-colors p-3.5 sm:p-4 flex flex-col justify-between">
               <textarea
-                disabled
+                ref={inputRef}
+                value={questionInput}
+                onChange={(e) => setQuestionInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
                 rows={2}
-                placeholder="Select a source to ask research questions..."
-                className="w-full bg-transparent text-sm font-normal text-cri-textPrimary placeholder:text-cri-textMuted resize-none focus:outline-none leading-relaxed cursor-not-allowed"
+                placeholder={
+                  activeDocument
+                    ? "Ask a research question about this document..."
+                    : "Select a source to ask research questions..."
+                }
+                className="w-full bg-transparent text-sm font-normal text-cri-textPrimary placeholder:text-cri-textMuted resize-none focus:outline-none leading-relaxed"
               />
-              <div className="flex items-center justify-end pt-2">
+
+              <div className="flex items-center justify-end gap-2.5 pt-2 text-xs">
+                <span className="hidden sm:inline text-[11px] font-mono text-cri-textMuted select-none">
+                  ⌘ Enter
+                </span>
+
                 <button
-                  disabled
-                  className="h-8 px-3.5 rounded-md bg-cri-surfaceElevated text-cri-textMuted text-xs font-medium cursor-not-allowed border border-cri-border flex items-center gap-1.5"
+                  type="submit"
+                  disabled={isLoading || !questionInput.trim() || !activeDocument}
+                  className={`h-8 px-3.5 rounded-md text-xs font-medium tracking-normal transition-colors flex items-center justify-center gap-1.5 ${
+                    isLoading || !questionInput.trim() || !activeDocument
+                      ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
+                      : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer"
+                  }`}
                 >
-                  <span>Run analysis</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Analyzing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Run analysis</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>
-          </div>
-        ) : (
-          activeTab === "ask" && (
-            <div className="space-y-6 max-w-4xl mx-auto">
-              <form onSubmit={handleSubmit} className="relative">
-                <div className="min-h-[120px] sm:min-h-[135px] rounded-lg border border-cri-border bg-cri-surfaceSecondary focus-within:border-cri-orange transition-colors p-3.5 sm:p-4 flex flex-col justify-between">
-                  <textarea
-                    ref={inputRef}
-                    value={questionInput}
-                    onChange={(e) => setQuestionInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={isLoading}
-                    rows={2}
-                    placeholder="Ask a research question about this document..."
-                    className="w-full bg-transparent text-sm font-normal text-cri-textPrimary placeholder:text-cri-textMuted resize-none focus:outline-none leading-relaxed"
-                  />
+          </form>
 
-                  <div className="flex items-center justify-end gap-2.5 pt-2 text-xs">
-                    <span className="hidden sm:inline text-[11px] font-mono text-cri-textMuted select-none">
-                      ⌘ Enter
+          {/* Loading state */}
+          {isLoading && (
+            <div className="p-6 rounded-lg bg-cri-surface border border-cri-border flex flex-col items-center justify-center space-y-2.5 text-center">
+              <Loader2 className="w-5 h-5 text-cri-orange animate-spin" />
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-cri-textPrimary">Analyzing Research Document</p>
+                <p className="text-[11px] text-cri-textSecondary">
+                  Retrieving evidence passages, reranking context, and synthesizing grounded answer...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Response container */}
+          {queryResponse && !isLoading && (
+            <div className="space-y-5">
+              {isAbstention ? (
+                <div className="p-5 rounded-lg border border-cri-orange/60 bg-cri-surface space-y-2.5">
+                  <div className="flex items-center gap-1.5 text-cri-orange">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-semibold uppercase tracking-wider font-sans">
+                      Insufficient Evidence
                     </span>
-
-                    <button
-                      type="submit"
-                      disabled={isLoading || !questionInput.trim()}
-                      className={`h-8 px-3.5 rounded-md text-xs font-medium tracking-normal transition-colors flex items-center justify-center gap-1.5 ${
-                        isLoading || !questionInput.trim()
-                          ? "bg-cri-surfaceElevated text-cri-textMuted cursor-not-allowed border border-cri-border"
-                          : "bg-cri-orange hover:bg-cri-orange-hover text-white cursor-pointer"
-                      }`}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Analyzing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Run analysis</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </>
-                      )}
-                    </button>
                   </div>
+                  <h2 className="text-sm font-semibold text-cri-textPrimary leading-snug">
+                    I don&apos;t have sufficient evidence in the selected document to answer this question.
+                  </h2>
+                  <p className="text-xs text-cri-textSecondary leading-relaxed">
+                    The question cannot be answered using evidence from the selected document. To ensure factual accuracy, an ungrounded answer was not generated.
+                  </p>
                 </div>
-              </form>
-
-              {isLoading && (
-                <div className="p-6 rounded-lg bg-cri-surface border border-cri-border flex flex-col items-center justify-center space-y-2.5 text-center">
-                  <Loader2 className="w-5 h-5 text-cri-orange animate-spin" />
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold text-cri-textPrimary">Analyzing Research Document</p>
-                    <p className="text-[11px] text-cri-textSecondary">
-                      Retrieving evidence passages, reranking context, and synthesizing grounded answer...
-                    </p>
+              ) : (
+                <div className="rounded-lg border border-cri-border bg-cri-surface p-5 sm:p-6 space-y-5">
+                  <div className="border-b border-cri-border pb-3.5">
+                    <h2 className="text-base sm:text-lg font-semibold text-cri-textPrimary leading-snug font-sans">
+                      {queryResponse.query}
+                    </h2>
                   </div>
-                </div>
-              )}
 
-              {queryResponse && !isLoading && (
-                <div className="space-y-5">
-                  {isAbstention ? (
-                    <div className="p-5 rounded-lg border border-cri-orange/60 bg-cri-surface space-y-2.5">
-                      <div className="flex items-center gap-1.5 text-cri-orange">
-                        <AlertTriangle className="w-4 h-4 shrink-0" />
-                        <span className="text-xs font-semibold uppercase tracking-wider font-sans">
-                          Insufficient Evidence
+                  {/* Rendered answer with proper Markdown */}
+                  <div className="cri-answer-body text-sm leading-relaxed text-cri-textPrimary">
+                    {renderAnswerContent(queryResponse.answer)}
+                  </div>
+
+                  {/* Citations section */}
+                  {queryResponse.citations && queryResponse.citations.length > 0 && (
+                    <div className="pt-5 border-t border-cri-border space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-cri-textSecondary font-sans">
+                          Citations
+                        </h3>
+                        <span className="text-[11px] font-mono text-cri-textMuted">
+                          {queryResponse.citations.length} sources
                         </span>
                       </div>
-                      <h2 className="text-sm font-semibold text-cri-textPrimary leading-snug">
-                        I don&apos;t have sufficient evidence in the selected document to answer this question.
-                      </h2>
-                      <p className="text-xs text-cri-textSecondary leading-relaxed">
-                        The question cannot be answered using evidence from the selected document. To ensure factual accuracy, an ungrounded answer was not generated.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-cri-border bg-cri-surface p-5 sm:p-6 space-y-5">
-                      <div className="border-b border-cri-border pb-3.5">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-cri-orange font-mono mb-1">
-                          Research Synthesis
-                        </div>
-                        <h2 className="text-base sm:text-lg font-semibold text-cri-textPrimary leading-snug font-sans">
-                          {queryResponse.query}
-                        </h2>
-                      </div>
 
-                      <div className="cri-answer-body font-normal text-sm leading-relaxed text-cri-textPrimary">
-                        {renderAnswerWithCitations(queryResponse.answer)}
-                      </div>
-
-                      <div className="pt-5 border-t border-cri-border space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold uppercase tracking-wider text-cri-textSecondary font-sans">
-                            KEY FINDINGS
-                          </span>
-                          <span className="text-[11px] text-cri-textMuted font-mono">
-                            {findings.length} findings
-                          </span>
-                        </div>
-
-                        <div className="space-y-2">
-                          {visibleFindings.map((finding, fIdx) => (
+                      <div className="flex flex-wrap gap-2">
+                        {queryResponse.citations.map((cite) => {
+                          const isSelected = selectedCitationIndex === cite.citation_index;
+                          return (
                             <div
-                              key={fIdx}
-                              className="flex items-start gap-2.5 p-2.5 rounded-md bg-cri-surfaceSecondary border border-cri-border text-xs transition-colors"
+                              key={cite.citation_index}
+                              className={`text-xs font-mono px-2.5 py-1.5 rounded-md border flex items-center gap-2 transition-colors ${
+                                isSelected
+                                  ? "bg-cri-orange/15 border-cri-orange text-cri-orange font-semibold"
+                                  : "bg-cri-surfaceSecondary border-cri-border text-cri-textPrimary"
+                              }`}
                             >
-                              <span className="font-mono text-xs font-bold text-cri-orange shrink-0 mt-0.5">
-                                {fIdx + 1}.
+                              <button
+                                type="button"
+                                onClick={() => onCitationClick(cite.citation_index)}
+                                className="font-bold text-cri-orange hover:underline cursor-pointer"
+                                title={`Highlight citation [${cite.citation_index}] in Evidence panel`}
+                              >
+                                [{cite.citation_index}]
+                              </button>
+                              <span
+                                className="font-sans text-xs truncate max-w-[200px]"
+                                title={cite.section_title || cite.section || "Relevant Section"}
+                              >
+                                {cite.section_title || cite.section || "Relevant Section"}
                               </span>
-                              <span className="text-cri-textPrimary leading-relaxed">
-                                {renderFormattedInline(finding, `finding-${fIdx}`)}
-                              </span>
+                              {onOpenCitationDocument && (
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenCitationDocument(cite.page_number)}
+                                  className="text-[10px] text-cri-textMuted hover:text-cri-orange font-mono underline ml-1 cursor-pointer"
+                                  title={`View page ${cite.page_number} in document viewer`}
+                                >
+                                  p.{cite.page_number} ↗
+                                </button>
+                              )}
                             </div>
-                          ))}
-                        </div>
-
-                        {findings.length > 3 && (
-                          <button
-                            type="button"
-                            onClick={() => setShowAllFindings(!showAllFindings)}
-                            className="flex items-center gap-1 text-xs text-cri-orange hover:underline font-medium pt-0.5 cursor-pointer"
-                          >
-                            <span>{showAllFindings ? "Show less ↑" : "Show more ↓"}</span>
-                          </button>
-                        )}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="p-3.5 rounded-lg bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted font-sans">
-                          Confidence
-                        </span>
-                        <div className="flex items-center gap-1 text-xs text-cri-success font-medium">
-                          <Check className="w-3.5 h-3.5 text-cri-success stroke-[2.5]" />
-                          <span>Well supported</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-bold text-cri-textPrimary font-mono">
-                          {confidencePct}%
-                        </span>
-                        <span className="text-xs text-cri-textSecondary font-medium">Confidence</span>
-                      </div>
-
-                      <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1.5 border-t border-cri-border">
-                        Calculated from verified evidence alignment in the scoped document.
-                      </p>
-                    </div>
-
-                    <div className="p-3.5 rounded-lg bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2">
-                      <div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted font-sans">
-                            Evidence Used
-                          </span>
-                          <span className="text-[10px] font-mono text-cri-textMuted">
-                            {queryResponse.citations?.length || 0} citations
-                          </span>
-                        </div>
-                        <p className="text-xs text-cri-textSecondary leading-relaxed mt-0.5">
-                          {queryResponse.citations?.length || 0} passages from {activeDocument ? activeDocument.filename : "sources"}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {queryResponse.citations && queryResponse.citations.length > 0 ? (
-                          queryResponse.citations.slice(0, 3).map((cite) => (
-                            <button
-                              key={cite.citation_index}
-                              type="button"
-                              onClick={() => onCitationClick(cite.citation_index)}
-                              className="text-[10px] font-mono px-2 py-0.5 rounded bg-cri-surfaceElevated hover:bg-cri-surfaceHover border border-cri-border text-cri-textPrimary flex items-center gap-1 transition-colors cursor-pointer"
-                              title={`Jump to [${cite.citation_index}]`}
-                            >
-                              <span className="text-cri-orange font-bold">[{cite.citation_index}]</span>
-                              <span className="truncate max-w-[90px]">
-                                {cite.filename ? `${cite.filename.slice(0, 8)} · p.${cite.page_number}` : `p.${cite.page_number}`}
-                              </span>
-                            </button>
-                          ))
-                        ) : (
-                          <span className="text-[11px] text-cri-textMuted">No citations extracted</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="p-3.5 rounded-lg bg-cri-surface border border-cri-border flex flex-col justify-between space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-cri-textMuted font-sans">
-                          Methodology
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setShowConfidenceWhy(!showConfidenceWhy)}
-                          className="text-[11px] font-medium text-cri-orange hover:underline cursor-pointer"
-                        >
-                          {showConfidenceWhy ? "Hide details" : "View details →"}
-                        </button>
-                      </div>
-                      <p className="text-xs text-cri-textSecondary leading-relaxed">
-                        Answer synthesized from retrieved evidence and verified citations.
-                      </p>
-                      {showConfidenceWhy ? (
-                        <p className="text-[11px] text-cri-textMuted leading-relaxed pt-1.5 border-t border-cri-border">
-                          Every statement is grounded against cited passages with strict document isolation.
-                        </p>
-                      ) : (
-                        <div className="flex items-center gap-1 text-xs text-cri-success font-medium pt-0.5">
-                          <Check className="w-3.5 h-3.5 text-cri-success stroke-[2.5]" />
-                          <span>Grounded output</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
-          )
-        )}
-
-        {activeTab === "summary" && (
-          <div className="max-w-4xl mx-auto p-5 rounded-lg bg-cri-surface border border-cri-border space-y-3.5 text-xs">
-            <h2 className="text-xs font-semibold text-cri-textPrimary font-mono uppercase tracking-wider">
-              Executive Research Summary
-            </h2>
-            <p className="text-cri-textSecondary leading-relaxed">
-              BERT (Bidirectional Encoder Representations from Transformers) introduces a novel language representation model pre-trained on bidirectional representations from unlabeled text. Unlike previous models (such as OpenAI GPT and ELMo), BERT jointly conditions on both left and right context in all layers.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 font-mono text-[11px]">
-              <div className="p-2.5 rounded-md bg-cri-surfaceSecondary border border-cri-border">
-                <div className="text-cri-textMuted uppercase text-[9px]">Model Base</div>
-                <div className="text-cri-textPrimary font-bold mt-0.5">110M Params</div>
-              </div>
-              <div className="p-2.5 rounded-md bg-cri-surfaceSecondary border border-cri-border">
-                <div className="text-cri-textMuted uppercase text-[9px]">Model Large</div>
-                <div className="text-cri-textPrimary font-bold mt-0.5">340M Params</div>
-              </div>
-              <div className="p-2.5 rounded-md bg-cri-surfaceSecondary border border-cri-border">
-                <div className="text-cri-textMuted uppercase text-[9px]">GLUE Score</div>
-                <div className="text-cri-orange font-bold mt-0.5">80.5%</div>
-              </div>
-              <div className="p-2.5 rounded-md bg-cri-surfaceSecondary border border-cri-border">
-                <div className="text-cri-textMuted uppercase text-[9px]">SQuAD F1</div>
-                <div className="text-cri-success font-bold mt-0.5">93.2</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "takeaways" && (
-          <div className="max-w-4xl mx-auto p-5 rounded-lg bg-cri-surface border border-cri-border space-y-3 text-xs">
-            <h2 className="text-xs font-semibold text-cri-textPrimary font-mono uppercase tracking-wider">
-              Core Contributions & Takeaways
-            </h2>
-            <div className="space-y-2">
-              {findings.map((finding, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 p-2.5 rounded-md bg-cri-surfaceSecondary border border-cri-border">
-                  <span className="font-mono text-xs font-bold text-cri-orange shrink-0 mt-0.5">
-                    {idx + 1}.
-                  </span>
-                  <span className="text-cri-textPrimary leading-relaxed">{finding}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "citations" && (
-          <div className="max-w-4xl mx-auto p-5 rounded-lg bg-cri-surface border border-cri-border space-y-3 text-xs">
-            <h2 className="text-xs font-semibold text-cri-textPrimary font-mono uppercase tracking-wider">
-              Document Provenance Citations ({queryResponse?.citations?.length || 0})
-            </h2>
-            {queryResponse?.citations && queryResponse.citations.length > 0 ? (
-              <div className="space-y-2">
-                {queryResponse.citations.map((c) => (
-                  <div key={c.citation_index} className="p-2.5 rounded-md bg-cri-surfaceSecondary border border-cri-border flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-cri-orange font-mono font-bold">[{c.citation_index}]</span>
-                      <span className="font-medium text-cri-textPrimary">{c.section_title || c.section}</span>
-                      <span className="text-cri-textMuted font-mono">Page {c.page_number}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => onCitationClick(c.citation_index)}
-                        className="text-xs text-cri-orange hover:underline font-medium cursor-pointer"
-                      >
-                        Highlight passage →
-                      </button>
-                      {onOpenCitationDocument && (
-                        <button
-                          type="button"
-                          onClick={() => onOpenCitationDocument(c.page_number)}
-                          className="text-xs text-cri-textSecondary hover:text-cri-textPrimary font-medium cursor-pointer"
-                          title={`View page ${c.page_number} in document viewer`}
-                        >
-                          View page {c.page_number} ↗
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-cri-textMuted">Run a research query to generate verified citation mappings.</p>
-            )}
-          </div>
-        )}
-
-        {activeTab === "related" && (
-          <div className="max-w-4xl mx-auto p-5 rounded-lg bg-cri-surface border border-cri-border space-y-3 text-xs">
-            <h2 className="text-xs font-semibold text-cri-textPrimary font-mono uppercase tracking-wider">
-              Comparative Context & Baselines
-            </h2>
-            <p className="text-cri-textSecondary leading-relaxed">
-              Comparison against feature-based representations (ELMo) and left-to-right autoregressive transformers (OpenAI GPT):
-            </p>
-            <div className="rounded-md border border-cri-border overflow-hidden">
-              <table className="w-full text-left font-mono text-[11px]">
-                <thead className="bg-cri-surfaceSecondary text-cri-textMuted border-b border-cri-border">
-                  <tr>
-                    <th className="p-2.5">Architecture</th>
-                    <th className="p-2.5">Context Direction</th>
-                    <th className="p-2.5">Pre-training Objective</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-cri-border">
-                  <tr>
-                    <td className="p-2.5 text-cri-textPrimary">BERT (Ours)</td>
-                    <td className="p-2.5 text-cri-success">Deep Bidirectional</td>
-                    <td className="p-2.5">Masked LM + NSP</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2.5 text-cri-textSecondary">OpenAI GPT</td>
-                    <td className="p-2.5 text-cri-textMuted">Left-to-Right</td>
-                    <td className="p-2.5">Standard Autoregressive LM</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2.5 text-cri-textSecondary">ELMo</td>
-                    <td className="p-2.5 text-cri-textMuted">Shallow Concatenation</td>
-                    <td className="p-2.5">Separate LTR + RTL LSTMs</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </main>
   );

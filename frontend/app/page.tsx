@@ -31,6 +31,16 @@ export default function WorkspacePage() {
   const [isMobileSourcesOpen, setIsMobileSourcesOpen] = useState(false);
   const [isMobileEvidenceOpen, setIsMobileEvidenceOpen] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const v = params.get("view");
+      if (v === "evaluation" || v === "architecture" || v === "observability") {
+        setActiveView(v);
+      }
+    }
+  }, []);
+
   const loadDocuments = useCallback(async () => {
     try {
       setApiError(null);
@@ -155,11 +165,6 @@ export default function WorkspacePage() {
               >
                 <FolderOpen className="w-4 h-4 text-cri-orange shrink-0" />
                 <span>Sources</span>
-                {documents.length > 0 && (
-                  <span className="px-1.5 py-0.5 rounded bg-cri-surfaceElevated text-[11px] font-mono text-cri-textSecondary border border-cri-border">
-                    {documents.length}
-                  </span>
-                )}
               </button>
 
               <div className="flex items-center gap-2">
@@ -257,10 +262,7 @@ export default function WorkspacePage() {
             <div className="h-12 px-4 border-b border-cri-border flex items-center justify-between shrink-0 bg-cri-surface">
               <div className="flex items-center gap-2">
                 <FolderOpen className="w-4 h-4 text-cri-orange" />
-                <span className="text-sm font-semibold text-cri-textPrimary font-sans">Research Sources</span>
-                <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-cri-surfaceElevated border border-cri-border text-cri-textSecondary">
-                  {documents.length}
-                </span>
+                <span className="text-sm font-semibold text-cri-textPrimary font-sans">Sources</span>
               </div>
               <button
                 type="button"
@@ -307,7 +309,7 @@ export default function WorkspacePage() {
             <div className="h-12 px-4 border-b border-cri-border flex items-center justify-between shrink-0 bg-cri-surface">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-cri-success" />
-                <span className="text-sm font-semibold text-cri-textPrimary font-sans">Evidence & Citations</span>
+                <span className="text-sm font-semibold text-cri-textPrimary font-sans">Evidence</span>
                 {queryResponse?.citations && queryResponse.citations.length > 0 && (
                   <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-cri-orange/15 text-cri-orange font-bold">
                     {queryResponse.citations.length}

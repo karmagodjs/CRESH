@@ -66,23 +66,9 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
       aria-label="Evidence & Verification Workspace"
     >
       <div className="p-3.5 border-b border-cri-border flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary font-sans">
-            Evidence
-          </h2>
-          {hasEvidence && (
-            <span className="text-xs font-mono text-cri-textMuted font-medium">
-              ({citations.length})
-            </span>
-          )}
-        </div>
-
-        {hasEvidence && (
-          <div className="flex items-center gap-1 text-xs text-cri-success font-medium">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Verified</span>
-          </div>
-        )}
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-cri-textPrimary font-sans">
+          Evidence
+        </h2>
       </div>
 
       {hasEvidence && (
@@ -97,7 +83,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
                   : "text-cri-textMuted hover:text-cri-textSecondary"
               }`}
             >
-              All {citations.length}
+              All
             </button>
             <button
               type="button"
@@ -109,7 +95,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
               }`}
               title="Supporting evidence"
             >
-              Supporting {supportingCount}
+              Supporting
             </button>
             <button
               type="button"
@@ -121,7 +107,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
               }`}
               title="Contradicting evidence"
             >
-              Contradicting {contradictingCount}
+              Contradicting
             </button>
           </div>
         </div>
@@ -141,13 +127,13 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({
           <div className="p-3 rounded-lg border border-cri-orange/50 bg-cri-surface space-y-1.5">
             <div className="flex items-center gap-1.5 text-cri-orange">
               <AlertCircle className="w-4 h-4 shrink-0" />
-              <span className="text-xs font-semibold">Evidence Gate Refusal</span>
+              <span className="text-xs font-semibold">Insufficient Evidence</span>
             </div>
             <p className="text-xs text-cri-textPrimary leading-relaxed">
-              No sufficient supporting passage was found in the scoped document.
+              No sufficient supporting passage was found in the selected document.
             </p>
             <p className="text-[11px] text-cri-textMuted leading-relaxed">
-              Retrieved candidates did not meet the answerability threshold; generation was safely halted.
+              To ensure factual accuracy, an ungrounded answer was not generated.
             </p>
           </div>
         )}
